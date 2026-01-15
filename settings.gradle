@@ -1,5 +1,4 @@
 include ':app'
 include ':localeapi'
 include ':libkeks'
-include ':libglupro'
 include ':wear'

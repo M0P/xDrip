@@ -13,7 +13,7 @@ import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
-import com.eveningoutpost.dexdrip.GcmActivity;
+//import com.eveningoutpost.dexdrip.GcmActivity;
 import com.eveningoutpost.dexdrip.Home;
 import com.eveningoutpost.dexdrip.R;
 import com.eveningoutpost.dexdrip.importedlibraries.dexcom.records.CalRecord;
@@ -1056,7 +1056,7 @@ public class Calibration extends Model {
             CalibrationSendQueue.addToQueue(calibration, xdrip.getAppContext());
             newFingerStickData();
             if (from_interactive) {
-                GcmActivity.clearLastCalibration(uuid);
+               // GcmActivity.clearLastCalibration(uuid);
             }
         }
     }

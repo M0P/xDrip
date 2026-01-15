@@ -24,7 +24,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.eveningoutpost.dexdrip.BaseAppCompatActivity;
-import com.eveningoutpost.dexdrip.GcmActivity;
+//import com.eveningoutpost.dexdrip.GcmActivity;
 import com.eveningoutpost.dexdrip.models.JoH;
 import com.eveningoutpost.dexdrip.R;
 import com.eveningoutpost.dexdrip.utilitymodels.Pref;
@@ -224,7 +224,7 @@ public class DisplayQRCode extends BaseAppCompatActivity {
                                                 break;
                                             }
                                             case 2: {
-                                                GcmActivity.backfillLink(reply.substring(3, 35), JoH.bytesToHex(mykey));
+                                                //GcmActivity.backfillLink(reply.substring(3, 35), JoH.bytesToHex(mykey));
                                                 break;
                                             }
                                             default: {

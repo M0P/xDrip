@@ -128,10 +128,6 @@
                 <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".cgm.glupro.GluProActivity"
-            android:label="@string/glupro_activity_title"
-            android:exported="false" />
 
         <activity-alias
             android:name=".AndroidURationaleActivity"
@@ -146,11 +142,6 @@
                 <category android:name="android.intent.category.HEALTH_PERMISSIONS"/>
             </intent-filter>
         </activity-alias>
-
-        <activity
-            android:name=".cloud.backup.BackupActivity"
-            android:exported="false"
-            android:label="Cloud Backup" />
 
         <meta-data
             android:name="AA_DB_NAME"
@@ -207,19 +198,7 @@
                 <category android:name="android.intent.category.MULTIWINDOW_LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name="net.openid.appauth.RedirectUriReceiverActivity"
-            android:exported="true"
-            tools:node="replace">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="xdrip"
-                    android:path="/callback/tidepool"/>
-            </intent-filter>
-        </activity>
-        <activity android:name=".tidepool.AuthFlowIn" android:exported="true"/>
+
         <activity
             android:name=".BluetoothScan"
             android:configChanges="orientation|screenSize"
@@ -230,12 +209,7 @@
             android:enabled="true"
             android:exported="true"
             android:foregroundServiceType="connectedDevice|location" />
-        <service
-            android:name=".services.WifiCollectionService"
-            android:enabled="true"
-            android:exported="true" />
-        <service android:name=".services.ActivityRecognizedService" />
-        <service android:name=".services.BluetoothGlucoseMeter" />
+
         <service
             android:name=".services.broadcastservice.BroadcastService"
             android:enabled="true"
@@ -271,20 +245,7 @@
             android:name=".tables.SensorDataTable"
             android:configChanges="orientation|screenSize"
             android:label="@string/sensor_table" />
-        <activity
-            android:name=".ImportDatabaseActivity"
-            android:configChanges="orientation|screenSize"
-            android:label="@string/import_database" />
-        <!--
-        <activity
-            android:name=".GoogleDriveInterface"
-            android:label="Sync Data"
-            android:theme="@android:style/Theme.NoDisplay" />
-        <activity
-            android:name=".GcmActivity"
-            android:label="GCM connect"
-            android:theme="@android:style/Theme.NoDisplay" />
-        -->
+
         <activity
             android:name=".AddCalibration"
             android:configChanges="orientation|screenSize"
@@ -373,15 +334,7 @@
         <service
             android:name=".RegistrationIntentService"
             android:exported="false" />
-        <!--
-        <service
-            android:name=".MyDriveEventService"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.google.android.gms.drive.events.HANDLE_EVENT" />
-            </intent-filter>
-        </service>
-        -->
+
         <service
             android:name=".services.SyncService"
             android:enabled="true"
@@ -439,55 +392,7 @@
             android:name=".CalibrationCheckInActivity"
             android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_calibration_check_in" />
-        <activity
-            android:name=".utilitymodels.pebble.watchface.InstallPebbleWatchFace"
-            android:label="@string/install_pebble_watchface" />
-        <activity
-            android:name=".utilitymodels.pebble.watchface.InstallPebbleTrendWatchFace"
-            android:label="@string/install_pebble_trend_watchface" />
-        <activity
-            android:name=".utilitymodels.pebble.watchface.InstallPebbleClassicTrendWatchface"
-            android:label="@string/install_pebble_classic_trend_watchface" />
-        <activity
-            android:name=".utilitymodels.pebble.watchface.InstallPebbleTrendClayWatchFace"
-            android:label="Install Pebble Clay Watchface" />
-        <activity
-            android:name=".utilitymodels.pebble.watchface.InstallPebbleSnoozeControlApp"
-            android:label="@string/install_pebble_snooze_control_app" />
-        <activity
-            android:name=".UsbConnectedActivity"
-            android:label="@string/title_activity_usb_connected">
-            <intent-filter>
-                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
-            </intent-filter>
 
-            <meta-data
-                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
-                android:resource="@xml/device_filter" />
-        </activity>
-        <activity
-            android:name=".NFCFilterX"
-            android:configChanges="orientation|screenSize"
-            android:label="xDrip+ NFC"
-            android:launchMode="singleTask">
-            <intent-filter>
-                <action android:name="android.nfc.action.TECH_DISCOVERED" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.nfc.action.TECH_DISCOVERED"
-                android:resource="@xml/nfc_tech_list" />
-        </activity>
-        <activity
-            android:name=".NFCScanningX"
-            android:configChanges="orientation|screenSize"
-            android:label="NFC Scanning"
-            android:launchMode="singleTask" />
-
-        <service
-            android:name=".services.DexShareCollectionService"
-            android:enabled="true"
-            android:exported="true" />
         <service
             android:name=".services.G5CollectionService"
             android:enabled="true"
@@ -496,25 +401,7 @@
             android:name=".services.Ob1G5CollectionService"
             android:enabled="true"
             android:foregroundServiceType="connectedDevice|location" />
-        <service
-            android:name=".insulin.pendiq.PendiqService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="connectedDevice|location" />
-        <service
-            android:name=".cgm.medtrum.MedtrumCollectionService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="connectedDevice|location" />
-        <service
-            android:name=".cgm.glupro.GluProService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="connectedDevice|location" />
 
-        <activity
-            android:name=".ShareTest"
-            android:label="@string/title_activity_share_test" />
         <activity
             android:name=".utils.Preferences"
             android:configChanges="orientation|screenSize"
@@ -552,10 +439,6 @@
             android:name=".MissedReadingActivity"
             android:configChanges="orientation|screenSize"
             android:label="@string/configure_missed_readings" />
-        <activity
-            android:name=".FollowerManagementActivity"
-            android:configChanges="orientation|screenSize"
-            android:label="@string/manage_followers" />
 
         <service
             android:name=".services.SnoozeOnNotificationDismissService"
@@ -567,11 +450,6 @@
         <service
             android:name=".utilitymodels.Notifications"
             android:exported="false" />
-        <service
-            android:name=".utilitymodels.pebble.PebbleWatchSync"
-            android:enabled="true"
-            android:exported="true"
-            android:foregroundServiceType="connectedDevice|location" />
         <service
             android:name=".services.DailyIntentService"
             android:exported="false" />
@@ -617,11 +495,7 @@
                 <action android:name="com.eveningoutpost.dexdrip.NewCalibration" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".LibreAlarmReceiver">
-            <intent-filter>
-                <action android:name="com.eveningoutpost.dexdrip.FROM_LIBRE_ALARM" />
-            </intent-filter>
-        </receiver>
+
         <receiver android:name=".NSEmulatorReceiver">
             <intent-filter>
                 <action android:name="com.eveningoutpost.dexdrip.NS_EMULATOR" />
@@ -630,30 +504,7 @@
                 <action android:name="com.eveningoutpost.dexdrip.OOP2_BLUETOOTH_ENABLE_RESULT" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".receivers.aidex.AidexReceiver">
-            <intent-filter>
-                <action android:name="com.microtechmd.cgms.aidex.action.BgEstimate" />
-                <action android:name="com.microtechmd.cgms.aidex.action.Calibration" />
-                <action android:name="com.microtechmd.cgms.aidex.action.SensorNew" />
-                <action android:name="com.microtechmd.cgms.aidex.action.SensorRestart" />
-                <action android:name="com.microtechmd.cgms.aidex.action.SensorStop" />
-                <action android:name="com.microtechmd.cgms.aidex.action.Notification" />
-            </intent-filter>
-        </receiver>
-        <receiver android:name=".watch.thinjam.io.ThinJamApiReceiver">
-            <intent-filter>
-                <action android:name="com.eveningoutpost.dexdrip.THINJAM_API" />
-            </intent-filter>
-        </receiver>
-        <receiver android:name=".LibreReceiver">
-            <intent-filter>
-                <action android:name="com.librelink.app.ThirdPartyIntegration.GLUCOSE_READING" />
-                <action android:name="com.librelink.app.ThirdPartyIntegration.SENSOR_ACTIVATE" />
-                <action android:name="com.librelink.app.ThirdPartyIntegration.FOUND_DEVICE" />
-                <action android:name="com.librelink.app.ThirdPartyIntegration.CONNECTION_STATE" />
-                <action android:name="com.librelink.app.ThirdPartyIntegration.SENSOR_SCAN" />
-            </intent-filter>
-        </receiver>
+
         <receiver android:name=".utilitymodels.BroadcastSnoozeReceiver">
             <intent-filter>
                 <action android:name="com.eveningoutpost.dexdrip.Snooze" />
@@ -674,7 +525,7 @@
             </intent-filter>
         </receiver>
         <receiver android:name=".utils.framework.WakeLockTrampoline" />
-        <receiver android:name=".watch.thinjam.BackgroundScanReceiver" />
+
         <receiver
             android:name=".receiver.ReminderReceiver"
             android:enabled="true"
@@ -713,31 +564,12 @@
             android:exported="true" />
 
         <activity
-            android:name=".utilitymodels.UpdateActivity"
-            android:configChanges="orientation|screenSize"
-            android:label="@string/title_activity_update" />
-        <activity
             android:name=".utils.DisplayQRCode"
             android:configChanges="orientation|screenSize"
             android:exported="false"
             android:label="@string/title_activity_display_qrcode"
             android:noHistory="true" />
-        <activity
-            android:name=".utils.LibreTrendGraph"
-            android:configChanges="orientation|screenSize"
-            android:label="@string/libre_15_minutes_graph"
-            android:noHistory="true" />
-        <activity
-            android:name=".utilitymodels.SendFeedBack"
-            android:configChanges="orientation|screenSize"
-            android:label="@string/title_activity_send_feed_back"
-            android:noHistory="true">
-            <intent-filter>
-                <action android:name="xdrip_plus_send_developer_feedback" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
         <activity
             android:name=".utilitymodels.SaveLogs"
             android:configChanges="orientation|screenSize"
@@ -817,15 +649,7 @@
             android:configChanges="orientation|screenSize"
             android:label="@string/language_editor"
             android:windowSoftInputMode="adjustPan" />
-        <activity
-            android:name=".glucosemeter.BTGlucoseMeterActivity"
-            android:configChanges="orientation|screenSize"
-            android:label="@string/title_activity_btglucose_meter"
-            android:parentActivityName=".Home">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.eveningoutpost.dexdrip.Home" />
-        </activity>
+
         <activity
             android:name=".MegaStatus"
             android:configChanges="orientation|screenSize"
@@ -867,42 +691,15 @@
 
         <activity android:name=".utilitymodels.XDripDreamSettingsActivity" />
 
-        <service
-            android:name=".wearintegration.Amazfitservice"
-            android:enabled="true"
-            android:exported="true" />
-        <service
-            android:name=".watch.lefun.LeFunService"
-            android:foregroundServiceType="connectedDevice|location" />
-        <service
-            android:name=".watch.miband.MiBandService"
-            android:foregroundServiceType="connectedDevice|location" />
-        <service
-            android:name=".cgm.nsfollow.NightscoutFollowService"
-            android:foregroundServiceType="dataSync" />
-        <service
-            android:name=".insulin.inpen.InPenService"
-            android:foregroundServiceType="connectedDevice|location" />
-        <service
-            android:name=".cgm.sharefollow.ShareFollowService"
-            android:foregroundServiceType="dataSync" />
-        <service
-            android:name=".cgm.carelinkfollow.CareLinkFollowService"
-            android:foregroundServiceType="dataSync" />
-
         <activity
             android:name=".EventLogActivity"
             android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_error" />
-        <activity
-            android:name=".eassist.EmergencyAssistActivity"
-            android:label="@string/emergency_messages" />
+
         <activity
             android:name=".ui.activities.SelectAudioDevice"
             android:label="@string/select_device" />
-        <activity
-            android:name=".utilitymodels.MtpConfigureActivity"
-            android:label="USB programmer" />
+
         <activity
             android:name=".ui.activities.NumberWallPreview"
             android:exported="true"
@@ -911,16 +708,7 @@
         <activity
             android:name=".ui.activities.DatabaseAdmin"
             android:label="Database Admin" />
-        <activity
-            android:name=".ui.activities.ThinJamActivity"
-            android:configChanges="orientation|screenSize"
-            android:label="BlueJay Admin"
-            android:launchMode="singleTask" />
 
-        <service
-            android:name=".watch.thinjam.BlueJayService"
-            android:foregroundServiceType="connectedDevice|location" />
-        <service android:name=".cgm.webfollow.WebFollowService" />
     </application>
 
 </manifest>

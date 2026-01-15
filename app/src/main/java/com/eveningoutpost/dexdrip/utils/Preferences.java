@@ -59,7 +59,7 @@ import com.bytehamster.lib.preferencesearch.SearchConfiguration;
 import com.bytehamster.lib.preferencesearch.SearchPreferenceResult;
 import com.bytehamster.lib.preferencesearch.SearchPreferenceResultListener;
 import com.eveningoutpost.dexdrip.BasePreferenceActivity;
-import com.eveningoutpost.dexdrip.GcmActivity;
+//import com.eveningoutpost.dexdrip.GcmActivity;
 import com.eveningoutpost.dexdrip.Home;
 import com.eveningoutpost.dexdrip.NFCReaderX;
 import com.eveningoutpost.dexdrip.ParakeetHelper;
@@ -330,8 +330,8 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
                     InfoContentProvider.ping("pref");
                     if (prefs.getString("dex_collection_method", "").equals("Follower")) {
                         PlusSyncService.clearandRestartSyncService(getApplicationContext());
-                        GcmActivity.last_sync_request = 0;
-                        GcmActivity.requestBGsync();
+                       // GcmActivity.last_sync_request = 0;
+                       // GcmActivity.requestBGsync();
                     }
                 });
 
@@ -787,8 +787,8 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
             preference.setTitle(preference.getTitle().toString().replaceAll("  \\([a-z0-9A-Z]+\\)$", "") + "  (" + value.toString() + ")");
             if (do_update) {
                 preference.getEditor().putString(preference.getKey(), value.toString()).apply(); // update prefs now
-                UpdateActivity.last_check_time = -2;
-                UpdateActivity.checkForAnUpdate(preference.getContext());
+                //UpdateActivity.last_check_time = -2;
+                //UpdateActivity.checkForAnUpdate(preference.getContext());
             }
             return true;
         }
@@ -2633,7 +2633,7 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
                                 AllPrefsFragment.this.prefs.edit().putBoolean("plus_follow_master", false).apply();
                                 JoH.static_toast(preference.getContext(),"Turning off xDrip+ Sync Master for Followers!",Toast.LENGTH_LONG);
                             }
-                            GcmActivity.requestBGsync();
+                            //GcmActivity.requestBGsync();
                         }
                     //} else {
                     //    CollectionServiceStarter.restartCollectionService(preference.getContext());
@@ -3216,4 +3216,3 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
         return true;
     }
 }
-
