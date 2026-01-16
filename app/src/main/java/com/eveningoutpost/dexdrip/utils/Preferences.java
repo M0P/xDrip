@@ -701,7 +701,10 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
     private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange(Preference preference, Object value) {
-            String stringValue = value.toString();
+            // NOTE: Some Android ROMs / preference variants can supply null values here.
+            // Always guard before calling toString() to prevent NPEs.
+            final String stringValue = value != null ? value.toString() : "";
+
             if (preference instanceof ListPreference) {
                 ListPreference listPreference = (ListPreference) preference;
                 int index = listPreference.findIndexOfValue(stringValue);
@@ -711,30 +714,39 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
                                 : null);
 
             } else if (preference instanceof RingtonePreference) {
-                // For ringtone preferences, look up the correct display value
-                // using RingtoneManager.
+                // For ringtone preferences, look up the correct display value using RingtoneManager.
+                // NOTE: Some devices can return invalid / missing URIs, or RingtoneManager can throw.
+                // Never crash the Preferences screen due to ringtone resolution.
                 if (TextUtils.isEmpty(stringValue)) {
                     // Empty values correspond to 'silent' (no ringtone).
                     preference.setSummary(R.string.pref_ringtone_silent);
-
                 } else {
-                    Ringtone ringtone = RingtoneManager.getRingtone(
-                            preference.getContext(), Uri.parse(stringValue));
-
-                    if (ringtone == null) {
-                        // Clear the summary if there was a lookup error.
+                    try {
+                        final Uri ringtoneUri = Uri.parse(stringValue);
+                        final Ringtone ringtone = RingtoneManager.getRingtone(preference.getContext(), ringtoneUri);
+                        if (ringtone == null) {
+                            // Clear the summary if there was a lookup error.
+                            preference.setSummary(null);
+                        } else {
+                            try {
+                                // Set the summary to reflect the new ringtone display name.
+                                final String name = ringtone.getTitle(preference.getContext());
+                                preference.setSummary(name);
+                            } catch (Exception e) {
+                                // Some ROMs can throw here (e.g., ContentResolver issues). Fail safe.
+                                Log.e(TAG, "Failed to resolve ringtone title for " + ringtoneUri + ": " + e);
+                                preference.setSummary(null);
+                            }
+                        }
+                    } catch (Exception e) {
+                        // Any unexpected errors should never take down the settings UI.
+                        Log.e(TAG, "Failed to resolve ringtone summary: " + e);
                         preference.setSummary(null);
-                    } else {
-                        // Set the summary to reflect the new ringtone display
-                        // name.
-                        String name = ringtone.getTitle(preference.getContext());
-                        preference.setSummary(name);
                     }
                 }
 
             } else {
-                // For all other preferences, set the summary to the value's
-                // simple string representation.
+                // For all other preferences, set the summary to the value's simple string representation.
                 preference.setSummary(stringValue);
             }
             return true;
@@ -849,16 +861,16 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
 
 
     private static String format_carb_ratio(String oldValue, String newValue) {
-        return oldValue.replaceAll(" \\(.*\\)$", "") + "  (" + newValue + "g per Unit)";
+        return oldValue.replaceAll(" \\(.+\\)$", "") + "  (" + newValue + "g per Unit)";
     }
 
     private static String format_carb_absorption_rate(String oldValue, String newValue) {
-        return oldValue.replaceAll(" \\(.*\\)$", "") + "  (" + newValue + "g per hour)";
+        return oldValue.replaceAll(" \\(.+\\)$", "") + "  (" + newValue + "g per hour)";
     }
 
     private static String format_insulin_sensitivity(String oldValue, String newValue) {
         try {
-            return oldValue.replaceAll("  \\((.*)\\)$", "") + "  (" + newValue + " " + static_units + " per U)";
+            return oldValue.replaceAll("  \\((.+)\\)$", "") + "  (" + newValue + " " + static_units + " per U)";
         } catch (Exception e) {
             return "ERROR - Invalid number";
         }
@@ -1412,7 +1424,8 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
             final PreferenceCategory displayCategory = (PreferenceCategory) safeFindPreference("xdrip_plus_display_category");
 
 
-            lockListener.setSummaryPreference(findPreference("pick_numberwall_start"));
+            // NOTE: This key is not always present in all preference XMLs.
+            lockListener.setSummaryPreference(safeFindPreference("pick_numberwall_start"));
 
             final Preference enableAmazfit = safeFindPreference("pref_amazfit_enable_key");
 
@@ -2154,11 +2167,13 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
                     return true;
                 }
             });
-            final Preference nfc_show_age = findPreference("nfc_show_age");
-            if (nfc_show_age == null) {
+            final Preference nfc_show_age_pref = safeFindPreference("nfc_show_age");
+            if (!(nfc_show_age_pref instanceof CheckBoxPreference)) {
+                // NOTE: Some builds omit or change the type of this preference; keep settings screen working.
                 Log.wtf(TAG, "Missing preference nfc_show_age");
                 return;
             }
+            final CheckBoxPreference nfc_show_age = (CheckBoxPreference) nfc_show_age_pref;
             nfc_show_age.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -2169,41 +2184,64 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
         }
 
         private void update_nfc_expiry_preferences(Boolean show_age) {
+            // NOTE: Historically this method could crash by calling removePreference(null) when
+            // preferences are missing in some variants. Always guard via safe* helpers.
             try {
-                final PreferenceScreen nfcScreen = (PreferenceScreen) findPreference("xdrip_plus_nfc_settings");
+                final Preference nfcScreenPref = safeFindPreference("xdrip_plus_nfc_settings");
+                if (!(nfcScreenPref instanceof PreferenceScreen)) {
+                    Log.wtf(TAG, "Missing preference xdrip_plus_nfc_settings");
+                    return;
+                }
+                final PreferenceScreen nfcScreen = (PreferenceScreen) nfcScreenPref;
+
                 final String nfc_expiry_days_string = AllPrefsFragment.this.prefs.getString("nfc_expiry_days", "14.5");
 
-                final CheckBoxPreference nfc_show_age = (CheckBoxPreference) findPreference("nfc_show_age");
+                final Preference nfc_show_age_pref = safeFindPreference("nfc_show_age");
+                if (!(nfc_show_age_pref instanceof CheckBoxPreference)) {
+                    Log.wtf(TAG, "Missing preference nfc_show_age");
+                    return;
+                }
+                final CheckBoxPreference nfc_show_age = (CheckBoxPreference) nfc_show_age_pref;
+
                 nfc_show_age.setSummaryOff("Show the sensor expiry time based on " + nfc_expiry_days_string + " days");
                 if (show_age == null) show_age = nfc_show_age.isChecked();
+
                 if (show_age) {
-                    nfcScreen.removePreference(nfc_expiry_days);
+                    safeRemovePreference(nfcScreen, nfc_expiry_days, "nfc_expiry_days");
                 } else {
-                    nfc_expiry_days.setOrder(3);
-                    nfcScreen.addPreference(nfc_expiry_days);
+                    if (nfc_expiry_days != null) {
+                        nfc_expiry_days.setOrder(3);
+                    }
+                    safeAddPreference(nfcScreen, nfc_expiry_days, "nfc_expiry_days");
                 }
-            } catch (NullPointerException e) {
-                //
+            } catch (Exception e) {
+                Log.wtf(TAG, "Failed to update NFC expiry preferences: " + e);
             }
         }
 
         private void bindWidgetUpdater() {
-            findPreference("widget_range_lines").setOnPreferenceChangeListener(new WidgetListener());
-            findPreference("extra_status_line").setOnPreferenceChangeListener(new WidgetListener());
-            findPreference("widget_status_line").setOnPreferenceChangeListener(new WidgetListener());
-            findPreference("status_line_calibration_long").setOnPreferenceChangeListener(new WidgetListener());
-            findPreference("status_line_calibration_short").setOnPreferenceChangeListener(new WidgetListener());
-            findPreference("status_line_avg").setOnPreferenceChangeListener(new WidgetListener());
-            findPreference("status_line_a1c_dcct").setOnPreferenceChangeListener(new WidgetListener());
-            findPreference("status_line_a1c_ifcc").setOnPreferenceChangeListener(new WidgetListener());
-            findPreference("status_line_in").setOnPreferenceChangeListener(new WidgetListener());
-            findPreference("status_line_high").setOnPreferenceChangeListener(new WidgetListener());
-            findPreference("status_line_low").setOnPreferenceChangeListener(new WidgetListener());
-            findPreference("extra_status_line").setOnPreferenceChangeListener(new WidgetListener());
-            findPreference("status_line_capture_percentage").setOnPreferenceChangeListener(new WidgetListener());
-            findPreference("status_line_realtime_capture_percentage").setOnPreferenceChangeListener(new WidgetListener());
-            findPreference("extra_status_stats_24h").setOnPreferenceChangeListener(new WidgetListener());
+            // NOTE: Some builds remove widget-related preferences. Bind only those that exist.
+            final String[] keys = new String[]{
+                    "widget_range_lines",
+                    "extra_status_line",
+                    "widget_status_line",
+                    "status_line_calibration_long",
+                    "status_line_calibration_short",
+                    "status_line_avg",
+                    "status_line_a1c_dcct",
+                    "status_line_a1c_ifcc",
+                    "status_line_in",
+                    "status_line_high",
+                    "status_line_low",
+                    "status_line_capture_percentage",
+                    "status_line_realtime_capture_percentage",
+                    "extra_status_stats_24h"
+            };
 
+            final WidgetListener listener = new WidgetListener();
+            for (final String key : keys) {
+                safeSetOnPreferenceChangeListener(key, listener);
+            }
         }
 
         private void update_force_english_title(String param) {
@@ -2338,32 +2376,36 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
         }
 
         private void bindTTSListener() {
-            findPreference("bg_to_speech").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference, Object newValue) {
-                    if ((Boolean) newValue) {
-                        prefs.edit().putBoolean("bg_to_speech", true).commit();
-                        final AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
-                        alertDialog.setTitle(R.string.install_text_to_speech_data_question);
-                        alertDialog.setMessage(getString(R.string.install_text_to_speech_data_question) + "\n" + getString(R.string.after_installation_of_languages_you_might_have_to));
-                        alertDialog.setCancelable(true);
-                        alertDialog.setPositiveButton(R.string.ok, (dialog, which) -> SpeechUtil.installTTSData(getActivity()));
-                        alertDialog.setNegativeButton(R.string.no, null);
-                        final AlertDialog alert = alertDialog.create();
-                        alert.show();
-                        try {
-                            BgToSpeech.testSpeech();
-                        } catch (Exception e) {
-                            Log.e(TAG, "Got exception with TTS: " + e);
+            // NOTE: Some builds remove TTS preferences. Only bind listeners when present.
+            final Preference bgToSpeech = safeFindPreference("bg_to_speech");
+            if (bgToSpeech != null) {
+                bgToSpeech.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                    @Override
+                    public boolean onPreferenceChange(Preference preference, Object newValue) {
+                        if ((Boolean) newValue) {
+                            prefs.edit().putBoolean("bg_to_speech", true).commit();
+                            final AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
+                            alertDialog.setTitle(R.string.install_text_to_speech_data_question);
+                            alertDialog.setMessage(getString(R.string.install_text_to_speech_data_question) + "\n" + getString(R.string.after_installation_of_languages_you_might_have_to));
+                            alertDialog.setCancelable(true);
+                            alertDialog.setPositiveButton(R.string.ok, (dialog, which) -> SpeechUtil.installTTSData(getActivity()));
+                            alertDialog.setNegativeButton(R.string.no, null);
+                            final AlertDialog alert = alertDialog.create();
+                            alert.show();
+                            try {
+                                BgToSpeech.testSpeech();
+                            } catch (Exception e) {
+                                Log.e(TAG, "Got exception with TTS: " + e);
+                            }
+                        } else {
+                            BgToSpeech.tearDownTTS();
                         }
-                    } else {
-                        BgToSpeech.tearDownTTS();
+                        return true;
                     }
-                    return true;
-                }
-            });
+                });
+            }
 
-            findPreference("speech_speed").setOnPreferenceChangeListener((preference, newValue) ->
+            safeSetOnPreferenceChangeListener("speech_speed", (preference, newValue) ->
                     {
                         prefs.edit().putInt("speech_speed", (Integer) newValue).commit();
                         try {
@@ -2374,7 +2416,7 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
                         return true;
                     }
             );
-            findPreference("speech_pitch").setOnPreferenceChangeListener((preference, newValue) ->
+            safeSetOnPreferenceChangeListener("speech_pitch", (preference, newValue) ->
                     {
                         prefs.edit().putInt("speech_pitch", (Integer) newValue).commit();
                         try {
