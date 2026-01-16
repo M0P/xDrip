@@ -23,6 +23,7 @@ import com.eveningoutpost.dexdrip.models.HeartRate;
 import com.eveningoutpost.dexdrip.models.JoH;
 import com.eveningoutpost.dexdrip.models.StepCounter;
 import com.eveningoutpost.dexdrip.models.Treatments;
+import com.eveningoutpost.dexdrip.models.JoH;
 import com.eveningoutpost.dexdrip.models.UserError;
 import com.eveningoutpost.dexdrip.models.UserNotification;
 import com.eveningoutpost.dexdrip.services.MissedReadingService;
@@ -231,7 +232,7 @@ public class BroadcastService extends Service {
     public void onCreate() {
         UserError.Log.e(TAG, "starting service");
         broadcastEntities = new HashMap<>();
-        registerReceiver(broadcastReceiver, new IntentFilter(ACTION_WATCH_COMMUNICATION_RECEIVER));
+        JoH.registerReceiver(this, broadcastReceiver, new IntentFilter(ACTION_WATCH_COMMUNICATION_RECEIVER), false);
 
         JoH.startService(BroadcastService.class, Const.INTENT_FUNCTION_KEY, Const.CMD_START);
 

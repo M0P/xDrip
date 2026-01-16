@@ -73,7 +73,7 @@ public class WidgetUpdateService extends Service {
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         if (isRegistered)
             unregisterReceiver(broadcastReceiver);
-        registerReceiver(broadcastReceiver, intentFilter);
+        JoH.registerReceiver(this, broadcastReceiver, intentFilter, false);
         isRegistered = true;
     }
 
@@ -84,7 +84,7 @@ public class WidgetUpdateService extends Service {
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         if (isRegistered)
             unregisterReceiver(broadcastReceiver);
-        registerReceiver(broadcastReceiver, intentFilter);
+        JoH.registerReceiver(this, broadcastReceiver, intentFilter, false);
         isRegistered = true;
     }
 

@@ -1169,7 +1169,7 @@ public class DexCollectionService extends Service implements BtCallBack {
         final IntentFilter pairingRequestFilter = new IntentFilter(BluetoothDevice.ACTION_PAIRING_REQUEST);
         pairingRequestFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY - 1);
         if (Build.VERSION.SDK_INT < 26) {
-            registerReceiver(mPairingRequestRecevier, pairingRequestFilter);
+            JoH.registerReceiver(this, mPairingRequestRecevier, pairingRequestFilter, false);
         } else {
             Log.d(TAG, "Not starting pairing request receiver on android 8+");
         }

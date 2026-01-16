@@ -1147,7 +1147,7 @@ public class Ob1G5CollectionService extends G5BaseService {
         } else {
 
             try {
-                registerReceiver(mBondStateReceiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
+                JoH.registerReceiver(this, mBondStateReceiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED), false);
             } catch (Exception e) {
                 UserError.Log.e(TAG, "Could not register bond state receiver: " + e);
             }
@@ -1156,7 +1156,7 @@ public class Ob1G5CollectionService extends G5BaseService {
             pairingRequestFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY - 1);
             try {
                 if (Build.VERSION.SDK_INT < 26) {
-                    registerReceiver(mPairingRequestRecevier, pairingRequestFilter);
+                    JoH.registerReceiver(this, mPairingRequestRecevier, pairingRequestFilter, false);
                 } else {
                     UserError.Log.d(TAG, "Not registering pairing receiver on Android 8+");
                 }

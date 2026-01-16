@@ -697,7 +697,7 @@ public  abstract class BaseWatchFace extends WatchFace implements SharedPreferen
 
     public static int getWearBatteryLevel(Context context) {
         IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);//from BgSendQueue
-        Intent batteryStatus = context.registerReceiver(null, ifilter);
+        Intent batteryStatus = JoH.registerReceiver(context, null, ifilter, false);
         int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
         int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
         if (level == -1 || scale == -1) {

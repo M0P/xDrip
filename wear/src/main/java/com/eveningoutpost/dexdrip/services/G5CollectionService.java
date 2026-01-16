@@ -207,11 +207,11 @@ public class G5CollectionService extends G5BaseService {
 
         final IntentFilter bondintent = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);//KS turn on
         bondintent.addAction(BluetoothDevice.ACTION_FOUND);//KS add
-        registerReceiver(mPairReceiver, bondintent);//KS turn on
+        JoH.registerReceiver(this, mPairReceiver, bondintent, false);//KS turn on
 
         final IntentFilter pairingRequestFilter = new IntentFilter(BluetoothDevice.ACTION_PAIRING_REQUEST);
         pairingRequestFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY - 1);
-        registerReceiver(mPairingRequestRecevier, pairingRequestFilter);
+        JoH.registerReceiver(this, mPairingRequestRecevier, pairingRequestFilter, false);
     }
 
     final BroadcastReceiver mPairReceiver = new BroadcastReceiver() {

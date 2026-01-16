@@ -1113,7 +1113,7 @@ public class Ob1G5CollectionService extends G5BaseService {
         } else {
 
             try {
-                registerReceiver(mBondStateReceiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
+                JoH.registerReceiver(this, mBondStateReceiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED), false);
             } catch (Exception e) {
                 UserError.Log.e(TAG, "Could not register bond state receiver: " + e);
             }

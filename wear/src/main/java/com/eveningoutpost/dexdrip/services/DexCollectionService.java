@@ -1122,7 +1122,7 @@ public class DexCollectionService extends Service implements BtCallBack {
 
         final IntentFilter pairingRequestFilter = new IntentFilter(BluetoothDevice.ACTION_PAIRING_REQUEST);
         pairingRequestFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY - 1);
-        registerReceiver(mPairingRequestRecevier, pairingRequestFilter);
+        JoH.registerReceiver(this, mPairingRequestRecevier, pairingRequestFilter, false);
         Log.i(TAG, "onCreate: STARTING SERVICE: pin code: " + DEFAULT_BT_PIN);
 
         Blukon.unBondIfBlukonAtInit();

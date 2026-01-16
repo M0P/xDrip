@@ -169,7 +169,7 @@ public class TransmitterRawData {
         TransmissionId = Integer.parseInt(parsed[5]);
         CaptureDateTime = new Date().getTime();
 
-        Intent i = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        Intent i = JoH.registerReceiver(context, null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED), false);
         UploaderBatteryLife = i.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
         Uploaded = 0;
         UploadAttempts = 1;

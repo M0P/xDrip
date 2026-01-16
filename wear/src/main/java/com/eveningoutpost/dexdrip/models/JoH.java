@@ -1747,5 +1747,13 @@ public class JoH {
         return str == null || str.length() == 0;
     }
 
+    public static Intent registerReceiver(Context context, BroadcastReceiver receiver, IntentFilter filter, boolean exported) {
+        if (Build.VERSION.SDK_INT >= 33) {
+            return context.registerReceiver(receiver, filter, exported ? Context.RECEIVER_EXPORTED : Context.RECEIVER_NOT_EXPORTED);
+        } else {
+            return context.registerReceiver(receiver, filter);
+        }
+    }
+
 
 }

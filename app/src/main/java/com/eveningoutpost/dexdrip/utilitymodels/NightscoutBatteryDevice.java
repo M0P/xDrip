@@ -11,6 +11,7 @@ import android.os.Build;
 
 import com.eveningoutpost.dexdrip.g5model.Ob1G5StateMachine;
 import com.eveningoutpost.dexdrip.g5model.Ob1DexTransmitterBattery;
+import com.eveningoutpost.dexdrip.models.JoH;
 import com.eveningoutpost.dexdrip.services.DexCollectionService;
 
 import org.json.JSONException;
@@ -28,7 +29,7 @@ public enum NightscoutBatteryDevice {
     PHONE {
         @Override
         int getBatteryLevel(Context mContext) {
-            Intent batteryIntent = mContext.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+            Intent batteryIntent = JoH.registerReceiver(mContext, null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED), false);
             if (batteryIntent != null) {
                 int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
                 int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);

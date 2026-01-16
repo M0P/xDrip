@@ -21,6 +21,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
@@ -2053,5 +2054,11 @@ public class JoH {
         return str == null || str.length() == 0;
     }
 
-
+    public static Intent registerReceiver(Context context, BroadcastReceiver receiver, IntentFilter filter, boolean exported) {
+        if (Build.VERSION.SDK_INT >= 33) {
+            return context.registerReceiver(receiver, filter, exported ? Context.RECEIVER_EXPORTED : Context.RECEIVER_NOT_EXPORTED);
+        } else {
+            return context.registerReceiver(receiver, filter);
+        }
+    }
 }

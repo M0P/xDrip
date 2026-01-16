@@ -120,7 +120,7 @@ public class DexShareCollectionService extends Service {
         //KS foregroundServiceStarter = new ForegroundServiceStarter(getApplicationContext(), service);
         //KS foregroundServiceStarter.start();
         final IntentFilter bondintent = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-        registerReceiver(mPairReceiver, bondintent);
+        JoH.registerReceiver(this, mPairReceiver, bondintent, false);
         prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         listenForChangeInSettings();
         //KS bgToSpeech = BgToSpeech.setupTTS(getApplicationContext()); //keep reference to not being garbage collected
@@ -766,7 +766,7 @@ public class DexShareCollectionService extends Service {
 
     public void bondDevice() {
         final IntentFilter bondintent = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-        registerReceiver(mPairReceiver, bondintent);
+        JoH.registerReceiver(this, mPairReceiver, bondintent, false);
         if(!share2){ device.setPin("000000".getBytes()); }
         device.createBond();
     }

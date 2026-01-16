@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 
+import com.eveningoutpost.dexdrip.models.JoH;
 import com.eveningoutpost.dexdrip.models.UserError.Log;
 import com.eveningoutpost.dexdrip.xdrip;
 
@@ -70,7 +71,7 @@ public class UsbTools {
         }
         final PendingIntent mPermissionIntent = PendingIntent.getBroadcast(xdrip.getAppContext(), 0, new Intent(ACTION_USB_PERMISSION), 0);
         final IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
-        xdrip.getAppContext().registerReceiver(receiver, filter);
+        JoH.registerReceiver(xdrip.getAppContext(), receiver, filter, false);
         usbManager.requestPermission(device, mPermissionIntent);
     }
 

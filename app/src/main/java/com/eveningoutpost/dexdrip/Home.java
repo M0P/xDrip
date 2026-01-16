@@ -1899,8 +1899,16 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
         };
 
 
-        registerReceiver(_broadcastReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
-        registerReceiver(newDataReceiver, new IntentFilter(Intents.ACTION_NEW_BG_ESTIMATE_NO_DATA));
+        // For system broadcast (ACTION_TIME_TICK)
+        ContextCompat.registerReceiver(this, _broadcastReceiver,
+                new IntentFilter(Intent.ACTION_TIME_TICK),
+                ContextCompat.RECEIVER_EXPORTED);
+
+        // For internal app broadcast
+        ContextCompat.registerReceiver(this, newDataReceiver,
+                new IntentFilter(Intents.ACTION_NEW_BG_ESTIMATE_NO_DATA),
+                ContextCompat.RECEIVER_EXPORTED);
+
 
         LocalBroadcastManager.getInstance(this).registerReceiver(statusReceiver,
                 new IntentFilter(Intents.HOME_STATUS_ACTION));

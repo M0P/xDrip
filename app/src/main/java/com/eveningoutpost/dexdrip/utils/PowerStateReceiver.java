@@ -9,6 +9,7 @@ import android.os.BatteryManager;
 import android.util.Log;
 
 import com.eveningoutpost.dexdrip.alert.Poller;
+import com.eveningoutpost.dexdrip.models.JoH;
 import com.eveningoutpost.dexdrip.xdrip;
 
 /**
@@ -47,7 +48,7 @@ public class PowerStateReceiver extends BroadcastReceiver {
 
     @SuppressWarnings("ConstantConditions")
     public static int getBatteryLevel(Context context) {
-        final Intent batteryIntent = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        final Intent batteryIntent = JoH.registerReceiver(context, null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED), false);
         try {
             int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
             int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
