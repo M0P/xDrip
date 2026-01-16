@@ -238,7 +238,9 @@ dependencies {
 
     implementation project(':localeapi')
     implementation project(':libkeks')
-    
+
+    def work_version = "2.11.0"
+    implementation "androidx.work:work-runtime:$work_version"
 
     // app auth implementation
     //implementation(name: 'core-1.1.0', ext: 'aar')
