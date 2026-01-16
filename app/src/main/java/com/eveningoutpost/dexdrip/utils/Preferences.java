@@ -1220,6 +1220,10 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
             final ListPreference currentCalibrationPlugin = (ListPreference) findPreference("current_calibration_plugin");
             final PreferenceCategory collectionCategory = (PreferenceCategory) findPreference("collection_category");
 
+            // NOTE: Must be declared at this scope (not inside a try-block), because it is used later in this method.
+            // Some preference XML variants may omit this key, so it is allowed to be null.
+            final EditTextPreference transmitterId = (EditTextPreference) findPreference("dex_txid");
+
             final Preference shareKey = findPreference("share_key");
             shareKey.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
@@ -1635,8 +1639,6 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
                     Log.wtf(TAG, "Nullpointer wifireceivers ", e);
                 }
 
-                final EditTextPreference transmitterId = (EditTextPreference) findPreference("dex_txid");
-
                 if ((collectionType != DexCollectionType.DexbridgeWixel)
                         && (collectionType != DexCollectionType.WifiDexBridgeWixel)) {
                     try {
@@ -1809,40 +1811,45 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
                 }
             });
 
-            bindPreferenceSummaryToValue(transmitterId); // duplicated below but this sets initial value
-            transmitterId.getEditText().setFilters(new InputFilter[]{new InputFilter.AllCaps()});
-            transmitterId.getEditText().post(() -> {
-                try {
-                    transmitterId.getEditText().setSelection(transmitterId.getEditText().getText().length());
-                } catch (Exception e) {
-                    UserError.Log.d(TAG, "Could not set selection for transmitter id: " + e);
-                }
-            });
-            transmitterId.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference, Object newValue) {
-                    final Activity activity = getActivity();
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Dialog.askIfNeeded(activity, (String) newValue);
-                            try {
-                                Thread.sleep(1000);
-                            } catch (InterruptedException e) {
-                                //
+            // NOTE: transmitterId might not exist in some flavors / older XMLs. Guard it so the settings screen still works.
+            if (transmitterId != null) {
+                bindPreferenceSummaryToValue(transmitterId); // duplicated below but this sets initial value
+                transmitterId.getEditText().setFilters(new InputFilter[]{new InputFilter.AllCaps()});
+                transmitterId.getEditText().post(() -> {
+                    try {
+                        transmitterId.getEditText().setSelection(transmitterId.getEditText().getText().length());
+                    } catch (Exception e) {
+                        UserError.Log.d(TAG, "Could not set selection for transmitter id: " + e);
+                    }
+                });
+                transmitterId.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                    @Override
+                    public boolean onPreferenceChange(Preference preference, Object newValue) {
+                        final Activity activity = getActivity();
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Dialog.askIfNeeded(activity, (String) newValue);
+                                try {
+                                    Thread.sleep(1000);
+                                } catch (InterruptedException e) {
+                                    //
+                                }
+                                Log.d(TAG, "Trying to restart collector due to tx id change");
+
+                                clearDataWhenTransmitterIdEntered((String) newValue);
+
+                                CollectionServiceStarter.restartCollectionService(xdrip.getAppContext());
                             }
-                            Log.d(TAG, "Trying to restart collector due to tx id change");
+                        }).start();
+                        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference, newValue);
 
-                            clearDataWhenTransmitterIdEntered((String) newValue);
-
-                            CollectionServiceStarter.restartCollectionService(xdrip.getAppContext());
-                        }
-                    }).start();
-                    sBindPreferenceSummaryToValueListener.onPreferenceChange(preference, newValue);
-
-                    return true;
-                }
-            });
+                        return true;
+                    }
+                });
+            } else {
+                Log.wtf(TAG, "Missing preference dex_txid (transmitter id)");
+            }
 
             collectionMethod.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
@@ -1893,13 +1900,19 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
 
                     if ((collectionType != DexCollectionType.DexbridgeWixel)
                             && (collectionType != DexCollectionType.WifiDexBridgeWixel)) {
-                        collectionCategory.removePreference(transmitterId);
+                        if (transmitterId != null) {
+                            collectionCategory.removePreference(transmitterId);
+                        }
                     } else {
-                        collectionCategory.addPreference(transmitterId);
+                        if (transmitterId != null) {
+                            collectionCategory.addPreference(transmitterId);
+                        }
                     }
 
                     if (collectionType == DexCollectionType.DexcomG5) {
-                        collectionCategory.addPreference(transmitterId);
+                        if (transmitterId != null) {
+                            collectionCategory.addPreference(transmitterId);
+                        }
                     }
 
                     if (collectionType == DexCollectionType.NSFollow) {
