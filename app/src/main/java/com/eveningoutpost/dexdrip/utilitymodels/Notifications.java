@@ -420,7 +420,7 @@ public class Notifications extends IntentService {
 
         UserNotification userNotification = UserNotification.GetNotificationByType("bg_unclear_readings_alert");
         if (userNotification == null) {
-            // This is the case, that we are in unclear sensor reading, but for small time, so there is no call 
+            // This is the case, that we are in unclear sensor reading, but for small time, so there is no call
             Log.i(TAG, "No active alert exists. returning Long.MAX_VALUE");
             return Long.MAX_VALUE;
         } else {
@@ -587,11 +587,8 @@ public class Notifications extends IntentService {
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(mContext);
         stackBuilder.addParentStack(Home.class);
         stackBuilder.addNextIntent(intent);
-        PendingIntent resultPendingIntent =
-                stackBuilder.getPendingIntent(
-                        0,
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                );
+        int pendingIntentFlags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE;
+        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, pendingIntentFlags);
 
         //final NotificationCompat.Builder b = new NotificationCompat.Builder(mContext, NotificationChannels.ONGOING_CHANNEL);
         //final NotificationCompat.Builder b = new NotificationCompat.Builder(mContext); // temporary fix until ONGOING CHANNEL is silent by default on android 8+
