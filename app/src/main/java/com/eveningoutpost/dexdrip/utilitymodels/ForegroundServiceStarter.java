@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.os.Build;
 
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.eveningoutpost.dexdrip.Home;
 import com.eveningoutpost.dexdrip.R;
@@ -34,7 +35,7 @@ public class ForegroundServiceStarter {
     private final boolean run_service_in_foreground;
 
     public static boolean shouldRunCollectorInForeground() {
-        // Force foreground with Oreo and above
+        // Force foreground with Oreo and above.
         return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !Home.get_follower())
                 || Pref.getBoolean("run_service_in_foreground", true);
     }
@@ -47,9 +48,9 @@ public class ForegroundServiceStarter {
 
     /**
      * Android O+ strictly requires a valid Notification channel for foreground services.
-     * Some ROMs/Android versions will crash the app if startForeground() is called with
-     * an invalid notification (e.g. channelId missing), producing:
-     * RemoteServiceException$CannotPostForegroundServiceNotificationException.
+     * Some ROMs/Android versions (notably MIUI) crash the app if startForeground() is called with
+     * an invalid notification, producing:
+     * RemoteServiceException$CannotPostForegroundServiceNotificationException: Bad notification for startForeground
      */
     @TargetApi(Build.VERSION_CODES.O)
     private static void ensureOngoingChannelExists(final Context context) {
@@ -74,14 +75,17 @@ public class ForegroundServiceStarter {
 
             nm.createNotificationChannel(channel);
         } catch (Exception e) {
-            // Best effort: if channel creation fails, caller will still attempt fallback notification.
+            // Best effort only.
             Log.e(TAG, "Failed to ensure ongoing notification channel exists: " + e);
         }
     }
 
     private Notification buildFallbackForegroundNotification() {
-        // Minimal notification used only when the full ongoing notification cannot be built.
-        // This prevents the service from crashing on startForeground() due to a bad Notification.
+        // Minimal notification used for the actual startForeground() call.
+        //
+        // IMPORTANT: Even if we can build the full xDrip ongoing notification, some Android builds
+        // may still reject it when posted as a foreground-service notification (RemoteViews, bitmaps,
+        // channel edge cases). So we start with a minimal, known-safe notification and then update it.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             ensureOngoingChannelExists(mContext);
         }
@@ -102,21 +106,27 @@ public class ForegroundServiceStarter {
                 .build();
     }
 
-    private Notification buildOngoingNotificationSafely(final long start, final long end) {
-        try {
-            // Prefer the full xDrip ongoing notification with graph.
-            return new Notifications().createOngoingNotification(new BgGraphBuilder(mContext, start, end), mContext);
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to build full ongoing notification, using fallback: " + e);
-            return buildFallbackForegroundNotification();
-        }
+    private Notification buildRichOngoingNotification(final long start, final long end) {
+        // This is the existing “full” notification (graph etc). It can be updated after the service
+        // is already in the foreground.
+        return new Notifications().createOngoingNotification(new BgGraphBuilder(mContext, start, end), mContext);
+    }
+
+    private void updateToRichNotification(final long start, final long end) {
+        // Update in the background; if this fails, the service is still safe because the minimal
+        // notification remains.
+        Inevitable.task("update-rich-ongoing-notification", 1500, () -> {
+            try {
+                final Notification rich = buildRichOngoingNotification(start, end);
+                NotificationManagerCompat.from(mContext).notify(ongoingNotificationId, rich);
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to post rich ongoing notification (keeping fallback): " + e);
+            }
+        });
     }
 
     /**
      * Start the service in foreground mode with proper Android 15+ (API 35+) handling.
-     *
-     * Android 15+ requires additional foreground service type permissions to be declared
-     * in the manifest.
      */
     public void start() {
         if (mService == null) {
@@ -135,49 +145,41 @@ public class ForegroundServiceStarter {
         foregroundStatus();
         Log.d(TAG, "CALLING START FOREGROUND: " + mService.getClass().getSimpleName());
 
-        // Build notification once so every startForeground() attempt uses identical content.
-        final Notification notification = buildOngoingNotificationSafely(start, end);
+        // Always use the safe notification for startForeground().
+        final Notification safeNotification = buildFallbackForegroundNotification();
 
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                /*
-                  When is a foreground service not a foreground service?
-                  When it's started from the background of course!
-
-                  On Android 10+, even though the user explicitly grants permissions,
-                  we still have to request to use them on a foreground service,
-                  but only when it isn't re-started with the app open.
-                 */
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-                    // Android 15+: Use FOREGROUND_SERVICE_TYPE_MANIFEST if available
+                    // Android 15+: Use FOREGROUND_SERVICE_TYPE_MANIFEST if available.
                     try {
                         mService.startForeground(
                                 ongoingNotificationId,
-                                notification,
+                                safeNotification,
                                 FOREGROUND_SERVICE_TYPE_MANIFEST
                         );
                         Log.d(TAG, "Successfully started foreground service with type manifest for "
                                 + mService.getClass().getSimpleName());
                     } catch (SecurityException e) {
-                        // Fallback: Missing required permissions in manifest
+                        // Fallback: Missing required permissions in manifest.
                         Log.e(TAG, "SecurityException starting foreground service (check manifest permissions): "
                                 + mService.getClass().getSimpleName() + " - " + e.getMessage());
-                        // Try without the service type flag
                         try {
-                            mService.startForeground(ongoingNotificationId, notification);
+                            mService.startForeground(ongoingNotificationId, safeNotification);
                             Log.w(TAG, "Started foreground service without type flag (degraded mode) for "
                                     + mService.getClass().getSimpleName());
                         } catch (Exception fallbackException) {
                             Log.e(TAG, "Failed to start foreground service even in fallback mode: "
                                     + fallbackException.getMessage());
+                            return;
                         }
                     }
                 } else {
-                    // Android 10-14
+                    // Android 10-14.
                     try {
                         mService.startForeground(
                                 ongoingNotificationId,
-                                notification,
+                                safeNotification,
                                 FOREGROUND_SERVICE_TYPE_MANIFEST
                         );
                         Log.d(TAG, "Successfully started foreground service for "
@@ -185,16 +187,21 @@ public class ForegroundServiceStarter {
                     } catch (IllegalArgumentException e) {
                         Log.e(TAG, "Got exception trying to use Android 10+ service starting for "
                                 + mService.getClass().getSimpleName() + " " + e);
-                        mService.startForeground(ongoingNotificationId, notification);
+                        mService.startForeground(ongoingNotificationId, safeNotification);
                     }
                 }
             } else {
-                // Android 9 and below
-                mService.startForeground(ongoingNotificationId, notification);
+                // Android 9 and below.
+                mService.startForeground(ongoingNotificationId, safeNotification);
                 Log.d(TAG, "Started foreground service (Android < 10) for "
                         + mService.getClass().getSimpleName());
             }
+
+            // If we got here, startForeground() succeeded. Now try to update the notification.
+            updateToRichNotification(start, end);
+
         } catch (Exception e) {
+            // If this throws, Android will likely kill the process. Log anyway for crash reports.
             Log.e(TAG, "Unexpected error starting foreground service: " + e.getMessage());
         }
     }
