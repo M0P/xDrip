@@ -95,7 +95,7 @@ public class WakeLockTrampoline extends BroadcastReceiver {
         final int scheduleId = name.hashCode() + id;
 
         final Intent intent = new Intent(xdrip.getAppContext(), WakeLockTrampoline.class).putExtra(SERVICE_PARAMETER, name);
-        if (function != null) intent.putExtra("function",function);
+        if (function != null) intent.putExtra("function", function);
         cache.put(name, serviceClass);
 
         if (D)
@@ -113,7 +113,17 @@ public class WakeLockTrampoline extends BroadcastReceiver {
                     UserError.Log.d(TAG, "Recurring schedule id: " + scheduleId + " for " + existing);
             }
         }
-        return PendingIntent.getBroadcast(xdrip.getAppContext(), scheduleId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        
+        // Fix for Android 12+ (API 31+): Add FLAG_IMMUTABLE to PendingIntent flags
+        // This is required by the system as broadcast receivers don't need mutable intents
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            // Android 12+ requires either FLAG_IMMUTABLE or FLAG_MUTABLE to be specified
+            // Use FLAG_IMMUTABLE for security best practices since this is a broadcast receiver
+            flags |= PendingIntent.FLAG_IMMUTABLE;
+        }
+        
+        return PendingIntent.getBroadcast(xdrip.getAppContext(), scheduleId, intent, flags);
     }
 
     private static Class getClassFromName(final String name) {
