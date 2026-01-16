@@ -1,6 +1,7 @@
 package com.eveningoutpost.dexdrip;
 
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
@@ -83,6 +84,13 @@ public class SystemStatusFragment extends Fragment {
     private static final String TAG = "SystemStatus";
     private BroadcastReceiver serviceDataReceiver;
     private TextView db_size_view;
+
+    // Android 12+ runtime permission request code.
+    // This is used to avoid crashes when calling BluetoothAdapter.getBondedDevices().
+    private static final int REQ_BLUETOOTH_CONNECT = 9101;
+
+    // Prevent repeated permission prompts while the Fragment is active.
+    private boolean btConnectPermissionRequested = false;
 
     //@Inject
     MicroStatus microStatus;
@@ -314,6 +322,51 @@ public class SystemStatusFragment extends Fragment {
         collection_method.setText(prefs.getString("dex_collection_method", "BluetoothWixel").replace("Dexbridge", "xBridge"));
     }
 
+    // Android 12+ (API 31+) requires BLUETOOTH_CONNECT runtime permission for many Bluetooth calls.
+    // This helper prevents hard crashes when users haven’t granted the permission yet.
+    private boolean hasBluetoothConnectPermission() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return true;
+        try {
+            return safeGetContext().checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED;
+        } catch (Exception e) {
+            // If permission state can't be read, assume missing.
+            return false;
+        }
+    }
+
+    // Request BLUETOOTH_CONNECT permission once per Fragment lifetime to avoid spamming dialogs.
+    private void requestBluetoothConnectPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return;
+        if (btConnectPermissionRequested) return;
+        if (hasBluetoothConnectPermission()) return;
+        if (!isAdded()) return;
+
+        btConnectPermissionRequested = true;
+        try {
+            requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, REQ_BLUETOOTH_CONNECT);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to request BLUETOOTH_CONNECT permission", e);
+        }
+    }
+
+    // Safe wrapper around BluetoothAdapter.getBondedDevices().
+    // Returns null when permission is missing, and triggers a permission request.
+    private Set<BluetoothDevice> getBondedDevicesSafe(final BluetoothAdapter adapter) {
+        if (adapter == null) return null;
+        if (!hasBluetoothConnectPermission()) {
+            requestBluetoothConnectPermissionIfNeeded();
+            return null;
+        }
+        try {
+            return adapter.getBondedDevices();
+        } catch (SecurityException e) {
+            // This is the crash seen on Android 12+ when BLUETOOTH_CONNECT isn’t granted.
+            Log.e(TAG, "Missing BLUETOOTH_CONNECT permission for getBondedDevices()", e);
+            requestBluetoothConnectPermissionIfNeeded();
+            return null;
+        }
+    }
+
     public void setCurrentDevice() {
         if (activeBluetoothDevice != null) {
             current_device.setText(activeBluetoothDevice.name);
@@ -328,32 +381,33 @@ public class SystemStatusFragment extends Fragment {
                 mBluetoothAdapter = mBluetoothManager.getAdapter();
             }
             if (mBluetoothAdapter != null) {
-                try {
-                    Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-                    if ((pairedDevices != null) && (pairedDevices.size() > 0)) {
-                        for (BluetoothDevice device : pairedDevices) {
-                            if (device.getName() != null) {
+                // Prefer the safe wrapper to avoid crashing on Android 12+.
+                final Set<BluetoothDevice> pairedDevices = getBondedDevicesSafe(mBluetoothAdapter);
+                if ((pairedDevices != null) && (!pairedDevices.isEmpty())) {
+                    for (BluetoothDevice device : pairedDevices) {
+                        if (device.getName() != null) {
 
-                                String transmitterIdLastTwo = Extensions.lastTwoCharactersOfString(defaultTransmitter.transmitterId);
-                                String deviceNameLastTwo = Extensions.lastTwoCharactersOfString(device.getName());
+                            String transmitterIdLastTwo = Extensions.lastTwoCharactersOfString(defaultTransmitter.transmitterId);
+                            String deviceNameLastTwo = Extensions.lastTwoCharactersOfString(device.getName());
 
-                                if (transmitterIdLastTwo.equals(deviceNameLastTwo)) {
-                                    current_device.setText(defaultTransmitter.transmitterId);
-                                }
-
+                            if (transmitterIdLastTwo.equals(deviceNameLastTwo)) {
+                                current_device.setText(defaultTransmitter.transmitterId);
                             }
+
                         }
-                    }
-                } catch (SecurityException e) {
-                    Log.d(TAG, "Got SecurityException in setCurrentDevice "+ e);
-                    try {
-                        LocationHelper.requestLocationForBluetooth(this.getActivity());
-                    } catch (Exception e1) {
-                        Log.d(TAG, "Got Exception in setCurrentDevice attempting to request location permissions"+ e1);
                     }
                 }
             } else {
                 current_device.setText("No Bluetooth");
+            }
+
+            // Legacy fallback: request location permission for older Android versions.
+            if (!hasBluetoothConnectPermission()) {
+                try {
+                    LocationHelper.requestLocationForBluetooth(this.getActivity());
+                } catch (Exception e1) {
+                    Log.d(TAG, "Got Exception in setCurrentDevice attempting to request location permissions" + e1);
+                }
             }
         }
     }
@@ -399,9 +453,10 @@ public class SystemStatusFragment extends Fragment {
         } catch (SecurityException e) {
             Log.e(TAG, "Got SecurityException in setConnectionStatus ", e);
             connection_status.setText(R.string.need_bluetooth_permission);
+            requestBluetoothConnectPermissionIfNeeded();
         } catch (Exception e) {
             connection_status.setText("Unknown");
-            Log.d(TAG, "Got Exception in setConnectionStatus "+ e);
+            Log.d(TAG, "Got Exception in setConnectionStatus " + e);
         }
 
 
@@ -410,8 +465,9 @@ public class SystemStatusFragment extends Fragment {
             Transmitter defaultTransmitter = new Transmitter(prefs.getString("dex_txid", "ABCDEF"));
             if (Build.VERSION.SDK_INT >= 18) mBluetoothAdapter = mBluetoothManager.getAdapter();
             if (mBluetoothAdapter != null) {
-                Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-                if (pairedDevices.size() > 0) {
+                // Use safe wrapper to avoid crashing on Android 12+.
+                final Set<BluetoothDevice> pairedDevices = getBondedDevicesSafe(mBluetoothAdapter);
+                if ((pairedDevices != null) && (!pairedDevices.isEmpty())) {
                     for (BluetoothDevice device : pairedDevices) {
                         if (device.getName() != null) {
 
@@ -426,9 +482,12 @@ public class SystemStatusFragment extends Fragment {
 
                         }
                     }
+                } else if (!hasBluetoothConnectPermission()) {
+                    // Explicitly tell the user what’s blocking the display.
+                    connection_status.setText(R.string.need_bluetooth_permission);
                 }
             } else {
-                connection_status.setText(safeGetContext().getString(R.string.no_bluetooth)); 
+                connection_status.setText(safeGetContext().getString(R.string.no_bluetooth));
             }
         }
     }
@@ -510,17 +569,22 @@ public class SystemStatusFragment extends Fragment {
                 if (mBluetoothManager != null && ActiveBluetoothDevice.first() != null) {
                     final BluetoothAdapter bluetoothAdapter = mBluetoothManager.getAdapter();
                     if (bluetoothAdapter != null) {
-                        for (BluetoothDevice bluetoothDevice : bluetoothAdapter.getBondedDevices()) {
-                            if (bluetoothDevice.getAddress().compareTo(ActiveBluetoothDevice.first().address) == 0) {
-                                try {
-                                    Method m = bluetoothDevice.getClass().getMethod("removeBond", (Class[]) null);
-                                    m.invoke(bluetoothDevice, (Object[]) null);
-                                    notes.append("\n- Bluetooth unbonded, if using share tell it to forget your device.");
-                                    notes.append("\n- Scan for devices again to set connection back up!");
-                                } catch (Exception e) {
-                                    Log.e("SystemStatus", e.getMessage(), e);
+                        final Set<BluetoothDevice> bonded = getBondedDevicesSafe(bluetoothAdapter);
+                        if (bonded != null) {
+                            for (BluetoothDevice bluetoothDevice : bonded) {
+                                if (bluetoothDevice.getAddress().compareTo(ActiveBluetoothDevice.first().address) == 0) {
+                                    try {
+                                        Method m = bluetoothDevice.getClass().getMethod("removeBond", (Class[]) null);
+                                        m.invoke(bluetoothDevice, (Object[]) null);
+                                        notes.append("\n- Bluetooth unbonded, if using share tell it to forget your device.");
+                                        notes.append("\n- Scan for devices again to set connection back up!");
+                                    } catch (Exception e) {
+                                        Log.e("SystemStatus", e.getMessage(), e);
+                                    }
                                 }
                             }
+                        } else {
+                            notes.append("\n- Cannot unbond: Bluetooth permission missing");
                         }
 
                         ActiveBluetoothDevice.forget();
@@ -547,8 +611,8 @@ public class SystemStatusFragment extends Fragment {
                     Transmitter defaultTransmitter = new Transmitter(prefs.getString("dex_txid", "ABCDEF"));
                     mBluetoothAdapter = mBluetoothManager.getAdapter();
 
-                    Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-                    if ((pairedDevices != null) && (pairedDevices.size() > 0)) {
+                    final Set<BluetoothDevice> pairedDevices = getBondedDevicesSafe(mBluetoothAdapter);
+                    if ((pairedDevices != null) && (!pairedDevices.isEmpty())) {
                         for (BluetoothDevice device : pairedDevices) {
                             if (device.getName() != null) {
 
@@ -567,6 +631,8 @@ public class SystemStatusFragment extends Fragment {
 
                             }
                         }
+                    } else if (!hasBluetoothConnectPermission()) {
+                        notes.append("\n- Cannot unbond G5: Bluetooth permission missing");
                     }
                 }
             }
