@@ -10,8 +10,6 @@ import com.eveningoutpost.dexdrip.utilitymodels.Constants;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.val;
-
 public class BasalRepository {
 
     private static final int WHOLE_DAY_IN_MINUTES = 60 * 24;
@@ -49,7 +47,7 @@ public class BasalRepository {
     }
 
     static int minutesPerSegment() {
-        val size = rates.size();
+        final int size = rates.size();
         if (size == 0) return WHOLE_DAY_IN_MINUTES;
         return WHOLE_DAY_IN_MINUTES / size;
     }

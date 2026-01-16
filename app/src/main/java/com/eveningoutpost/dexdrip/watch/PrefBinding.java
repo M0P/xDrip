@@ -9,14 +9,11 @@ import com.eveningoutpost.dexdrip.utilitymodels.Pref;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Getter;
-
 interface PrefBindingInit{
     void initialize();
 }
 
 public abstract class PrefBinding implements PrefBindingInit {
-     @Getter
     private final List<Pair<String, Integer>> items = new ArrayList<>();
 
     protected PrefBinding(){
@@ -25,6 +22,10 @@ public abstract class PrefBinding implements PrefBindingInit {
 
     public void add(final String pref, final int value) {
         items.add(new Pair<>(pref, value));
+    }
+
+    public List<Pair<String, Integer>> getItems() {
+        return items;
     }
 
     public List<Integer> getEnabled(final String prefix) {

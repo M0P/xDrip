@@ -6,7 +6,7 @@ import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
-import com.eveningoutpost.dexdrip.GcmActivity;
+//import com.eveningoutpost.dexdrip.GcmActivity;
 import com.eveningoutpost.dexdrip.Home;
 import com.eveningoutpost.dexdrip.importedlibraries.usbserial.util.HexDump;
 import com.eveningoutpost.dexdrip.models.UserError.Log;
@@ -88,7 +88,7 @@ public class TransmitterData extends Model {
                         try {
                             Pref.setInt("bridge_battery", Integer.parseInt(data[2]));
                             if (Home.get_master()) {
-                                GcmActivity.sendBridgeBattery(Pref.getInt("bridge_battery", -1));
+//                                GcmActivity.sendBridgeBattery(Pref.getInt("bridge_battery", -1));
                             }
                             CheckBridgeBattery.checkBridgeBattery();
                         } catch (Exception e) {

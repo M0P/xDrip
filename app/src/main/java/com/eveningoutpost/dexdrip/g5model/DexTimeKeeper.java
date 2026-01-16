@@ -6,7 +6,7 @@ import com.eveningoutpost.dexdrip.models.JoH;
 import com.eveningoutpost.dexdrip.models.UserError;
 import com.eveningoutpost.dexdrip.utilitymodels.PersistentStore;
 
-import lombok.val;
+//import lombok.val;
 
 /**
  * Created by jamorham on 25/11/2016.
@@ -124,9 +124,9 @@ public class DexTimeKeeper {
     public static final int MAX_AGE_DAYS = 100;
 
     public static Integer getTransmitterDaysRemaining(final String transmitterId) {
-        val age = getTransmitterAgeInDays(transmitterId);
+        int age = getTransmitterAgeInDays(transmitterId);
         if (age < 0) return null;
-        val modified = FirmwareCapability.isTransmitterModified(transmitterId);
+        boolean modified = FirmwareCapability.isTransmitterModified(transmitterId);
         return modified ? ABSOLUTE_MAX_AGE_DAYS - age : MAX_AGE_DAYS - age;
     }
 

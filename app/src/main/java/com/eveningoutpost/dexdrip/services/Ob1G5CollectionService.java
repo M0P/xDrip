@@ -50,7 +50,7 @@ import static com.eveningoutpost.dexdrip.utilitymodels.StatusItem.Highlight.NORM
 import static com.eveningoutpost.dexdrip.utilitymodels.StatusItem.Highlight.NOTICE;
 import static com.eveningoutpost.dexdrip.utils.DexCollectionType.DexcomG5;
 import static com.eveningoutpost.dexdrip.utils.bt.Subscription.addErrorHandler;
-import static com.eveningoutpost.dexdrip.watch.thinjam.BlueJayEntry.isNative;
+//import static com.eveningoutpost.dexdrip.watch.thinjam.BlueJayEntry.isNative;
 import static com.eveningoutpost.dexdrip.xdrip.gs;
 import static com.polidea.rxandroidble2.scan.ScanSettings.CALLBACK_TYPE_ALL_MATCHES;
 import static com.polidea.rxandroidble2.scan.ScanSettings.CALLBACK_TYPE_FIRST_MATCH;
@@ -114,15 +114,15 @@ import com.eveningoutpost.dexdrip.utilitymodels.Inevitable;
 import com.eveningoutpost.dexdrip.utilitymodels.PersistentStore;
 import com.eveningoutpost.dexdrip.utilitymodels.Pref;
 import com.eveningoutpost.dexdrip.utilitymodels.RxBleProvider;
-import com.eveningoutpost.dexdrip.utilitymodels.SendFeedBack;
+//import com.eveningoutpost.dexdrip.utilitymodels.SendFeedBack;
 import com.eveningoutpost.dexdrip.utilitymodels.StatusItem;
 import com.eveningoutpost.dexdrip.utilitymodels.StatusItem.Highlight;
-import com.eveningoutpost.dexdrip.utilitymodels.UpdateActivity;
+//import com.eveningoutpost.dexdrip.utilitymodels.UpdateActivity;
 import com.eveningoutpost.dexdrip.utilitymodels.WholeHouse;
 import com.eveningoutpost.dexdrip.utils.DexCollectionType;
 import com.eveningoutpost.dexdrip.utils.bt.Subscription;
 import com.eveningoutpost.dexdrip.utils.framework.WakeLockTrampoline;
-import com.eveningoutpost.dexdrip.watch.thinjam.BlueJayEntry;
+//import com.eveningoutpost.dexdrip.watch.thinjam.BlueJayEntry;
 import com.eveningoutpost.dexdrip.xdrip;
 import com.google.common.collect.Sets;
 import com.polidea.rxandroidble2.RxBleClient;
@@ -145,15 +145,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.Scheduler;
 import io.reactivex.schedulers.Schedulers;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.val;
 
 
 /**
@@ -194,8 +192,6 @@ public class Ob1G5CollectionService extends G5BaseService {
     public static volatile long lastUsableGlucosePacketTime = 0;
     private static volatile String static_connection_state = null;
     public static volatile long static_last_connected = 0;
-    @Setter
-    @Getter
     private static long last_transmitter_timestamp = 0;
     private static long lastStateUpdated = 0;
     private static long wakeup_time = 0;
@@ -258,6 +254,14 @@ public class Ob1G5CollectionService extends G5BaseService {
     private static final Set<String> alwaysConnectModels = Sets.newHashSet("G Watch");
     private static final Set<String> alwaysBuggyWakeupModels = Sets.newHashSet("Jelly-Pro", "SmartWatch 3");
     private static final HashMap<String, Long> failureTally = new HashMap<>();
+
+    public static long getLast_transmitter_timestamp() {
+        return last_transmitter_timestamp;
+    }
+
+    public static void setLast_transmitter_timestamp(long last_transmitter_timestamp) {
+        Ob1G5CollectionService.last_transmitter_timestamp = last_transmitter_timestamp;
+    }
 
     // Internal process state tracking
     public enum STATE {
@@ -362,7 +366,7 @@ public class Ob1G5CollectionService extends G5BaseService {
                         break;
                     case CONNECT_NOW:
                         if (specialPairingWorkaround()) {
-                            val locallyBonded = isDeviceLocallyBonded();
+                            final boolean locallyBonded = isDeviceLocallyBonded();
                             UserError.Log.d(TAG, "wasbonded = " + wasBonded + " local: " + locallyBonded);
                             if (wasBonded.equals(getTransmitterID()) && !locallyBonded && skippedConnects < 10) {
                                 skippedConnects++;
@@ -548,9 +552,9 @@ public class Ob1G5CollectionService extends G5BaseService {
     }
 
     private static void init_tx_id() {
-        val TXID_PREF = "dex_txid";
-        val txid = Pref.getString(TXID_PREF, "NULL");
-        val txid_filtered = txid.trim();
+        final String TXID_PREF = "dex_txid";
+        final String txid = Pref.getString(TXID_PREF, "NULL");
+        final String txid_filtered = txid.trim();
         transmitterID = txid_filtered;
         if (!txid.equals(txid_filtered)) {
             Pref.setString(TXID_PREF, txid_filtered);
@@ -842,10 +846,10 @@ public class Ob1G5CollectionService extends G5BaseService {
                 return false;
             }
 
-            if (BlueJayEntry.isPhoneCollectorDisabled()) {
-                UserError.Log.d(TAG, "Not running as BlueJay is collector");
-                return false;
-            }
+//            if (BlueJayEntry.isPhoneCollectorDisabled()) {
+//                UserError.Log.d(TAG, "Not running as BlueJay is collector");
+//                return false;
+//            }
 
         } else {
             // android wear code
@@ -874,7 +878,7 @@ public class Ob1G5CollectionService extends G5BaseService {
     }
 
     public static boolean immediateBonding() {
-        return Pref.getBooleanDefaultFalse("engineering_ob1_bonding_test") || isNative();
+        return Pref.getBooleanDefaultFalse("engineering_ob1_bonding_test") ;
     }
 
     public static boolean ignoreBonding() {
@@ -1331,7 +1335,7 @@ public class Ob1G5CollectionService extends G5BaseService {
         final String this_name = bleScanResult.getBleDevice().getName();
         final String this_address = bleScanResult.getBleDevice().getMacAddress();
         final String search_name = getTransmitterBluetoothName();
-        val mdata = bleScanResult.getScanRecord().getManufacturerSpecificData(0xD << 4);
+        final byte[] mdata = bleScanResult.getScanRecord().getManufacturerSpecificData(0xD << 4);
         if (isScanMatch(this_address, historicalTransmitterMAC, this_name, search_name)) {
             stopScan(); // we got one!
             last_scan_started = 0; // clear scanning for time
@@ -1615,7 +1619,7 @@ public class Ob1G5CollectionService extends G5BaseService {
     }
 
     private void releaseFloating() {
-        val wl = floatingWakeLock;
+        final PowerManager.WakeLock wl = floatingWakeLock;
         if (wl != null) {
             if (wl.isHeld()) {
                 JoH.releaseWakeLock(wl);
@@ -1645,7 +1649,7 @@ public class Ob1G5CollectionService extends G5BaseService {
                     try {
                         plugin = Loader.getLocalInstance(Registry.get(KEKS), getTransmitterID());
                         if (plugin == null) {
-                            val msg = "Unable to load keks plugin - please re-enter transmitter id";
+                            final String msg = "Unable to load keks plugin - please re-enter transmitter id";
                             UserError.Log.wtf(TAG, msg);
                             JoH.static_toast_long(msg);
                         } else {
@@ -2218,11 +2222,11 @@ public class Ob1G5CollectionService extends G5BaseService {
 
     private static void handleUnknownFirmwareClick() {
         UserError.Log.d(TAG, "handleUnknownFirmwareClick()");
-        if (UpdateActivity.testAndSetNightly(true)) {
-            val vr1 = (VersionRequest1RxMessage) Ob1G5StateMachine.getFirmwareXDetails(getTransmitterID(), 1);
-            UserError.Log.d(TAG, "Starting feedback activity");
-            xdrip.getAppContext().startActivity(new Intent(xdrip.getAppContext(), SendFeedBack.class).putExtra("generic_text", "Automated Report of unknown firmware version\n" + vr1.toString()).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-        }
+//        if (UpdateActivity.testAndSetNightly(true)) {
+//            final VersionRequest1RxMessage vr1 = (VersionRequest1RxMessage) Ob1G5StateMachine.getFirmwareXDetails(getTransmitterID(), 1);
+//            UserError.Log.d(TAG, "Starting feedback activity");
+//            xdrip.getAppContext().startActivity(new Intent(xdrip.getAppContext(), SendFeedBack.class).putExtra("generic_text", "Automated Report of unknown firmware version\n" + vr1.toString()).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+//        }
     }
 
     // data for MegaStatus
@@ -2242,7 +2246,7 @@ public class Ob1G5CollectionService extends G5BaseService {
             l.add(new StatusItem("Turn Sound On!", "You will not hear pairing request with volume set low or do not disturb enabled!", CRITICAL));
         }
 
-        l.add(new StatusItem("Phone Service State", lastState + (BlueJayEntry.isPhoneCollectorDisabled() ? "\nDisabled by BlueJay option" : ""), msSince(lastStateUpdated) < 300000 ? (lastState.startsWith("Got data") ? Highlight.GOOD : NORMAL) : (isWatchRunning() ? Highlight.GOOD : CRITICAL)));
+//        l.add(new StatusItem("Phone Service State", lastState + (BlueJayEntry.isPhoneCollectorDisabled() ? "\nDisabled by BlueJay option" : ""), msSince(lastStateUpdated) < 300000 ? (lastState.startsWith("Got data") ? Highlight.GOOD : NORMAL) : (isWatchRunning() ? Highlight.GOOD : CRITICAL)));
         if (last_scan_started > 0) {
             final long scanning_time = msSince(last_scan_started);
             l.add(new StatusItem("Time scanning", niceTimeScalar(scanning_time), scanning_time > MINUTE_IN_MS * 5 ? (scanning_time > MINUTE_IN_MS * 10 ? BAD : NOTICE) : NORMAL));
@@ -2320,7 +2324,7 @@ public class Ob1G5CollectionService extends G5BaseService {
         final VersionRequest2RxMessage vr3 = (VersionRequest2RxMessage) Ob1G5StateMachine.getFirmwareXDetails(tx_id, 3);
         try {
             if (vr1 != null) {
-                val known = FirmwareCapability.isKnownFirmware(vr1.firmware_version_string);
+                final boolean known = FirmwareCapability.isKnownFirmware(vr1.firmware_version_string);
                 if (!known) {
                     if (quietratelimit("log ob1 unknown firmware outer", 3600)) {
                         if (pratelimit("log ob1 unknown firmware", 86400 * 7)) {
@@ -2328,9 +2332,9 @@ public class Ob1G5CollectionService extends G5BaseService {
                         }
                     }
                 }
-                val unknown = !known ? (" " + "Unknown!" + "\n" + (UpdateActivity.testAndSetNightly(false) ? "Tap to report" : "Tap to use nightly version")) : "";
+//                final String unknown = !known ? (" " + "Unknown!" + "\n" + (UpdateActivity.testAndSetNightly(false) ? "Tap to report" : "Tap to use nightly version")) : "";
 
-                l.add(new StatusItem("Firmware Version", vr1.firmware_version_string + unknown, !known ? CRITICAL : NORMAL, !known ? "long-press" : null, !known ? (Runnable) Ob1G5CollectionService::handleUnknownFirmwareClick : null));
+//                l.add(new StatusItem("Firmware Version", vr1.firmware_version_string + unknown, !known ? CRITICAL : NORMAL, !known ? "long-press" : null, !known ? (Runnable) Ob1G5CollectionService::handleUnknownFirmwareClick : null));
                 //l.add(new StatusItem("Build Version", "" + vr1.build_version));
                 if (vr1.version_code != 3 && get_engineering_mode()) {
                     l.add(new StatusItem("Compat Version", "" + vr1.version_code, NORMAL));
@@ -2496,25 +2500,25 @@ public class Ob1G5CollectionService extends G5BaseService {
     }
 
     public synchronized void logFailure() {
-        val localMac = transmitterMAC;
+        final String localMac = transmitterMAC;
         if (localMac == null) {
             UserError.Log.e(TAG, "Could not log failure as mac is null");
             return;
         }
-        val tsl = tsl();
+        final long tsl = tsl();
         failureTally.put(localMac, tsl);
         UserError.Log.d(TAG, "Adding " + localMac + " to failure tally " + JoH.dateTimeText(tsl));
         resetSomeInternalState();
     }
 
     private static void expireFailures(final boolean all) {
-        val remove = new ArrayList<String>();
-        for (val entry : failureTally.entrySet()) {
+        final ArrayList<String> remove = new ArrayList<>();
+        for (final Map.Entry<String, Long> entry : failureTally.entrySet()) {
             if (all || msSince(entry.getValue()) > (MINUTE_IN_MS * 30)) {
                 remove.add(entry.getKey());
             }
         }
-        for (val entry : remove) {
+        for (final String entry : remove) {
             UserError.Log.d(TAG, "Removing " + entry + " from failure tally");
             failureTally.remove(entry);
         }

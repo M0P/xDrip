@@ -3,7 +3,6 @@ package com.eveningoutpost.dexdrip.utilitymodels;
 import static com.eveningoutpost.dexdrip.utilitymodels.BgGraphBuilder.FUZZER;
 
 import lecho.lib.hellocharts.model.PointValue;
-import lombok.AllArgsConstructor;
 
 /**
  * JamOrHam
@@ -11,7 +10,6 @@ import lombok.AllArgsConstructor;
  * Handle de-fuzzing and legacy calls
  */
 
-@AllArgsConstructor
 public class HPointValue extends PointValue {
 
     public HPointValue set(double x, double y) {

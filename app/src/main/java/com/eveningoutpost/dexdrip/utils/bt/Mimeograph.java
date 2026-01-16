@@ -20,8 +20,6 @@ import java.io.InputStream;
 import java.nio.charset.IllegalCharsetNameException;
 import java.util.List;
 
-import lombok.RequiredArgsConstructor;
-
 import static com.eveningoutpost.dexdrip.models.JoH.emptyString;
 import static com.eveningoutpost.dexdrip.utils.bt.Mimeograph.SearchState.COPY_COLLISION_KEY;
 import static com.eveningoutpost.dexdrip.utils.bt.Mimeograph.SearchState.COPY_DEVICE_KEY;
@@ -339,7 +337,6 @@ public class Mimeograph {
         }
     }
 
-    @RequiredArgsConstructor
     private static class Xfer {
         @Expose
         public String spoofMac;
@@ -349,6 +346,11 @@ public class Mimeograph {
         final public String device;
         @Expose
         public long lastRecord;
+
+        public Xfer(final String adapter, final String device) {
+            this.adapter = adapter;
+            this.device = device;
+        }
 
         {
             try {

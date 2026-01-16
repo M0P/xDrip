@@ -15,7 +15,6 @@ import com.eveningoutpost.dexdrip.models.UserError.Log;
 import com.eveningoutpost.dexdrip.utilitymodels.Constants;
 import com.eveningoutpost.dexdrip.xdrip;
 
-import lombok.val;
 
 /**
  * JamOrHam
@@ -44,10 +43,10 @@ public class SensorExpiry extends BaseAlert {
 
     @Override
     public boolean activate() {
-        val expiry = niceTimeScalarNatural(SensorDays.get().getRemainingSensorPeriodInMs(), 1);
-        val notificationId = SENSORY_EXPIRY_NOTIFICATION_ID;
+        String expiry = niceTimeScalarNatural(SensorDays.get().getRemainingSensorPeriodInMs(), 1);
+        int notificationId = SENSORY_EXPIRY_NOTIFICATION_ID;
         cancelNotification(notificationId);
-        val expireMsg = xdrip.gs(R.string.sensor_will_expire_in, expiry);
+        String expireMsg = xdrip.gs(R.string.sensor_will_expire_in, expiry);
         showNotification(xdrip.gs(R.string.sensor_expiring), expireMsg, null, notificationId, null, true, true, null, null, null, true);
         Treatments.create_note("Warning: " + expireMsg, tsl()); // TODO i18n but note classifier also needs updating for that
         UserError.Log.uel(TAG, "Sensor will expire soon");
@@ -56,10 +55,10 @@ public class SensorExpiry extends BaseAlert {
 
     @Override
     public boolean isMet() {
-        val sd = SensorDays.get();
+        SensorDays sd = SensorDays.get();
         if (sd.isValid()) {
-            val now = sd.getRemainingSensorPeriodInMs();
-            val last = remaining.get();
+            long now = sd.getRemainingSensorPeriodInMs();
+            long last = remaining.get();
 
             try {
                 if (now > (last + Constants.HOUR_IN_MS)) {
@@ -67,8 +66,8 @@ public class SensorExpiry extends BaseAlert {
                     alerted.set(NOT_ALERTED);
                 } else if (last > now) {
                     Log.d(TAG, "Period reduced to: " + niceTimeScalar(now) + " was " + niceTimeScalar(last));
-                    val lastAlerted = alerted.get();
-                    for (val threshold : THRESHOLDS) {
+                    long lastAlerted = alerted.get();
+                    for (long threshold : THRESHOLDS) {
                         if (now <= threshold && threshold < lastAlerted) {
                             alerted.set(threshold);
                             return true;

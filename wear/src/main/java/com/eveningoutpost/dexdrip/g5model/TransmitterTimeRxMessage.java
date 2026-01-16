@@ -1,59 +1,70 @@
 package com.eveningoutpost.dexdrip.g5model;
 
 import com.eveningoutpost.dexdrip.models.JoH;
+import com.eveningoutpost.dexdrip.models.UserError;
+import com.eveningoutpost.dexdrip.services.G5CollectionService;
+import com.eveningoutpost.dexdrip.utilitymodels.Constants;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import lombok.Getter;
 
 /**
- * Created by joeginley on 3/28/16.
+ * Created by jamorham on 25/11/2016.
  */
+
 public class TransmitterTimeRxMessage extends BaseMessage {
+
+    private final static String TAG = G5CollectionService.TAG; // meh
+
     public static final byte opcode = 0x25;
-    @Getter
-    private TransmitterStatus status;
-    @Getter
+    private int status;
     private int currentTime;
-    @Getter
     private int sessionStartTime;
+
+    public int getStatus() {
+        return status;
+    }
+
+    public int getCurrentTime() {
+        return currentTime;
+    }
+
+    public int getSessionStartTime() {
+        return sessionStartTime;
+    }
 
     public TransmitterTimeRxMessage(byte[] packet) {
         if (packet.length >= 10) {
-            if (packet[0] == opcode && checkCRC(packet)) {
-                data = ByteBuffer.wrap(packet).order(ByteOrder.LITTLE_ENDIAN);
-
-                status = TransmitterStatus.getBatteryLevel(data.get(1));
-                currentTime = data.getInt(2);
-                sessionStartTime = data.getInt(6);
-                // TODO more bytes after this?
+            data = ByteBuffer.wrap(packet).order(ByteOrder.LITTLE_ENDIAN);
+            if (data.get() == opcode) {
+                status = data.get();
+                currentTime = data.getInt();
+                sessionStartTime = data.getInt();
+                if (sessionStartTime == -1) sessionStartTime = 0;
             }
+        } else {
+            UserError.Log.wtf(TAG, "Invalid TransmitterTimeRxMessage packet length: " + packet.length);
         }
     }
 
     public boolean sessionInProgress() {
-        return sessionStartTime != -1 && currentTime != sessionStartTime;
-    }
-
-    public long getRealSessionStartTime(long now) {
-        return now - ((currentTime - sessionStartTime) * 1000L);
+        return sessionStartTime != 0 && sessionStartTime != -1;
     }
 
     public long getRealSessionStartTime() {
-
         if (sessionInProgress()) {
-            return getRealSessionStartTime(JoH.tsl());
+            return JoH.tsl() - ((long) (currentTime - sessionStartTime) * 1000L);
         } else {
-            return -1;
+            return 0;
         }
     }
 
     public long getSessionDuration() {
         if (sessionInProgress()) {
-            return JoH.msSince(getRealSessionStartTime());
+            return ((long) (currentTime - sessionStartTime)) * Constants.SECOND_IN_MS;
         } else {
-            return -1;
+            return 0;
         }
     }
 

@@ -18,9 +18,9 @@ import com.eveningoutpost.dexdrip.services.ActivityRecognizedService;
 import com.eveningoutpost.dexdrip.services.G5BaseService;
 import com.eveningoutpost.dexdrip.services.Ob1G5CollectionService;
 import com.eveningoutpost.dexdrip.services.UiBasedCollector;
-import com.eveningoutpost.dexdrip.cgm.medtrum.MedtrumCollectionService;
-import com.eveningoutpost.dexdrip.cloud.backup.BackupActivity;
-import com.eveningoutpost.dexdrip.insulin.opennov.data.SaveCompleted;
+//import com.eveningoutpost.dexdrip.cgm.medtrum.MedtrumCollectionService;
+//import com.eveningoutpost.dexdrip.cloud.backup.BackupActivity;
+//import com.eveningoutpost.dexdrip.insulin.opennov.data.SaveCompleted;
 import com.eveningoutpost.dexdrip.plugin.Registry;
 import com.eveningoutpost.dexdrip.profileeditor.BasalProfileEditor;
 import com.eveningoutpost.dexdrip.ui.activities.DatabaseAdmin;
@@ -89,15 +89,15 @@ public class VoiceCommands {
         } else if (allWords.contentEquals("reset motion count sync")) {
             PersistentStore.setLong("nightscout-rest-motion-synced-time", 0);
             JoH.static_toast_long("Cleared motion count sync data");
-        } else if (allWords.contentEquals("vehicle mode test")) {
-            ActivityRecognizedService.spoofActivityRecogniser(mActivity, JoH.tsl() + "^" + 0);
-            staticRefreshBGCharts();
-        } else if (allWords.contentEquals("vehicle mode quit")) {
-            ActivityRecognizedService.spoofActivityRecogniser(mActivity, JoH.tsl() + "^" + 3);
-            staticRefreshBGCharts();
-        } else if (allWords.contentEquals("vehicle mode walk")) {
-            ActivityRecognizedService.spoofActivityRecogniser(mActivity, JoH.tsl() + "^" + 2);
-            staticRefreshBGCharts();
+//        } else if (allWords.contentEquals("vehicle mode test")) {
+//            ActivityRecognizedService.spoofActivityRecogniser(mActivity, JoH.tsl() + "^" + 0);
+//            staticRefreshBGCharts();
+//        } else if (allWords.contentEquals("vehicle mode quit")) {
+//            ActivityRecognizedService.spoofActivityRecogniser(mActivity, JoH.tsl() + "^" + 3);
+//            staticRefreshBGCharts();
+//        } else if (allWords.contentEquals("vehicle mode walk")) {
+//            ActivityRecognizedService.spoofActivityRecogniser(mActivity, JoH.tsl() + "^" + 2);
+//            staticRefreshBGCharts();
         } else if (allWords.equals("delete random glucose data")) {
             BgReading.deleteRandomData();
             JoH.static_toast_long("Deleting random glucose data");
@@ -105,8 +105,8 @@ public class VoiceCommands {
         } else if (allWords.equals("test ui based collector")) {
             UiBasedCollector.switchToAndEnable(mActivity);
             JoH.static_toast_long("Enabling UI based collector");
-        } else if (allWords.equals("test cloud backup")) {
-            JoH.startActivity(BackupActivity.class);
+//        } else if (allWords.equals("test cloud backup")) {
+//            JoH.startActivity(BackupActivity.class);
         } else if (allWords.contentEquals("delete selected glucose meter") || allWords.contentEquals("delete selected glucose metre")) {
             Pref.setString("selected_bluetooth_meter_address", "");
         } else if (allWords.contentEquals("delete all finger stick data") || (allWords.contentEquals("delete all fingerstick data"))) {
@@ -154,10 +154,10 @@ public class VoiceCommands {
                 Ob1G5StateMachine.startSensor(JoH.tsl());
                 JoH.static_toast_long("Attempting to start sensor session");
                 break;
-            case "clear last update check time":
-                UpdateActivity.clearLastCheckTime();
-                JoH.static_toast_long(allWords);
-                break;
+//            case "clear last update check time":
+//                UpdateActivity.clearLastCheckTime();
+//                JoH.static_toast_long(allWords);
+//                break;
             case "clean up excessive high readings":
                 BgReading.cleanupOutOfRangeValues();
                 Home.staticRefreshBGChartsOnIdle();
@@ -180,17 +180,17 @@ public class VoiceCommands {
                 Ob1G5StateMachine.disableExtensionParameter();
                 JoH.static_toast_long("Disabling extension parameter");
                 break;
-            case "test medtrum calibrate":
-                MedtrumCollectionService.calibratePing();
-                break;
-            case "delete all desert sync data":
-                JoH.static_toast_long("deleted all desert sync data");
-                DesertSync.deleteAll();
-                break;
-            case "delete all pen data":
-                JoH.static_toast_long("deleted all pen sync data");
-                SaveCompleted.deleteAll();
-                break;
+//            case "test medtrum calibrate":
+//                MedtrumCollectionService.calibratePing();
+//                break;
+//            case "delete all desert sync data":
+//                JoH.static_toast_long("deleted all desert sync data");
+//                DesertSync.deleteAll();
+//                break;
+//            case "delete all pen data":
+//                JoH.static_toast_long("deleted all pen sync data");
+//                SaveCompleted.deleteAll();
+//                break;
             case "start usb configuration":
                 JoH.startActivity(MtpConfigureActivity.class);
                 break;

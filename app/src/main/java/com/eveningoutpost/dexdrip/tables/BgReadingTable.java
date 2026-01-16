@@ -32,8 +32,6 @@ import java.util.Locale;
 
 import static com.eveningoutpost.dexdrip.xdrip.gs;
 
-import lombok.val;
-
 
 public class BgReadingTable extends BaseListActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks {
     private String menu_name = "BG Data Table";
@@ -81,7 +79,7 @@ public class BgReadingTable extends BaseListActivity implements NavigationDrawer
     private void parseDataForStats(List<BgReading> list) {
         long cutoff = JoH.tsl() - Constants.DAY_IN_MS;
         long oldest = 0;
-        for (val item : list) {
+        for (BgReading item : list) {
             if (item.timestamp < cutoff) break;
             oldest = item.timestamp;
             total++;
@@ -91,7 +89,7 @@ public class BgReadingTable extends BaseListActivity implements NavigationDrawer
         }
 
         if (total > 0) {
-            val expectedReadings = (JoH.tsl() - oldest) / DexCollectionType.getCurrentSamplePeriod();
+            final long expectedReadings = (JoH.tsl() - oldest) / DexCollectionType.getCurrentSamplePeriod();
             missing = (int) (expectedReadings - total);
         }
 

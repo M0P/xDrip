@@ -15,8 +15,6 @@ import java.nio.ByteBuffer;
 import jamorham.keks.util.AESwrapper;
 import jamorham.libkeks.Digest;
 import jamorham.libkeks.SHA256;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
 
 
 /**
@@ -34,8 +32,8 @@ public class Calc {
     private static final BigInteger exponent = fromUnsignedByteArray(REFERENCE.bytes);
 
     public static Packet getRound12Packet(final Context context, boolean part2) {
-        val key = part2 ? context.KeyB : context.keyA;
-        val zkp = new ZKP(Curve.G, key, context.alice);
+        KeyPair key = part2 ? context.KeyB : context.keyA;
+        ZKP zkp = new ZKP(Curve.G, key, context.alice);
         return new Packet(zkp.getProof(), key.getPublicKey(), zkp.getGv());
     }
 
@@ -61,38 +59,38 @@ public class Calc {
     }
 
     public static Packet getRound3Packet(final Context context) {
-        val packet1 = context.getRound1Packet();
-        val packet2 = context.getRound2Packet();
-        val x1 = context.keyA.getPublicKey();
-        val x2 = context.KeyB.getPrivateKey();
-        val x3 = packet1.getPublicKeyPoint1();
-        val x4 = packet2.getPublicKeyPoint1();
-        val s = context.getPasswordBigInteger();
-        val x2s = x2.multiply(s).mod(Curve.Q);
-        val x134 = x1.add(x3).add(x4).normalize();
-        val A = x134.multiply(x2s).normalize();
-        val zkp = new ZKP(x134, new KeyPair(x2s, A), context.alice);
+        Packet packet1 = context.getRound1Packet();
+        Packet packet2 = context.getRound2Packet();
+        ECPoint x1 = context.keyA.getPublicKey();
+        BigInteger x2 = context.KeyB.getPrivateKey();
+        ECPoint x3 = packet1.getPublicKeyPoint1();
+        ECPoint x4 = packet2.getPublicKeyPoint1();
+        BigInteger s = context.getPasswordBigInteger();
+        BigInteger x2s = x2.multiply(s).mod(Curve.Q);
+        ECPoint x134 = x1.add(x3).add(x4).normalize();
+        ECPoint A = x134.multiply(x2s).normalize();
+        ZKP zkp = new ZKP(x134, new KeyPair(x2s, A), context.alice);
         return new Packet(zkp.getProof(), A, zkp.getGv());
     }
 
     public static boolean validateRound3Packet(final Context context) {
-        val packet = context.getRound3Packet();
+        Packet packet = context.getRound3Packet();
         if (packet == null) return false;
-        val x1 = context.keyA.getPublicKey();
-        val x2 = context.KeyB.getPublicKey();
-        val x3 = context.getRound1Packet().getPublicKeyPoint1();
-        val g = x1.add(x2).add(x3).normalize();
-        val public1 = packet.getPublicKeyPoint1();
+        ECPoint x1 = context.keyA.getPublicKey();
+        ECPoint x2 = context.KeyB.getPublicKey();
+        ECPoint x3 = context.getRound1Packet().getPublicKeyPoint1();
+        ECPoint g = x1.add(x2).add(x3).normalize();
+        ECPoint public1 = packet.getPublicKeyPoint1();
         return validateZeroKnowledgeProof(g, public1, packet.getPublicKeyPoint2(), packet.getHash(), context.bob);
     }
 
     public static byte[] getSharedKey(final Context context) {
         if (context.getRound3Packet() == null) return null;
-        val point1 = context.getRound3Packet().getPublicKeyPoint1();
-        val x2 = context.KeyB.getPrivateKey();
-        val x4 = context.getRound2Packet().getPublicKeyPoint1();
-        val s = context.getPasswordBigInteger();
-        val key = point1.subtract(x4.multiply(
+        ECPoint point1 = context.getRound3Packet().getPublicKeyPoint1();
+        BigInteger x2 = context.KeyB.getPrivateKey();
+        ECPoint x4 = context.getRound2Packet().getPublicKeyPoint1();
+        BigInteger s = context.getPasswordBigInteger();
+        ECPoint key = point1.subtract(x4.multiply(
                 x2.multiply(s).mod(Curve.Q))).multiply(x2).normalize();
         return SHA256.hash(key.getXCoord().getEncoded());
     }
@@ -102,28 +100,33 @@ public class Calc {
     }
 
     public static byte[] calculateHash(final Context context) {
-        val data = context.challenge;
-        val key = context.savedKey != null ? context.savedKey : getShortSharedKey(context);
+        byte[] data = context.challenge;
+        byte[] key = context.savedKey != null ? context.savedKey : getShortSharedKey(context);
         if (key == null) {
             return null;
         }
         ByteBuffer bb = ByteBuffer.allocate(16);
         bb.put(data);
         bb.put(data);
-        val doubleData = bb.array();
-        val aesBytes = new AESwrapper(key).aes(doubleData);
+        byte[] doubleData = bb.array();
+        byte[] aesBytes = new AESwrapper(key).aes(doubleData);
         bb = ByteBuffer.allocate(8);
         bb.put(aesBytes, 0, 8);
         return bb.array();
     }
 
-    @RequiredArgsConstructor
     public static class ZKP {
         private final BigInteger exponent = Curve.getExponent();
         private final ECPoint g;
         private final KeyPair keyPair;
         private final byte[] party;
         private ECPoint gv = null;
+
+        public ZKP(ECPoint g, KeyPair keyPair, byte[] party) {
+            this.g = g;
+            this.keyPair = keyPair;
+            this.party = party;
+        }
 
         private ECPoint getGv() {
             if (gv == null) {
@@ -140,7 +143,7 @@ public class Calc {
     }
 
     public static boolean validateZeroKnowledgeProof(final ECPoint g, final ECPoint publicKey, final ECPoint gv, BigInteger b, byte[] party) {
-        val hash = getZeroKnowledgeHash(g, gv, publicKey, party);
+        BigInteger hash = getZeroKnowledgeHash(g, gv, publicKey, party);
         return g.multiply(b)
                 .add(publicKey.multiply(hash))
                 .normalize()
@@ -148,8 +151,8 @@ public class Calc {
     }
 
     public static BigInteger getZeroKnowledgeHash(final ECPoint g, final ECPoint gv, final ECPoint gx, byte[] party) {
-        val digestBytes = new byte[32];
-        val digest = new Digest(digestBytes);
+        byte[] digestBytes = new byte[32];
+        Digest digest = new Digest(digestBytes);
         updateDigestIncludingSize(digest, g);
         updateDigestIncludingSize(digest, gv);
         updateDigestIncludingSize(digest, gx);
@@ -169,7 +172,7 @@ public class Calc {
     }
 
     public static byte[] challenger(final byte[] bytes, final byte[] challenge) {
-        val pchallenge = new byte[16];
+        byte[] pchallenge = new byte[16];
         arraycopy(challenge, 2, pchallenge, 0, pchallenge.length);
         return new DSAChallenger(KeyPair.fromBytes(bytes))
                 .response(pchallenge);

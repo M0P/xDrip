@@ -7,8 +7,6 @@ import com.eveningoutpost.dexdrip.models.UserError;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-import lombok.Getter;
-
 /**
  * Created by jamorham on 07/03/2018.
  *
@@ -89,7 +87,6 @@ public class Inevitable {
     }
 
     private static class Task {
-        @Getter
         private long when;
         private final Runnable what;
         private final String id;
@@ -119,6 +116,10 @@ public class Inevitable {
                 return true;
             }
             return false;
+        }
+
+        public long getWhen() {
+            return when;
         }
 
     }

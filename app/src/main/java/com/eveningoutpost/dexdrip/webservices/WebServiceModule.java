@@ -90,8 +90,10 @@ public class WebServiceModule {
     @Named("WebServiceSync")
     BaseWebService providesWebServiceSync() {
         UserError.Log.d(TAG, "creating WebServiceSync");
-        return new WebServiceSync();
+//        return new WebServiceSync();
+        return null;
     }
+
 
     @Provides
     @Singleton

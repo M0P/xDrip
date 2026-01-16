@@ -14,13 +14,13 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-import lombok.val;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * JamOrHam
- *
+ * <p>
  * Plugin downloader
  */
 
@@ -31,13 +31,13 @@ public class Download {
 
     private static byte[] getData(final PluginDef pluginDef) {
         if (pluginDef == null) return null;
-        val url = getUrl(pluginDef);
-        val client = new OkHttpClient();
-        val builder = new Request.Builder().url(url);
-        val request = builder.build();
+        final String url = getUrl(pluginDef);
+        final OkHttpClient client = new OkHttpClient();
+        final Request.Builder builder = new Request.Builder().url(url);
+        final Request request = builder.build();
         UserError.Log.d(TAG, "REQUEST URL: " + request.url());
         try {
-            val response = client.newCall(request).execute();
+            final Response response = client.newCall(request).execute();
             if (response.code() == 410) {
                 UserError.Log.wtf(TAG, "Shutdown requested");
                 setDexCollectionType(Disabled);
@@ -56,25 +56,25 @@ public class Download {
     }
 
     private static byte[] getSizedBlock(final ByteBuffer bb) {
-        val b1size = bb.getInt();
+        final int b1size = bb.getInt();
         if (b1size < 0 || b1size > 10000000) return null;
-        val b1 = new byte[b1size];
+        final byte[] b1 = new byte[b1size];
         bb.get(b1);
         return b1;
     }
 
     public static boolean get(final PluginDef pluginDef) {
         try {
-            val bytes = getData(pluginDef);
+            final byte[] bytes = getData(pluginDef);
             if (bytes == null) return false;
-            val bb = ByteBuffer.wrap(bytes);
-            val b1 = getSizedBlock(bb);
-            val b2 = getSizedBlock(bb);
-            val b3 = getSizedBlock(bb);
-            val ok = Verify.verify(b1, b2);
+            final ByteBuffer bb = ByteBuffer.wrap(bytes);
+            final byte[] b1 = getSizedBlock(bb);
+            final byte[] b2 = getSizedBlock(bb);
+            final byte[] b3 = getSizedBlock(bb);
+            final boolean ok = Verify.verify(b1, b2);
             if (ok && b3 != null) {
-                val storagePath = xdrip.getAppContext().getFilesDir().getPath();
-                val fileStruct = storagePath + "/" + pluginDef.name;
+                final String storagePath = xdrip.getAppContext().getFilesDir().getPath();
+                final String fileStruct = storagePath + "/" + pluginDef.name;
                 writeToFile(TAG, fileStruct + ".dex", decompressBytesToBytes(b1));
                 writeToFile(TAG, fileStruct + ".sig", b3);
                 writeToFile(TAG, fileStruct + ".ver", pluginDef.version.getBytes(StandardCharsets.UTF_8));

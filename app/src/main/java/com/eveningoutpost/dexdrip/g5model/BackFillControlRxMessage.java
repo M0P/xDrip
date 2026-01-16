@@ -4,8 +4,6 @@ package com.eveningoutpost.dexdrip.g5model;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import lombok.Getter;
-
 /**
  * JamOrHam
  */
@@ -13,7 +11,6 @@ import lombok.Getter;
 public class BackFillControlRxMessage extends BaseMessage {
 
     public static final byte opcode = 0x59;
-    @Getter
     private boolean valid;
 
     public BackFillControlRxMessage(final byte[] packet) {
@@ -22,6 +19,10 @@ public class BackFillControlRxMessage extends BaseMessage {
             valid = true;
             // TODO more to parse here
         }
+    }
+
+    public boolean isValid() {
+        return valid;
     }
 
 }

@@ -44,6 +44,7 @@
 -dontwarn ar.com.hjg.pngj.**
 -dontwarn okhttp3.**
 -dontwarn org.influxdb.**
+-dontwarn lombok.**
 
 -keep class com.eveningoutpost.dexdrip.tidepool.** { *; }
 -keep class com.nightscout.** { *; }

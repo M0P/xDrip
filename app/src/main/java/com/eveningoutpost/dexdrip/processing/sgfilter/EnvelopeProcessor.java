@@ -2,7 +2,6 @@ package com.eveningoutpost.dexdrip.processing.sgfilter;
 
 import java.security.InvalidParameterException;
 
-import lombok.val;
 
 /**
  * JamOrHam
@@ -41,7 +40,7 @@ public class EnvelopeProcessor implements Postprocessor {
         if (data.length != alt_data.length) {
             throw new InvalidParameterException("Data and Alt Data must be the same size");
         }
-        val midpoint = alt_data.length / 2;
+        final int midpoint = alt_data.length / 2;
         double epsilon = 1d;
         for (int i = 0; i < midpoint; i++) {
             data[i] = (alt_data[i] * epsilon + data[i] * (1d - epsilon));

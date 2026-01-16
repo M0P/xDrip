@@ -1,7 +1,5 @@
 package com.eveningoutpost.dexdrip.utils.math;
 
-import lombok.Getter;
-
 /**
  * jamorham
  *
@@ -13,14 +11,20 @@ import lombok.Getter;
 
 public class RollingAverage {
 
-    @Getter
     private final int size;
-    @Getter
     private final double peak;
     private final int peak_rounded;
     private final double[] values;
 
     private int position;
+
+    public int getSize() {
+        return size;
+    }
+
+    public double getPeak() {
+        return peak;
+    }
 
     public RollingAverage(final int size) {
         if (size < 2) {

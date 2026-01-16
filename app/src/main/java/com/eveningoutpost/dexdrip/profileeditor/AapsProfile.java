@@ -5,8 +5,6 @@ import com.google.gson.annotations.Expose;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.val;
-
 public class AapsProfile {
 
     @Expose
@@ -39,7 +37,7 @@ public class AapsProfile {
                 for (int i = 0; i < 1440; i++) {
                     byMinute.add(current);
                 }
-                for (val entry : basal) {
+                for (AapsElement entry : basal) {
                     for (; currentMinute < (entry.timeAsSeconds / 60); currentMinute++) {
                         byMinute.set(currentMinute, current);
                     }
@@ -65,9 +63,9 @@ public class AapsProfile {
                     byMinute.add(new ProfileItem(i, i + 1, 0d, 0d));
                 }
                 double lastValue = 0d;
-                for (val entry : carbratio) {
+                for (AapsElement entry : carbratio) {
                     for (; currentMinute < (entry.timeAsSeconds / 60); currentMinute++) {
-                        val current = byMinute.get(currentMinute);
+                        ProfileItem current = byMinute.get(currentMinute);
                         current.carb_ratio = lastValue;
                         byMinute.set(currentMinute, current);
                     }
@@ -75,16 +73,16 @@ public class AapsProfile {
                 }
                 // fill tail
                 for (; currentMinute < byMinute.size(); currentMinute++) {
-                    val current = byMinute.get(currentMinute);
+                    ProfileItem current = byMinute.get(currentMinute);
                     current.carb_ratio = lastValue;
                     byMinute.set(currentMinute, current);
                 }
 
                 currentMinute = 0;
                 lastValue = 0d;
-                for (val entry : sens) {
+                for (AapsElement entry : sens) {
                     for (; currentMinute < (entry.timeAsSeconds / 60); currentMinute++) {
-                        val current = byMinute.get(currentMinute);
+                        ProfileItem current = byMinute.get(currentMinute);
                         current.sensitivity = lastValue;
                         byMinute.set(currentMinute, current);
                     }
@@ -92,7 +90,7 @@ public class AapsProfile {
                 }
                 // fill tail
                 for (; currentMinute < byMinute.size(); currentMinute++) {
-                    val current = byMinute.get(currentMinute);
+                    ProfileItem current = byMinute.get(currentMinute);
                     current.sensitivity = lastValue;
                     byMinute.set(currentMinute, current);
                 }
@@ -105,9 +103,9 @@ public class AapsProfile {
 
     // merge exploded back to consolidated ProfileItem list
     public List<ProfileItem> getXdripMergedProfileList() {
-        val output = new ArrayList<ProfileItem>();
+        final List<ProfileItem> output = new ArrayList<ProfileItem>();
         ProfileItem current = null;
-        for (val item : getProfileItemByMinute()) {
+        for (ProfileItem item : getProfileItemByMinute()) {
             if (current == null) {
                 current = item;
                 continue;

@@ -13,18 +13,10 @@ import com.google.gson.annotations.Expose;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.val;
-
 /**
  * Created by jamorham on 11/06/2018.
  */
 
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "APStatus", id = BaseColumns._ID)
 public class APStatus extends PlusModel {
 
@@ -51,6 +43,47 @@ public class APStatus extends PlusModel {
     @Expose
     @Column(name = "basal_absolute")
     public double basal_absolute;
+
+    public APStatus() {
+    }
+
+    public APStatus(long timestamp, int basal_percent, double basal_absolute) {
+        this.timestamp = timestamp;
+        this.basal_percent = basal_percent;
+        this.basal_absolute = basal_absolute;
+    }
+
+    public static class APStatusBuilder {
+        private long timestamp;
+        private int basal_percent;
+        private double basal_absolute;
+
+        APStatusBuilder() {
+        }
+
+        public APStatusBuilder timestamp(long timestamp) {
+            this.timestamp = timestamp;
+            return this;
+        }
+
+        public APStatusBuilder basal_percent(int basal_percent) {
+            this.basal_percent = basal_percent;
+            return this;
+        }
+
+        public APStatusBuilder basal_absolute(double basal_absolute) {
+            this.basal_absolute = basal_absolute;
+            return this;
+        }
+
+        public APStatus build() {
+            return new APStatus(timestamp, basal_percent, basal_absolute);
+        }
+    }
+
+    public static APStatusBuilder builder() {
+        return new APStatusBuilder();
+    }
 
 
     public String toS() {
@@ -85,12 +118,12 @@ public class APStatus extends PlusModel {
     }
 
     public static APStatus createEfficientRecord(long timestamp_ms, int basal_percent) {
-        val basal_absolute = Profile.getBasalRateAbsoluteFromPercent(timestamp_ms, basal_percent);
+        double basal_absolute = Profile.getBasalRateAbsoluteFromPercent(timestamp_ms, basal_percent);
         return createEfficientRecord(timestamp_ms, basal_percent,  basal_absolute);
     }
 
     public static APStatus createEfficientRecord(long timestamp_ms, double basal_absolute) {
-        val basal_percent = Profile.getBasalRatePercentFromAbsolute(timestamp_ms, basal_absolute);
+        int basal_percent = Profile.getBasalRatePercentFromAbsolute(timestamp_ms, basal_absolute);
         return createEfficientRecord(timestamp_ms, basal_percent,  basal_absolute);
     }
 
@@ -180,6 +213,3 @@ public class APStatus extends PlusModel {
         patched = fixUpTable(schema, patched);
     }
 }
-
-
-

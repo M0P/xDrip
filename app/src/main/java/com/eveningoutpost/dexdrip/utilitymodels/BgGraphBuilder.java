@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.eveningoutpost.dexdrip.AddCalibration;
+//import com.eveningoutpost.dexdrip.GcmActivity;
 import com.eveningoutpost.dexdrip.GcmActivity;
 import com.eveningoutpost.dexdrip.Home;
 import com.eveningoutpost.dexdrip.models.APStatus;
@@ -37,7 +38,7 @@ import com.eveningoutpost.dexdrip.R;
 import com.eveningoutpost.dexdrip.services.ActivityRecognizedService;
 import com.eveningoutpost.dexdrip.calibrations.CalibrationAbstract;
 import com.eveningoutpost.dexdrip.calibrations.PluggableCalibration;
-import com.eveningoutpost.dexdrip.insulin.opennov.Options;
+//import com.eveningoutpost.dexdrip.insulin.opennov.Options;
 import com.eveningoutpost.dexdrip.processing.SmootherFactory;
 import com.eveningoutpost.dexdrip.store.FastStore;
 import com.eveningoutpost.dexdrip.store.KeyStore;
@@ -46,7 +47,7 @@ import com.eveningoutpost.dexdrip.ui.dialog.DoseAdjustDialog;
 import com.eveningoutpost.dexdrip.ui.helpers.BitmapLoader;
 import com.eveningoutpost.dexdrip.ui.helpers.ColorUtil;
 import com.eveningoutpost.dexdrip.utils.DexCollectionType;
-import com.eveningoutpost.dexdrip.utils.LibreTrendGraph;
+//import com.eveningoutpost.dexdrip.utils.LibreTrendGraph;
 import com.eveningoutpost.dexdrip.utils.math.RollingAverage;
 import com.eveningoutpost.dexdrip.xdrip;
 import com.google.android.gms.location.DetectedActivity;
@@ -79,10 +80,6 @@ import lecho.lib.hellocharts.model.PointValue;
 import lecho.lib.hellocharts.model.ValueShape;
 import lecho.lib.hellocharts.model.Viewport;
 import lecho.lib.hellocharts.util.ChartUtils;
-
-import lombok.Getter;
-
-import lombok.val;
 
 import static com.eveningoutpost.dexdrip.models.JoH.tolerantParseDouble;
 import static com.eveningoutpost.dexdrip.utilitymodels.ColorCache.X;
@@ -157,7 +154,7 @@ public class BgGraphBuilder {
     public double defaultMaxY;
     public boolean doMgdl;
     public static double capturePercentage = -1;
-    @Getter
+
     private int predictivehours = 0;
     private boolean prediction_enabled = false;
     private boolean simulation_enabled = false;
@@ -187,14 +184,15 @@ public class BgGraphBuilder {
     private final List<PointValue> smbValues = new ArrayList<>();
     private final List<PointValue> iconValues = new ArrayList<>();
     private final List<PointValue> iobValues = new ArrayList<PointValue>();
+    private final List<PointValue> activityValues = new ArrayList<PointValue>();
     private final List<PointValue> cobValues = new ArrayList<PointValue>();
     private final List<PointValue> predictedBgValues = new ArrayList<PointValue>();
     private final List<PointValue> polyBgValues = new ArrayList<PointValue>();
     private final List<PointValue> noisePolyBgValues = new ArrayList<PointValue>();
-    private final List<PointValue> activityValues = new ArrayList<PointValue>();
+    private final List<PointValue> activityValues_dup = new ArrayList<PointValue>();
     private final List<PointValue> annotationValues = new ArrayList<>();
     private final Pattern posPattern = Pattern.compile(".*?pos:([0-9.]+).*");
-    private final boolean hidePriming = Options.hidePrimingDoses();
+    //private final boolean hidePriming = Options.hidePrimingDoses();
     private static TrendLine noisePoly;
     public static double last_noise = -99999;
     public static double original_value = -99999;
@@ -338,10 +336,10 @@ public class BgGraphBuilder {
 
         Viewport v = new Viewport();
         if (topIsAnchor) {
-            v.top = currentTop; v.bottom = v.top - spanY;
+            v.top = (float) currentTop; v.bottom = (float) (v.top - spanY);
         }
         else {
-            v.bottom = currentBottom; v.top = v.bottom + spanY;
+            v.bottom = (float) currentBottom; v.top = (float) (v.bottom + spanY);
         }
         return v;
     }
@@ -361,7 +359,7 @@ public class BgGraphBuilder {
     private float clampNonGlucoseY(float y) {
         // Prevent drawing outside the glucose chart range
         y = Math.max(0f, y); // 0 is the smallest acceptable value for the vertical position of a non-glucose item.
-        y = Math.min(y, BgReading.BG_READING_MAXIMUM_VALUE); // BG_READING_MAXIMUM_VALUE is the largest acceptable value for the vertical position of a non-glucose item.
+        y = Math.min(y, (float)BgReading.BG_READING_MAXIMUM_VALUE); // BG_READING_MAXIMUM_VALUE is the largest acceptable value for the vertical position of a non-glucose item.
         return y;
     }
 
@@ -404,7 +402,7 @@ public class BgGraphBuilder {
         final List<Line> lines = new LinkedList<>();
 
         final boolean g_prediction = Pref.getBooleanDefaultFalse("show_g_prediction");
-        final boolean medtrum = (DexCollectionType.getDexCollectionType() == DexCollectionType.Medtrum)
+        final boolean medtrum = (getDexCollectionType() == DexCollectionType.Medtrum)
                 && Pref.getBooleanDefaultFalse("show_medtrum_secondary");
         if (medtrum || g_prediction) {
             final List<Prediction> plist = Prediction.latestForGraph(4000, loaded_start, loaded_end);
@@ -461,7 +459,7 @@ public class BgGraphBuilder {
                 dividerLine.setReverseYAxis(true);
                 dividerLine.setHasPoints(false);
 
-                final float one_hundred_percent = (100 * yscale) / 100f;
+                final float one_hundred_percent = (float) (100 * yscale) / 100f;
                 final List<PointValue> divider_points = new ArrayList<>(2);
                 divider_points.add(new HPointValue((double) loaded_start / FUZZER, one_hundred_percent));
                 dividerLine.setPointRadius(0);
@@ -476,9 +474,9 @@ public class BgGraphBuilder {
 
                 int count = aplist.size();
                 for (APStatus item : aplist) {
-                    val sanitized_percent = Math.min(BgReading.BG_READING_MAXIMUM_VALUE, Math.max(0, item.basal_percent)); // percent value plotted on glucose axis; capped to prevent Y-axis growth
+                    final int sanitized_percent = (int)Math.min(BgReading.BG_READING_MAXIMUM_VALUE, Math.max(0, item.basal_percent)); // percent value plotted on glucose axis; capped to prevent Y-axis growth
                     if (--count == 0 || (sanitized_percent != last_percent)) {
-                        float this_ypos = (sanitized_percent * yscale) / 100f;
+                        float this_ypos = (float) (sanitized_percent * yscale) / 100f;
                         this_ypos = clampNonGlucoseY(this_ypos + panCompensationOffset);
                         final double fuzzedT = (double) item.timestamp / FUZZER;
                         if (fuzzedT != last_timestamp) {
@@ -521,7 +519,7 @@ public class BgGraphBuilder {
             final boolean d = false;
             if (d) Log.d(TAG, "Delta: pmlist size: " + pmlist.size());
             final float yscale = doMgdl ? (float) Constants.MMOLL_TO_MGDL : 1f;
-            float ypos = 6 * yscale; // TODO Configurable
+            float ypos = (float) (6 * yscale); // TODO Configurable
             ypos = clampNonGlucoseY(ypos + panCompensationOffset);
             //final long last_timestamp = pmlist.get(pmlist.size() - 1).timestamp;
             final float MAX_SIZE = 50;
@@ -616,7 +614,7 @@ public class BgGraphBuilder {
                 if (d)
                     UserError.Log.d("HEARTRATE: ", JoH.dateTimeText(pm.timestamp) + " \tHR: " + pm.bpm);
 
-                ypos = (pm.bpm * yscale) / 10;
+                ypos = (float) (pm.bpm * yscale) / 10;
                 ypos = clampNonGlucoseY(ypos + panCompensationOffset);
                 final PointValue this_point = new HPointValue((double) pm.timestamp / FUZZER, ypos);
                 new_points.add(this_point);
@@ -635,7 +633,7 @@ public class BgGraphBuilder {
     }
 
 
-    private List<Line> motionLine() {
+    /*private List<Line> motionLine() {
 
         final ArrayList<ActivityRecognizedService.motionData> motion_datas = ActivityRecognizedService.getForGraph((long) start_time * FUZZER, (long) end_time * FUZZER);
         List<PointValue> linePoints = new ArrayList<>();
@@ -691,7 +689,7 @@ public class BgGraphBuilder {
         }
         Log.d(TAG, "Motion array size: " + line_array.size());
         return line_array;
-    }
+    }*/
 
 
     public LineChartData lineData() {
@@ -774,9 +772,9 @@ public class BgGraphBuilder {
 
             if (!simple) {
                 // motion lines
-                if (Pref.getBoolean("motion_tracking_enabled", false) && Pref.getBoolean("plot_motion", false)) {
+                /*if (Pref.getBoolean("motion_tracking_enabled", false) && Pref.getBoolean("plot_motion", false)) {
                     lines.addAll(motionLine());
-                }
+                }*/
                 lines.addAll(basalLines());
                 lines.addAll(heartLines());
                 lines.addAll(stepsLines());
@@ -812,7 +810,7 @@ public class BgGraphBuilder {
 
             if (prefs.getBoolean("show_libre_trend_line", false)) {
                 if (DexCollectionType.hasLibre()) {
-                    lines.add(libreTrendLine());
+//                    lines.add(libreTrendLine());
                 }
             }
 
@@ -1268,7 +1266,7 @@ public class BgGraphBuilder {
                     if (calibration.timestamp < (start_time * FUZZER)) break;
                     if (calibration.slope_confidence != 0) {
                         final long adjusted_timestamp = (calibration.timestamp + (AddCalibration.estimatedInterstitialLagSeconds * 1000));
-                        final PointValueExtended this_point = new PointValueExtended((double) (adjusted_timestamp / FUZZER), unitized(calibration.bg));
+                        final PointValueExtended this_point = new PointValueExtended((double) (adjusted_timestamp / FUZZER), (float) unitized(calibration.bg));
                         if (adjusted_timestamp >= close_to_side_time) {
                             predictivehours = Math.max(predictivehours, 1);
                         }
@@ -1287,7 +1285,7 @@ public class BgGraphBuilder {
             try {
                 for (BloodTest bloodtest : bloodtests) {
                     final long adjusted_timestamp = (bloodtest.timestamp + (AddCalibration.estimatedInterstitialLagSeconds * 1000));
-                    final PointValueExtended this_point = new PointValueExtended((double) (adjusted_timestamp / FUZZER), unitized(bloodtest.mgdl))
+                    final PointValueExtended this_point = new PointValueExtended((double) (adjusted_timestamp / FUZZER), (float) unitized(bloodtest.mgdl))
                             .setType(PointValueExtended.BloodTest)
                             .setUUID(bloodtest.uuid);
                     this_point.real_timestamp = bloodtest.timestamp;
@@ -1381,7 +1379,7 @@ public class BgGraphBuilder {
                     rawInterpretedValues.add(new HPointValue((double) (bgReading.timestamp / FUZZER), (float) unitized(Math.min(bgReading.raw_calculated, BgReading.BG_READING_MAXIMUM_VALUE))));
                 }
                 if ((!glucose_from_plugin) && (plugin != null) && (cd != null)) {
-                    pluginValues.add(new HPointValue((double) (bgReading.timestamp / FUZZER), (float) unitized(Math.min(plugin.getGlucoseFromBgReading(bgReading, cd), BgReading.BG_READING_MAXIMUM_VALUE))));
+                    pluginValues.add(new HPointValue((double) (bgReading.timestamp / FUZZER), (float) unitized(Math.min(plugin.getGlucoseFromBgReading(bgReading, cd), (double)BgReading.BG_READING_MAXIMUM_VALUE))));
                 }
                 if (bgReading.ignoreForStats) {
                     if (unitized(bgReading.calculated_value) <= defaultMaxY) { // Don't display value marked as bad if greater than the default Max (defaultMaxY)
@@ -1392,7 +1390,7 @@ public class BgGraphBuilder {
                 } else if (unitized(bgReading.calculated_value) >= highMark) {
                     highValues.add(new HPointValue((double) (bgReading.timestamp / FUZZER), (float) unitized(bgReading.calculated_value)));
                 } else if (unitized(bgReading.calculated_value) >= lowMark) {
-                    val ppx = new HPointValue((double) (bgReading.timestamp / FUZZER), (float) unitized(bgReading.calculated_value));
+                    final HPointValue ppx = new HPointValue((double) (bgReading.timestamp / FUZZER), (float) unitized(bgReading.calculated_value));
                     inRangeValues.add(ppx);
                 } else if (bgReading.calculated_value >= 40) {
                     lowValues.add(new HPointValue((double) (bgReading.timestamp / FUZZER), (float) unitized(bgReading.calculated_value)));
@@ -1460,7 +1458,7 @@ public class BgGraphBuilder {
             }
 
             try {
-                if (DexCollectionType.getDexCollectionType() == DexCollectionType.LibreReceiver && prefs.getBoolean("Libre2_showRawGraph", false)) {
+                if (getDexCollectionType() == DexCollectionType.LibreReceiver && prefs.getBoolean("Libre2_showRawGraph", false)) {
                     for (final Libre2RawValue bgLibre : Libre2RawValues) {
                         if (bgLibre.glucose > 0) {
                             rawInterpretedValues.add(new HPointValue((double) (bgLibre.timestamp / FUZZER), (float) unitized(bgLibre.glucose)));
@@ -1572,7 +1570,7 @@ public class BgGraphBuilder {
                 low_occurs_at = -1;
                 try {
                     if ((predict_lows) && (prediction_enabled) && (poly != null)) {
-                        final double offset = ActivityRecognizedService.raise_limit_due_to_vehicle_mode() ? unitized(ActivityRecognizedService.getVehicle_mode_adjust_mgdl()) : 0;
+                        final double offset = 0;
                         final double plow_now = JoH.ts();
                         double plow_timestamp = plow_now + (1000 * 60 * 99); // max look-ahead
                         double polyPredicty = poly.predict(plow_timestamp);
@@ -1607,7 +1605,7 @@ public class BgGraphBuilder {
 
                 final boolean show_noise_working_line;
                 if (last_noise > NOISE_TRIGGER ||
-                        (last_noise > BgGraphBuilder.NOISE_TRIGGER_ULTRASENSITIVE
+                        (last_noise > NOISE_TRIGGER_ULTRASENSITIVE
                                 && Pref.getBooleanDefaultFalse("engineering_mode")
                                 && Pref.getBooleanDefaultFalse("bg_compensate_noise_ultrasensitive")
                         )) {
@@ -1671,7 +1669,7 @@ public class BgGraphBuilder {
                         }
 
                         if (treatment.noteOnly()) {
-                            if (hidePriming && treatment.isPrimingDose()) {
+                            if ( treatment.isPrimingDose()) {
                                 continue;
                             }
                             final HPointValue pv = NoteClassifier.noteToPointValue(treatment.notes);
@@ -1725,7 +1723,7 @@ public class BgGraphBuilder {
                             pv.setBitmapTint(getCol(X.color_basal_tbr));
                             final Pair<Float, Float> yPositions = GraphTools.bestYPosition(bgReadings, treatment.timestamp, doMgdl, false, highMark, 27d + (18d * consecutiveCloseIcons));
                             yPosition = clampNonGlucoseY(yPositions.first + panCompensationOffset);
-                            pv.set(treatment.timestamp / FUZZER, yPosition);
+                            pv.set((double)treatment.timestamp / FUZZER, yPosition);
                             pv.note = treatment.getBestShortText();
                             iconValues.add(pv);
                             lastIconTimestamp = treatment.timestamp;
@@ -1921,7 +1919,7 @@ public class BgGraphBuilder {
                                         df.setMaximumFractionDigits(2);
                                         df.setMinimumIntegerDigits(1);
                                         //  iv.setLabel("IoB: " + df.format(iob.iob));
-                                        val iobformatted = df.format(iob.iob);
+                                        final String iobformatted = df.format(iob.iob);
                                         keyStore.putS("last_iob", iobformatted);
                                         keyStore.putL("last_iob_timestamp", JoH.tsl());
                                         Home.updateStatusLine("iob", iobformatted);
@@ -2044,8 +2042,8 @@ public class BgGraphBuilder {
     public Line idealLine() {
         // if profile has more than 1 target bg value then we need to iterate those and plot them for completeness
         List<PointValue> myLineValues = new ArrayList<PointValue>();
-        myLineValues.add(new HPointValue((double) start_time, (float) Profile.getTargetRangeInUnits(start_time)));
-        myLineValues.add(new HPointValue((double) predictive_end_time, (float) Profile.getTargetRangeInUnits(predictive_end_time)));
+        myLineValues.add(new HPointValue((double) start_time, (float) Profile.getTargetRangeInUnits((long) (start_time * FUZZER))));
+        myLineValues.add(new HPointValue((double) predictive_end_time, (float) Profile.getTargetRangeInUnits((long) (predictive_end_time * FUZZER))));
         Line myLine = new Line(myLineValues);
         myLine.setHasPoints(false);
         myLine.setStrokeWidth(1);
@@ -2123,17 +2121,17 @@ public class BgGraphBuilder {
         return minShowLine;
     }
 
-    private Line libreTrendLine() {
-        final List<PointValue> libreTrendValues = LibreTrendGraph.getTrendDataPoints(doMgdl, (long) (start_time * FUZZER), (long) (end_time * FUZZER));
-        final Line line = new Line(libreTrendValues);
-        line.setHasPoints(true);
-        line.setHasLines(false);
-        line.setCubic(false);
-        line.setStrokeWidth(2);
-        line.setPointRadius(1);
-        line.setColor(Color.argb(240, 25, 206, 244)); // temporary pending preference
-        return line;
-    }
+//    private Line libreTrendLine() {
+//        final List<PointValue> libreTrendValues = LibreTrendGraph.getTrendDataPoints(doMgdl, (long) (start_time * FUZZER), (long) (end_time * FUZZER));
+//        final Line line = new Line(libreTrendValues);
+//        line.setHasPoints(true);
+//        line.setHasLines(false);
+//        line.setCubic(false);
+//        line.setStrokeWidth(2);
+//        line.setPointRadius(1);
+//        line.setColor(Color.argb(240, 25, 206, 244)); // temporary pending preference
+//        return line;
+//    }
 
     private List<Line> smbLines() {
         final List<Line> lines = new LinkedList<>();
@@ -2224,7 +2222,7 @@ public class BgGraphBuilder {
             calendar.add(Calendar.HOUR, 1);
         }
         while (calendar.getTimeInMillis() < ((end_time * FUZZER) + ((long) predictivehours * 60 * 60 * 1000))) {
-            xAxisValues.add(new AxisValue(((double)calendar.getTimeInMillis() / FUZZER), (timeFormat.format(calendar.getTimeInMillis())).toCharArray()));
+            xAxisValues.add(new AxisValue((float)((double)calendar.getTimeInMillis() / FUZZER), (timeFormat.format(calendar.getTimeInMillis())).toCharArray()));
             calendar.add(Calendar.HOUR, 1);
         }
 
@@ -2252,7 +2250,7 @@ public class BgGraphBuilder {
 
     public void showUnSmoothedValues(final List<BgReading> readings) {
         pluginValues.clear();
-        for (val bgReading : readings) {
+        for (final BgReading bgReading : readings) {
             pluginValues.add(new HPointValue((double) (bgReading.timestamp / FUZZER), (float) unitized(bgReading.calculated_value)));
         }
     }
@@ -2430,6 +2428,10 @@ public class BgGraphBuilder {
         return new OnValueSelectTooltipListener(callerActivity);
     }
 
+    public int getPredictivehours() {
+        return predictivehours;
+    }
+
     public class OnValueSelectTooltipListener implements LineChartOnValueSelectListener {
 
         private Toast tooltip;
@@ -2471,7 +2473,7 @@ public class BgGraphBuilder {
 
             final java.text.DateFormat timeFormat = DateFormat.getTimeFormat(context);
             //Won't give the exact time of the reading but the time on the grid: close enough.
-            final Long time = (real_timestamp > 0) ? real_timestamp : ((long) pointValue.getX()) * FUZZER; // TODO last clause should never be used now
+            final Long time = (real_timestamp > 0) ? real_timestamp : (long) (((double) pointValue.getX()) * FUZZER); // TODO last clause should never be used now
             final double ypos = pointValue.getY();
 
             final String message;

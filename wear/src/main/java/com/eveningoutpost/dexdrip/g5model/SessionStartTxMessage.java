@@ -1,57 +1,61 @@
 package com.eveningoutpost.dexdrip.g5model;
 
-import com.eveningoutpost.dexdrip.models.JoH;
-import com.eveningoutpost.dexdrip.models.UserError;
+import com.eveningoutpost.dexdrip.services.G5CollectionService;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import lombok.Getter;
 
-// created by jamorham
+/**
+ * Created by jamorham on 25/11/2016.
+ */
 
 public class SessionStartTxMessage extends BaseMessage {
 
-    final byte opcode = 0x26;
-    @Getter
-    private final long startTime;
-    @Getter
-    private final int dexTime;
+    private final static String TAG = G5CollectionService.TAG; // meh
 
-    public SessionStartTxMessage(int dexTime) {
-        this((int) (JoH.tsl() / 1000), dexTime);
+    public static final byte opcode = 0x26;
+    private final int dexTime;
+    private final long startTime;
+
+    public int getDexTime() {
+        return dexTime;
+    }
+
+    public long getStartTime() {
+        return startTime;
     }
 
     public SessionStartTxMessage(long startTime, int dexTime) {
-        this(startTime, dexTime, null);
+        this.startTime = startTime;
+        this.dexTime = dexTime;
+        init(opcode, 5);
+        data.putInt(dexTime);
+        byteSequence = data.array();
     }
 
     public SessionStartTxMessage(long startTime, int dexTime, String code) {
         this.startTime = startTime;
         this.dexTime = dexTime;
-        final boolean using_g6 = (code != null);
-        data = ByteBuffer.allocate(code == null || new G6CalibrationParameters(code).isNullCode() ? (using_g6 ? 13 : 11) : 17);
-        data.order(ByteOrder.LITTLE_ENDIAN);
-        data.put(opcode);
+        init(opcode, 9);
         data.putInt(dexTime);
-        data.putInt((int) (startTime / 1000));
+        G6CalibrationParameters params = new G6CalibrationParameters(code);
+        if (params.isValid()) {
+            data.putShort((short) params.getParamA());
+            data.putShort((short) params.getParamB());
+        } else {
+            throw new RuntimeException("Invalid sensor code: " + code);
+        }
+        byteSequence = data.array();
+    }
 
-        if (code != null) {
-            final G6CalibrationParameters params = new G6CalibrationParameters(code);
-            if (params.isValid() && !params.isNullCode()) {
-                data.putShort((short) params.getParamA());
-                data.putShort((short) params.getParamB());
-            } else {
-                if (!params.isValid()) {
-                    throw new IllegalArgumentException("Invalid G6 code in SessionStartTxMessage");
-                }
-            }
-        }
-        if (using_g6) {
-            data.putShort((short) 0x0000);
-        }
-        appendCRC();
-        UserError.Log.d(TAG, "SessionStartTxMessage dbg: " + JoH.bytesToHex(byteSequence));
+    // parsing for re-construct
+    public SessionStartTxMessage(byte[] packet) {
+        data = ByteBuffer.wrap(packet).order(ByteOrder.LITTLE_ENDIAN);
+        // TODO opcode check
+        data.get();
+        dexTime = data.getInt();
+        startTime = 0; // unknown when reconstructing
     }
 
 }

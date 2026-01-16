@@ -4,7 +4,7 @@ import com.google.common.collect.Range;
 
 import org.junit.Test;
 
-import lombok.val;
+//import lombok.val;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
@@ -13,7 +13,7 @@ public class BlockFinderTest {
 
     @Test
     public void addBlockWithMergeTest() {
-        val b = new BlockFinder();
+        BlockFinder b = new BlockFinder();
         assertWithMessage("invalid bottom/top 0").that(b.addBlockWithMerge(-100, 90)).isNull();
         assertWithMessage("first block").that(b.addBlockWithMerge(10, 100)).isInstanceOf(BlockFinder.Block.class);
         assertWithMessage("invalid bottom/top 1").that(b.addBlockWithMerge(0, 0)).isNull();
@@ -31,7 +31,7 @@ public class BlockFinderTest {
 
     @Test
     public void findRandomAvailablePositionTest() {
-        val b = new BlockFinder();
+        BlockFinder b = new BlockFinder();
         b.addBlockWithMerge(10, 100);
         b.addBlockWithMerge(50, 150);
         for (int i = 0; i < 50; i++) {

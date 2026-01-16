@@ -27,7 +27,6 @@ import java.util.concurrent.TimeoutException;
 
 import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
-import lombok.NoArgsConstructor;
 
 import static com.eveningoutpost.dexdrip.models.JoH.ratelimit;
 
@@ -38,7 +37,6 @@ import static com.eveningoutpost.dexdrip.models.JoH.ratelimit;
 
 // TODO report missing location services via toast????
 
-@NoArgsConstructor
 public class ScanMeister {
 
     private static final String TAG = ScanMeister.class.getSimpleName();
@@ -67,6 +65,9 @@ public class ScanMeister {
     private static final String[] cannotFilterModels = {"Ticwatch E", "Ticwatch S"};
 
     // TODO Log errors when location disabled etc
+
+    public ScanMeister() {
+    }
 
     public ScanMeister(String address) {
         this.address = address;
@@ -189,7 +190,7 @@ public class ScanMeister {
             // TODO scanning by name doesn't build a filter
             filter = builder.build();
         } else {
-            UserError.Log.d(TAG,"Overriding with custom filter");
+            UserError.Log.d(TAG, "Overriding with custom filter");
         }
 
         scanSubscription = new Subscription(rxBleClient.scanBleDevices(
@@ -235,7 +236,7 @@ public class ScanMeister {
 
         try {
             for (ParcelUuid p : bleScanResult.getScanRecord().getServiceUuids()) {
-                UserError.Log.d(TAG,"SERVICE: "+p.getUuid());
+                UserError.Log.d(TAG, "SERVICE: " + p.getUuid());
             }
 
         } catch (Exception e) {

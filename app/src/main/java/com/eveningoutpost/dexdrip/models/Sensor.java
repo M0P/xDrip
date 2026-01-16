@@ -17,7 +17,6 @@ import com.eveningoutpost.dexdrip.utilitymodels.SensorSendQueue;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
-import com.google.gson.internal.bind.DateTypeAdapter;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,9 +25,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-
-import lombok.Setter;
-import lombok.val;
 
 /**
  * Created by Emma Black on 10/29/14.
@@ -60,8 +56,11 @@ public class Sensor extends Model {
   public String sensor_location;
 
 
-  @Setter
   private volatile static long unitTestStopTime;
+
+    public static void setUnitTestStopTime(long unitTestStopTime) {
+        Sensor.unitTestStopTime = unitTestStopTime;
+    }
 
     public synchronized static Sensor create(long starting_at) {
         stopSensor(true); // stop any existing sensor session clamping to the last reading
@@ -70,7 +69,7 @@ public class Sensor extends Model {
 
     public synchronized static Sensor create(long starting_at, String uuid) {//KS
         Sensor sensor = new Sensor();
-        val lastSensor = lastStopped(); // get the last sensor we stopped
+        Sensor lastSensor = lastStopped(); // get the last sensor we stopped
         // find the time it was stopped or 0 if there is no previous sensor
         long lastStoppedTime = lastSensor != null ? lastSensor.stopped_at : 0;
         sensor.started_at = Math.max(lastStoppedTime + 1, starting_at);
@@ -108,7 +107,7 @@ public class Sensor extends Model {
         sensor.stopped_at = (unitTestStopTime == 0) ? tsl() : unitTestStopTime;
 
         if (clampToLastReading) {
-            val lastReading = BgReading.last(true);
+            BgReading lastReading = BgReading.last(true);
             if (lastReading != null) {
                 // if we have a last reading then set the stop time to that last reading so long as it
                 // was actually from this sensor
@@ -129,7 +128,7 @@ public class Sensor extends Model {
     public String toS() {//KS
         Gson gson = new GsonBuilder()
                 .excludeFieldsWithoutExposeAnnotation()
-                .registerTypeAdapter(Date.class, new DateTypeAdapter())
+
                 .serializeSpecialFloatingPointValues()
                 .create();
         Log.d("SENSOR", "Sensor toS uuid=" + this.uuid + " started_at=" + this.started_at + " active=" + this.isActive() + " battery=" + this.latest_battery_level + " location=" + this.sensor_location + " stopped_at=" + this.stopped_at);

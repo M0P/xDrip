@@ -6,21 +6,17 @@ import com.eveningoutpost.dexdrip.models.JoH;
 import com.eveningoutpost.dexdrip.models.UserError;
 import com.eveningoutpost.dexdrip.utilitymodels.PersistentStore;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import static com.eveningoutpost.dexdrip.models.JoH.buggy_samsung;
 import static com.eveningoutpost.dexdrip.models.JoH.msSince;
 
 /**
  * jamorham
- *
+ * <p>
  * Samsung have made modifications to the Android framework which breaks compatibility with the
  * published reference documentation. This diminishes the user experience and the required features
  * available to developers. Until they fix these bugs we attempt to work-around them...
  */
 
-@RequiredArgsConstructor
 public class BuggySamsung {
 
     // TODO this overlaps with ob1 implementation
@@ -29,8 +25,15 @@ public class BuggySamsung {
     private static final long TOLERABLE_JITTER = 10000;
 
     private final String TAG;
-    @Getter
     private long max_wakeup_jitter;
+
+    public BuggySamsung(String TAG) {
+        this.TAG = TAG;
+    }
+
+    public long getMax_wakeup_jitter() {
+        return max_wakeup_jitter;
+    }
 
     public long evaluate(final long wakeup_time) {
         if (wakeup_time > 0) {

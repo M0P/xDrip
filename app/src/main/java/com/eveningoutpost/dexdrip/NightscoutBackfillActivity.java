@@ -9,7 +9,7 @@ import android.widget.Button;
 import com.eveningoutpost.dexdrip.models.BgReading;
 import com.eveningoutpost.dexdrip.models.JoH;
 import com.eveningoutpost.dexdrip.models.Treatments;
-import com.eveningoutpost.dexdrip.services.SyncService;
+//import com.eveningoutpost.dexdrip.services.SyncService;
 import com.eveningoutpost.dexdrip.utilitymodels.Constants;
 import com.eveningoutpost.dexdrip.utilitymodels.UploaderTask;
 import com.eveningoutpost.dexdrip.utilitymodels.PersistentStore;
@@ -123,10 +123,8 @@ public class NightscoutBackfillActivity extends AppCompatActivity implements Nav
                             }
                         }
 
-                        // TODO Calibrations? Blood tests?
-
                         JoH.static_toast_long("Queued " + bgcount + " glucose readings and " + trcount + " treatments!");
-                        SyncService.startSyncService(500);
+//                        SyncService.startSyncService(500);
                         locked = 0; // clear lock
                     } else {
                         JoH.static_toast_long(gs(R.string.didnt_find_any_glucose_readings_in_that_time_period));

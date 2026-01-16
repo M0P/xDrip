@@ -4,9 +4,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Locale;
 
-import lombok.Getter;
-import lombok.val;
-
 /**
  * Created by jamorham on 25/11/2016.
  */
@@ -24,7 +21,6 @@ public class VersionRequest2RxMessage extends BaseMessage {
     public int warmupSeconds;
     public int version1;
     public int version2;
-    @Getter
     public boolean type2;
 
 
@@ -33,7 +29,7 @@ public class VersionRequest2RxMessage extends BaseMessage {
         if (packet.length >= 9) {
             // TODO check CRC??
             data = ByteBuffer.wrap(packet).order(ByteOrder.LITTLE_ENDIAN);
-            val op = data.get();
+            final byte op = data.get();
             status = data.get();
             if (op == opcode) {
                 typicalSensorDays = getUnsignedByte(data);
@@ -47,9 +43,13 @@ public class VersionRequest2RxMessage extends BaseMessage {
                 warmupSeconds = getUnsignedShort(data);
                 version1 = (int) getUnsignedInt(data);
                 version2 = getUnsignedByte(data);
-                typicalSensorDays =  (int) Math.min(getUnsignedShort(data), lifeSeconds / 86400);
+                typicalSensorDays = (int) Math.min(getUnsignedShort(data), lifeSeconds / 86400);
             }
         }
+    }
+
+    public boolean isType2() {
+        return type2;
     }
 
     public String toString() {

@@ -16,7 +16,6 @@ import com.google.gson.annotations.Expose;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.val;
 
 /**
  * Created by jamorham on 01/11/2016.
@@ -78,7 +77,7 @@ public class StepCounter extends Model {
 
     public static synchronized StepCounter createUniqueRecord(final long timestamp_ms, final int data, final boolean absolute) {
         if (getForTimestamp(timestamp_ms) == null) {
-            val pm = new StepCounter();
+            StepCounter pm = new StepCounter();
             pm.timestamp = timestamp_ms;
             pm.metric = data;
             if (absolute) {
@@ -123,14 +122,14 @@ public class StepCounter extends Model {
 
     public static int getDailyTotal() {
         int accumulator = 0;
-        val list = latestForGraph(5000, JoH.tsl() - Constants.DAY_IN_MS, JoH.tsl()); // TODO since midnight vs 24 hours?
-        for (val item : list) {
+        List<StepCounter> list = latestForGraph(5000, JoH.tsl() - Constants.DAY_IN_MS, JoH.tsl()); // TODO since midnight vs 24 hours?
+        for (StepCounter item : list) {
             if (item.isAbsolute()) {
                 accumulator += item.metric;
             }
         }
         if (accumulator == 0) {
-            val last = last();
+            StepCounter last = last();
             if (last != null) {
                 return last.metric;
             } else {
@@ -218,6 +217,3 @@ public class StepCounter extends Model {
         patched = true;
     }
 }
-
-
-

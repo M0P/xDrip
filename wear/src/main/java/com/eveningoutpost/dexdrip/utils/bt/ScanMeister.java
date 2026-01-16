@@ -26,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import io.reactivex.schedulers.Schedulers;
-import lombok.NoArgsConstructor;
 
 import static com.eveningoutpost.dexdrip.models.JoH.ratelimit;
 
@@ -37,7 +36,6 @@ import static com.eveningoutpost.dexdrip.models.JoH.ratelimit;
 
 // TODO report missing location services via toast????
 
-@NoArgsConstructor
 public class ScanMeister {
 
     private static final String TAG = ScanMeister.class.getSimpleName();
@@ -66,6 +64,9 @@ public class ScanMeister {
     private static final String[] cannotFilterModels = {"Ticwatch E", "Ticwatch S"};
 
     // TODO Log errors when location disabled etc
+
+    public ScanMeister() {
+    }
 
     public ScanMeister(String address) {
         this.address = address;

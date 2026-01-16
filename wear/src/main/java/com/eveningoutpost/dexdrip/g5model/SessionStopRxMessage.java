@@ -1,61 +1,72 @@
 package com.eveningoutpost.dexdrip.g5model;
 
+import com.eveningoutpost.dexdrip.models.UserError;
+import com.eveningoutpost.dexdrip.services.G5CollectionService;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import lombok.Getter;
 
-// created by jamorham
+/**
+ * Created by jamorham on 25/11/2016.
+ */
 
 public class SessionStopRxMessage extends BaseMessage {
 
+    private final static String TAG = G5CollectionService.TAG; // meh
+
     public static final byte opcode = 0x29;
-    final byte length = 17;
-    @Getter
-    private byte status = (byte)0xFF;
-    private byte received = (byte)0xFF;
-    final String transmitterId;
-    int sessionStartTime=0;
-    int sessionStopTime =0;
-    int transitterTime=0;
-    boolean valid = false;
+    private int status;
+    private int sessionStop;
+    private int sessionStart;
+    private int transmitterTime;
 
-    public SessionStopRxMessage(byte[] packet,String transmitterId) {
-        this.transmitterId = transmitterId;
-        if (packet.length == length) {
+    public int getStatus() {
+        return status;
+    }
+
+    public int getSessionStop() {
+        return sessionStop;
+    }
+
+    public int getSessionStart() {
+        return sessionStart;
+    }
+
+    public int getTransmitterTime() {
+        return transmitterTime;
+    }
+
+    public SessionStopRxMessage(byte[] packet, String transmitterId) {
+        if (packet.length >= 2) {
             data = ByteBuffer.wrap(packet).order(ByteOrder.LITTLE_ENDIAN);
-            if ((data.get() == opcode) && checkCRC(packet)) {
-                valid = true;
+            if (data.get() == opcode) {
                 status = data.get();
-                received = data.get();
-                sessionStopTime = data.getInt();
-                sessionStartTime = data.getInt();
-                transitterTime = data.getInt();
-
+                if (status == 0x28) {
+                    sessionStop = data.getInt();
+                    sessionStart = data.getInt();
+                    transmitterTime = data.getInt();
+                } else {
+                    UserError.Log.e(TAG, "Session Stop Failed status: " + status);
+                }
             }
         }
     }
 
-    boolean isValid() {
-        return valid;
+    public boolean isValid() {
+        return (status == 0x28);
     }
 
-    boolean isOkay() {
-        return isValid() && status == 0x00;
+    public boolean isOkay() {
+        return isValid();
     }
 
-    long getSessionStart() {
-        if (isOkay() && sessionStartTime > 0) {
-            return DexTimeKeeper.fromDexTime(transmitterId, sessionStartTime);
-        } else {
-            return 0;
-        }
+    public long getSessionStart() {
+        return DexTimeKeeper.fromDexTimeCached(sessionStart);
     }
-    long getSessionStop() {
-        if (isOkay() && sessionStopTime > 0) {
-            return DexTimeKeeper.fromDexTime(transmitterId, sessionStopTime);
-        } else {
-            return 0;
-        }
+
+    public long getSessionStop() {
+        return DexTimeKeeper.fromDexTimeCached(sessionStop);
     }
+
 }

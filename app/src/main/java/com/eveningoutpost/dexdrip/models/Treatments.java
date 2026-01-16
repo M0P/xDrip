@@ -16,12 +16,12 @@ import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
 import com.activeandroid.util.SQLiteUtils;
-import com.eveningoutpost.dexdrip.GcmActivity;
+//import com.eveningoutpost.dexdrip.GcmActivity;
 import com.eveningoutpost.dexdrip.Home;
 import com.eveningoutpost.dexdrip.g5model.DexSessionKeeper;
 import com.eveningoutpost.dexdrip.models.UserError.Log;
 import com.eveningoutpost.dexdrip.R;
-import com.eveningoutpost.dexdrip.services.SyncService;
+//import com.eveningoutpost.dexdrip.services.SyncService;
 import com.eveningoutpost.dexdrip.utilitymodels.Constants;
 import com.eveningoutpost.dexdrip.utilitymodels.Pref;
 import com.eveningoutpost.dexdrip.utilitymodels.PumpStatus;
@@ -31,12 +31,11 @@ import com.eveningoutpost.dexdrip.insulin.Insulin;
 import com.eveningoutpost.dexdrip.insulin.InsulinManager;
 import com.eveningoutpost.dexdrip.insulin.MultipleInsulins;
 import com.eveningoutpost.dexdrip.utils.jobs.BackgroundQueue;
-import com.eveningoutpost.dexdrip.watch.thinjam.BlueJayEntry;
+//import com.eveningoutpost.dexdrip.watch.thinjam.BlueJayEntry;
 import com.eveningoutpost.dexdrip.xdrip;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
-import com.google.gson.internal.bind.DateTypeAdapter;
 import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONException;
@@ -54,7 +53,6 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import lombok.val;
 
 import static com.eveningoutpost.dexdrip.models.JoH.msSince;
 import static com.eveningoutpost.dexdrip.utilitymodels.Constants.HOUR_IN_MS;
@@ -149,7 +147,7 @@ public class Treatments extends Model {
         insulinInjections = i;
         Gson gson = new GsonBuilder()
                 .excludeFieldsWithoutExposeAnnotation()
-               // .registerTypeAdapter(Date.class, new DateTypeAdapter())
+               
                 .serializeSpecialFloatingPointValues()
                 .create();
         insulinJSON = gson.toJson(i);
@@ -190,7 +188,7 @@ public class Treatments extends Model {
     // take a simple insulin value and produce a list assuming it is bolus insulin - for legacy conversion
     static private List<InsulinInjection> convertLegacyDoseToBolusInjectionList(final double insulinSum) {
         final ArrayList<InsulinInjection> injections = new ArrayList<>();
-        val profile = InsulinManager.getBolusProfile();
+        Insulin profile = InsulinManager.getBolusProfile();
         if (profile != null) {
             injections.add(new InsulinInjection(profile, insulinSum));
         } else {
@@ -373,7 +371,7 @@ public class Treatments extends Model {
 
     static void createForTest(long timestamp, double insulin) {
         fixUpTable();
-        val treatment = new Treatments();
+        Treatments treatment = new Treatments();
         treatment.notes = "test";
         treatment.timestamp = timestamp;
         treatment.created_at = DateUtil.toISOString(timestamp);
@@ -437,7 +435,7 @@ public class Treatments extends Model {
         // Create treatment entry in the database if the sensor was started by another
         // device (e.g. receiver) and not xDrip. If the sensor was started by
         // xDrip, then there will be a Sensor Start treatment already in the db.
-        val lastSensorStart = Treatments.lastEventTypeFromXdrip(Treatments.SENSOR_START_EVENT_TYPE);
+        Treatments lastSensorStart = Treatments.lastEventTypeFromXdrip(Treatments.SENSOR_START_EVENT_TYPE);
 
         // If there isn't an existing sensor start in the xDrip db, or the most recently tracked
         // sensor start was more than 15 minutes ago, then we assume the sensor was actually
@@ -451,7 +449,7 @@ public class Treatments extends Model {
     }
 
     public static void sensorUpdateStartTimeIfNeeded() {
-        val lastSensorStart = Treatments.lastEventTypeFromXdrip(Treatments.SENSOR_START_EVENT_TYPE);
+        Treatments lastSensorStart = Treatments.lastEventTypeFromXdrip(Treatments.SENSOR_START_EVENT_TYPE);
         long localStartedAt = lastSensorStart.timestamp; // When the xDrip local session started
         long dexStartedAt = DexSessionKeeper.getStart(); // When the current session on the transmitter started
         if (dexStartedAt > 0 && !(dexStartedAt - localStartedAt < MINUTE_IN_MS * 5)) { // If the start time of the local session is more than 5 minutes older than the one on the transmitter
@@ -467,19 +465,17 @@ public class Treatments extends Model {
 
         BackgroundQueue.postDelayed(() -> {
             if (Home.get_master_or_follower()) {
-                GcmActivity.pushTreatmentAsync(treatment);
+//                GcmActivity.pushTreatmentAsync(treatment);
             }
 
             if (!(Pref.getBoolean("cloud_storage_api_enable", false) || Pref.getBoolean("cloud_storage_mongodb_enable", false))) {
                 NSClientChat.pushTreatmentAsync(treatment);
-            } else {
-                Log.d(TAG, "Skipping NSClient treatment broadcast as nightscout direct sync is enabled");
             }
-
+            // TODO this block is a repeat of existing if this is a master or follower
+            // only sync to nightscout if source of change was not from nightscout
             if (suggested_uuid == null) {
-                // only sync to nightscout if source of change was not from nightscout
                 if (UploaderQueue.newEntry(is_new ? "insert" : "update", treatment) != null) {
-                    SyncService.startSyncService(3000); // sync in 3 seconds
+//                    SyncService.startSyncService(3000); // sync in 3 seconds
                 }
             }
         },1000);
@@ -490,7 +486,7 @@ public class Treatments extends Model {
         Log.d(TAG, "pushTreatmentSyncToWatch Add treatment to UploaderQueue.");
         if (Pref.getBooleanDefaultFalse("wear_sync")) {
             if (UploaderQueue.newEntryForWatch(is_new ? "insert" : "update", treatment) != null) {
-                SyncService.startSyncService(3000); // sync in 3 seconds
+//                SyncService.startSyncService(3000); // sync in 3 seconds
             }
         }
     }
@@ -611,7 +607,7 @@ public class Treatments extends Model {
 
     public static void delete_all(boolean from_interactive) {
         if (from_interactive) {
-            GcmActivity.push_delete_all_treatments();
+//            GcmActivity.push_delete_all_treatments();
         }
         new Delete()
                 .from(Treatments.class)
@@ -647,8 +643,8 @@ public class Treatments extends Model {
 
             UploaderQueue.newEntry("delete", thistreat);
             if (from_interactive) {
-                GcmActivity.push_delete_treatment(thistreat);
-                SyncService.startSyncService(3000); // sync in 3 seconds
+//                GcmActivity.push_delete_treatment(thistreat);
+//                SyncService.startSyncService(3000); // sync in 3 seconds
             }
 
             thistreat.delete();
@@ -661,7 +657,7 @@ public class Treatments extends Model {
         if (thistreat != null) {
 
             if (from_interactive) {
-                GcmActivity.push_delete_treatment(thistreat);
+//                GcmActivity.push_delete_treatment(thistreat);
                 //GoogleDriveInterface gdrive = new GoogleDriveInterface();
                 //gdrive.deleteTreatmentAtRemote(thistreat.uuid);
             }
@@ -742,7 +738,7 @@ public class Treatments extends Model {
                 if ((dupe_treatment.uuid != null) && (mytreatment.uuid != null) && (dupe_treatment.uuid.equals(mytreatment.uuid)) && (mytreatment.notes != null)) {
 
                     if ((dupe_treatment.notes == null) || (dupe_treatment.notes.length() < mytreatment.notes.length())) {
-                        dupe_treatment.notes = mytreatment.notes;
+//                        dupe_treatment.notes = myytreatment.notes;
                         fixUpTable();
                         dupe_treatment.save();
                         Log.d(TAG, "Saved updated treatement notes");
@@ -788,7 +784,7 @@ public class Treatments extends Model {
 
     private static void evaluateNotesForNotification(final Treatments mytreatment) {
         if (!emptyString(mytreatment.notes) && mytreatment.notes.startsWith("-")) {
-            BlueJayEntry.sendNotifyIfEnabled(mytreatment.notes);
+//            BlueJayEntry.sendNotifyIfEnabled(mytreatment.notes);
         }
     }
 
@@ -1002,7 +998,7 @@ public class Treatments extends Model {
         // 10 hours max look or from insulin manager if enabled
         final double dontLookThisFar = MultipleInsulins.isEnabled() ? MINUTE_IN_MS * InsulinManager.getMaxEffect(true) : 10 * HOUR_IN_MS;
 // look back the longest effect period of all enabled insulin profiles (startTime is always 24h behind NOW)
-        List<Treatments> theTreatments = latestForGraph(2000, startTime - dontLookThisFar);
+        List<Treatments> theTreatments = latestForGraph(2000, startTime - (long) dontLookThisFar);
         Log.d(TAG,"TREATMENT LIST: "+theTreatments.size()+" "+JoH.dateTimeText((long)(startTime - dontLookThisFar)));
         if (theTreatments.size() == 0) return null;
 
@@ -1185,10 +1181,10 @@ public class Treatments extends Model {
             for (Treatments thisTreatment : theTreatments) {
                 // early optimisation exclusion
                 if ((thisTreatment.timestamp <= mytime) && (mytime - thisTreatment.timestamp) < dontLookThisFar) {
-                    calcreply = calcTreatment(thisTreatment, mytime, lastDecayedBy); // was last decayed by but that offset wrongly??
+                    calcreply = calcTreatment(thisTreatment, mytime, useBasal); // was last decayed by but that offset wrongly??
                     totalIOB += calcreply.iob;
                     //totalCOB += calcreply.cob;
-                    totalActivity += calcreply.activity;
+                    totalActivity += calcreply.jActivity;
                 } // endif excluding a treatment
             } // per treatment
 
@@ -1403,7 +1399,7 @@ public class Treatments extends Model {
     public String toS() {
         Gson gson = new GsonBuilder()
                 .excludeFieldsWithoutExposeAnnotation()
-                .registerTypeAdapter(Date.class, new DateTypeAdapter())
+                
                 .serializeSpecialFloatingPointValues()
                 .create();
         return gson.toJson(this);
@@ -1419,18 +1415,14 @@ public class Treatments extends Model {
             final Matcher m = penPattern.matcher(notes);
             if (m.matches()) {
                 return m.group(1);
-            } else {
-                return null;
             }
         } else {
             return null;
         }
+        return null;
     }
 
     public boolean isPrimingDose() {
         return notes != null && notes.startsWith("Priming");
     }
 }
-
-
-

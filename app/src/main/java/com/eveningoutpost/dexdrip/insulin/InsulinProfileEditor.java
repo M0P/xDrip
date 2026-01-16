@@ -15,8 +15,7 @@ import com.eveningoutpost.dexdrip.models.JoH;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import lombok.val;
+import java.util.List;
 
 /**
  * Created by gruoner on 28/07/2019.
@@ -53,7 +52,7 @@ public class InsulinProfileEditor extends BaseAppCompatActivity {
         basalSpinner = (Spinner) findViewById(R.id.basalSpinner);
         bolusSpinner = (Spinner) findViewById(R.id.bolusSpinner);
 
-        val iprofiles = InsulinManager.getAllProfiles();
+        final List<Insulin> iprofiles = InsulinManager.getAllProfiles();
         if (iprofiles == null) {
             JoH.static_toast_long("Can't initialize insulin profiles");
             finish();
@@ -158,4 +157,3 @@ public class InsulinProfileEditor extends BaseAppCompatActivity {
         }
     }
 }
-

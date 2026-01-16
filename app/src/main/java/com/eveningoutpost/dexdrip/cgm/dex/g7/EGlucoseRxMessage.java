@@ -8,9 +8,6 @@ import com.eveningoutpost.dexdrip.utilitymodels.Constants;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import lombok.Getter;
-import lombok.val;
-
 public class EGlucoseRxMessage extends BaseMessage {
 
     private static final String TAG = EGlucoseRxMessage.class.getSimpleName();
@@ -30,8 +27,11 @@ public class EGlucoseRxMessage extends BaseMessage {
     public int trend;
     public int age;
 
-    @Getter
     public boolean valid;
+
+    public boolean isValid() {
+        return valid;
+    }
 
     /**
      * JamOrHam
@@ -48,7 +48,7 @@ public class EGlucoseRxMessage extends BaseMessage {
                 status_raw = data.get();
                 clock = getUnsignedInt(data);
                 sequence = getUnsignedShort(data);
-                val bogus = getUnsignedShort(data);
+                int bogus = getUnsignedShort(data);
 
                 age = getUnsignedShort(data);
 
@@ -104,6 +104,3 @@ public class EGlucoseRxMessage extends BaseMessage {
         return calibrationState().usableGlucose();
     }
 }
-
-
-

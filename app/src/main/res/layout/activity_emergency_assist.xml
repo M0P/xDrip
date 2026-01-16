@@ -4,8 +4,6 @@
 
     <data>
 
-        <import type="me.tatarka.bindingcollectionadapter2.LayoutManagers" />
-
         <variable
             name="prefs"
             type="com.eveningoutpost.dexdrip.utilitymodels.PrefsViewImpl" />
@@ -13,18 +11,6 @@
         <variable
             name="sprefs"
             type="com.eveningoutpost.dexdrip.utilitymodels.PrefsViewString" />
-
-        <variable
-            name="model"
-            type="com.eveningoutpost.dexdrip.eassist.EmergencyAssist" />
-
-        <variable
-            name="contactModel"
-            type="com.eveningoutpost.dexdrip.eassist.EmergencyAssistActivity.ContactModel" />
-
-        <variable
-            name="activity"
-            type="com.eveningoutpost.dexdrip.eassist.EmergencyAssistActivity" />
 
     </data>
 
@@ -52,8 +38,7 @@
                 android:switchMinWidth="55dp"
                 android:text="@string/emergency_message_feature"
                 android:textSize="18sp"
-                appx:checked="@={prefs[`emergency_assist_enabled`]}"
-                appx:onCheckedChanged="@{() -> activity.masterEnable()}" />
+                appx:checked="@={prefs[`emergency_assist_enabled`]}" />
 
             <TextView
                 android:id="@+id/eaIntroText"
@@ -74,8 +59,7 @@
                 android:imeOptions="actionDone"
                 android:inputType="text"
                 android:lines="1"
-                android:maxLines="1"
-                android:text="@={model.username}" />
+                android:maxLines="1" />
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
@@ -91,7 +75,7 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="10dp"
                     android:layout_weight="1"
-                    android:text="@{model.lastExtendedText, default=`Preview Text`}"
+                    android:text="Preview Text"
                     android:textColor="#000000"
                     android:textStyle="italic" />
             </androidx.cardview.widget.CardView>
@@ -108,17 +92,15 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:layout_marginTop="5dp"
-                android:text="@{String.format(@string/d_selected_contacts_for_text_messages_format, contactModel.items.size()), default=`0 selected contacts for text messages`}"
-                android:textColor="@{contactModel.items.size() > 0 ? @android:color/white : @android:color/holo_red_dark}" />
+                android:text="0 selected contacts for text messages"
+                android:textColor="@android:color/holo_red_dark" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:paddingBottom="10dp"
                 android:scrollbars="vertical"
-                appx:itemBinding="@{contactModel.itemBinding}"
-                appx:items="@{contactModel.items}"
-                appx:layoutManager="@{LayoutManagers.linear()}" />
+                appx:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
 
             <ImageButton
@@ -182,8 +164,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_weight="1"
-                    android:minWidth="100dp"
-                    android:text="@{activity.prettyMinutes(sprefs[`emergency_assist_low_alert_minutes`])}" />
+                    android:minWidth="100dp" />
             </LinearLayout>
 
             <Switch
@@ -220,8 +201,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_weight="1"
-                    android:minWidth="100dp"
-                    android:text="@{activity.prettyMinutes(sprefs[`emergency_assist_lowest_alert_minutes`])}" />
+                    android:minWidth="100dp" />
             </LinearLayout>
 
 
@@ -261,8 +241,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_weight="1"
-                    android:minWidth="100dp"
-                    android:text="@{activity.prettyMinutes(sprefs[`emergency_assist_high_alert_minutes`])}" />
+                    android:minWidth="100dp" />
 
             </LinearLayout>
 
@@ -302,8 +281,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_weight="1"
-                    android:minWidth="100dp"
-                    android:text="@{activity.prettyMinutes(sprefs[`emergency_assist_inactivity_minutes`])}" />
+                    android:minWidth="100dp" />
 
             </LinearLayout>
 
@@ -321,13 +299,8 @@
                 android:layout_marginBottom="20dp"
                 android:onClick="testButton"
                 android:text="@string/test_message_sending"
-                appx:invisibleIfFalse="@{contactModel.items.size > 0}" />
+                android:visibility="invisible" />
 
-            <View
-                android:layout_width="fill_parent"
-                android:layout_height="1dp"
-                android:layout_margin="5dp"
-                android:background="#484848" />
         </LinearLayout>
     </ScrollView>
 

@@ -10,8 +10,7 @@ import com.eveningoutpost.dexdrip.utilitymodels.Inevitable;
 import com.eveningoutpost.dexdrip.xdrip;
 
 import java.util.LinkedList;
-
-import lombok.val;
+import java.util.List;
 
 /**
  * JamOrHam
@@ -44,7 +43,7 @@ public class Poller {
     // call from application start
     public static void init() {
         try {
-            val intentFilter = new IntentFilter();
+            final IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(Intent.ACTION_SCREEN_ON);
 
             try {
@@ -60,23 +59,23 @@ public class Poller {
 
     private static void poll(final Pollable.When event) {
         Log.d(TAG, "DEBUG POLL: " + event);
-        val remove = new LinkedList<Pollable>();
-        val triggeredGroups = new LinkedList<String>();
-        val registry = Registry.getRegistry();
-        for (val alert : registry) {
-            if (triggeredGroups.contains(alert.group())) {
-                Log.d(TAG, "Skipping due to group match: " + alert.group());
-                continue;
-            }
-            val result = alert.poll(event);
-            if (result.remove) {
-                remove.add(alert); // this one asked to be removed
-            }
-            if (result.triggered) {
-                triggeredGroups.add(alert.group());
-            }
-        }
-        for (val alert : remove) {
+        final List<Pollable> remove = new LinkedList<>();
+        final List<String> triggeredGroups = new LinkedList<>();
+//        final List<Pollable> registry = Registry.getRegistry();
+//        for (final Pollable alert : registry) {
+//            if (triggeredGroups.contains(alert.group())) {
+//                Log.d(TAG, "Skipping due to group match: " + alert.group());
+//                continue;
+//            }
+//            final Pollable.Result result = alert.poll(event);
+//            if (result.remove) {
+//                remove.add(alert); // this one asked to be removed
+//            }
+//            if (result.triggered) {
+//                triggeredGroups.add(alert.group());
+//            }
+//        }
+        for (final Pollable alert : remove) {
             Registry.remove(alert);
         }
     }

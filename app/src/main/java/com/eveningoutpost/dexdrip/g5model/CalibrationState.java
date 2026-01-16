@@ -7,7 +7,6 @@ import android.util.SparseArray;
 import com.eveningoutpost.dexdrip.models.UserError;
 import com.google.common.collect.ImmutableSet;
 
-import lombok.Getter;
 
 import static com.eveningoutpost.dexdrip.services.G5CollectionService.TAG;
 
@@ -50,10 +49,16 @@ public enum CalibrationState {
     SensorStopped(0xC2, "Sensor Stopped"),
     CalibrationSent(0xC3, "Calibration Sent");
 
-    @Getter
-    byte value;
-    @Getter
-    String text;
+    private byte value;
+    private String text;
+
+    public byte getValue() {
+        return value;
+    }
+
+    public String getText() {
+        return text;
+    }
 
 
     private static final SparseArray<CalibrationState> lookup = new SparseArray<>();

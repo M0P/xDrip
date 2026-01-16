@@ -12,9 +12,8 @@ import androidx.annotation.NonNull;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
-import com.eveningoutpost.dexdrip.cloud.jamcm.Legacy;
 import com.eveningoutpost.dexdrip.models.JoH;
-import com.eveningoutpost.dexdrip.utilitymodels.UpdateActivity;
+
 
 
 public class TaskService extends Worker {
@@ -28,9 +27,9 @@ public class TaskService extends Worker {
     private boolean doUnmeteredTask() {
         if (token != null) {
             if (JoH.pratelimit("unmetered-update", 43200)) {
-                UpdateActivity.checkForAnUpdate(getApplicationContext());
+                // UpdateActivity.checkForAnUpdate(getApplicationContext());
             }
-            Legacy.migration(token);
+            // Legacy.migration(token);
         }
         return true;
     }

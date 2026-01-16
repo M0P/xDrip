@@ -1,100 +1,79 @@
 package com.eveningoutpost.dexdrip.plugin;
 
-import static com.eveningoutpost.dexdrip.plugin.Cache.getPath;
+import static com.eveningoutpost.dexdrip.utils.FileUtils.readFromFile;
 
-import com.eveningoutpost.dexdrip.models.UserError;
-import com.eveningoutpost.dexdrip.xdrip;
+import com.eveningoutpost.dexdrip.models.UserError.Log;
 
-import java.lang.reflect.Method;
+import java.io.File;
 import java.util.HashMap;
 
-import dalvik.system.PathClassLoader;
-import lombok.AllArgsConstructor;
-import lombok.val;
+import dalvik.system.DexClassLoader;
+
 
 /**
  * JamOrHam
- *
- * Plugin virtual environment cache loader
+ * <p>
+ * Load plugins from file system and instantiate classes
  */
 
 public class Loader {
 
-    private static final String TAG = "Plugin";
-    private static final HashMap<String, Environ> loaderCache = new HashMap<>();
+    private static final String TAG = "PluginLoader";
+    private static final HashMap<String, Loaded> loaded = new HashMap<>();
 
-    public static void clear() {
-        synchronized (loaderCache) {
-            loaderCache.clear();
+    public static class Loaded {
+        private final Object instance;
+        private final Class<?> clazz;
+
+        public Loaded(Object instance, Class<?> clazz) {
+            this.instance = instance;
+            this.clazz = clazz;
+        }
+
+        public Object getInstance() {
+            return instance;
+        }
+
+        public Class<?> getClazz() {
+            return clazz;
         }
     }
 
-    public static void unload(final String name) {
-        synchronized (loaderCache) {
-            loaderCache.remove(name);
+    public static synchronized Loaded load(final PluginDef def) {
+        if (loaded.containsKey(def.getName())) {
+            return loaded.get(def.getName());
         }
-    }
-
-    @AllArgsConstructor
-    public static class Environ {
-        PathClassLoader virtualLoader;
-        Method getInstance;
-
-        public Environ(PathClassLoader loader) {
-            this.virtualLoader = loader;
-        }
-    }
-
-    public static synchronized IPluginDA getLocalInstance(final PluginDef def, final String parameter) {
-        switch (def.name) {
-            case "keks":
-                return jamorham.keks.Plugin.getInstance(parameter);
-            default:
-                throw new RuntimeException("Unknown local plugin " + def.name);
-        }
-    }
-
-    public static synchronized IPluginDA getInstance(final PluginDef def, final String parameter) {
-        if (def == null) return null;
-        try {
-            if (!Consent.isGiven(def)) {
-                UserError.Log.wtf(TAG, "User has not yet consented to use of plugin: " + def.name);
-                return null;
-            }
-
-            if (!def.isReady()) {
-                Cache.refresh(def);
-                if (!def.isReady()) {
-                    return null;
-                }
-            }
-            Environ environ;
-            synchronized (loaderCache) {
-                if (!loaderCache.containsKey(def.name)) {
-                    val loader = new PathClassLoader(getPath(def), xdrip.getAppContext().getClassLoader());
-                    loaderCache.put(def.name, new Environ(loader));
-                }
-                environ = loaderCache.get(def.name);
-            }
-            if (environ == null) {
-                UserError.Log.e(TAG, "Cannot get loader");
+        if (def.isLoaded()) {
+            final String path = Cache.getPath(def);
+            if (path == null) {
+                Log.e(TAG, "Cannot load plugin missing path: " + def.getName());
                 return null;
             }
             try {
-                if (environ.getInstance == null) {
-                    val c = environ.virtualLoader.loadClass(def.pname() + TAG);
-                    UserError.Log.d(TAG, "Loaded from file: " + c.getCanonicalName());
-                    environ.getInstance = c.getMethod("getInstance", String.class);
-                }
-                return (IPluginDA) environ.getInstance.invoke(null, parameter);
+                final File tmpDir = new File(path).getParentFile();
+                //final File tmpDir =  xdrip.getAppContext().getDir("dex", 0);
+
+                final DexClassLoader classLoader = new DexClassLoader(path, tmpDir.getAbsolutePath(), null, Loader.class.getClassLoader());
+                final Class<?> clazz = classLoader.loadClass(def.pname() + "Plugin");
+                //Method m = clazz.getMethod("test", String.class);
+                final Object instance = clazz.newInstance();
+                final Loaded l = new Loaded(instance, clazz);
+                loaded.put(def.getName(), l);
+                Log.d(TAG, "Loaded plugin: " + def.getName());
+                return l;
+
             } catch (Exception e) {
-                UserError.Log.e(TAG, "Got load exception: " + e);
-                unload(def.name);
+                Log.e(TAG, "Exception loading plugin: " + e);
             }
-        } catch (Exception e) {
-            UserError.Log.e(TAG, "Got exception in getInstance: " + e);
+        } else {
+            Log.d(TAG, "Plugin not ready: " + def.getName());
+            Cache.refresh(def);
         }
         return null;
+    }
+
+    public static synchronized void clear() {
+        loaded.clear();
     }
 
 }

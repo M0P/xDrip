@@ -34,7 +34,7 @@ import com.eveningoutpost.dexdrip.utilitymodels.Inevitable;
 import com.eveningoutpost.dexdrip.utilitymodels.PersistentStore;
 import com.eveningoutpost.dexdrip.utilitymodels.Pref;
 import com.eveningoutpost.dexdrip.utilitymodels.SaveLogs;
-import com.eveningoutpost.dexdrip.utilitymodels.SendFeedBack;
+//import com.eveningoutpost.dexdrip.utilitymodels.SendFeedBack;
 import com.eveningoutpost.dexdrip.databinding.ActivityEventLogBinding;
 import com.eveningoutpost.dexdrip.ui.helpers.BitmapUtil;
 import com.eveningoutpost.dexdrip.utils.ExtensionMethods;
@@ -43,9 +43,6 @@ import com.eveningoutpost.dexdrip.wearintegration.WatchUpdaterService;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.ExtensionMethod;
 import me.tatarka.bindingcollectionadapter2.BindingRecyclerViewAdapter;
 import me.tatarka.bindingcollectionadapter2.ItemBinding;
 import me.tatarka.bindingcollectionadapter2.collections.MergeObservableList;
@@ -59,7 +56,6 @@ import static com.eveningoutpost.dexdrip.utils.DexCollectionType.getBestCollecto
  * Created by jamorham 24/03/2018
  *
  */
-@ExtensionMethod({java.util.Arrays.class, ExtensionMethods.class})
 public class EventLogActivity extends BaseAppCompatActivity {
 
     private static final List<Integer> severitiesList = new ArrayList<>();
@@ -295,7 +291,7 @@ public class EventLogActivity extends BaseAppCompatActivity {
     }
 
     public synchronized void uploadEventLogs(View v) { // Send events log to JamOrHam
-        startActivity(new Intent(getApplicationContext(), SendFeedBack.class).putExtra("generic_text", packLogs()));
+//        startActivity(new Intent(getApplicationContext(), SendFeedBack.class).putExtra("generic_text", packLogs()));
     }
 
     public synchronized void saveEventLog(View v) { // Save events log in mobile storage
@@ -338,8 +334,7 @@ public class EventLogActivity extends BaseAppCompatActivity {
         public final ObservableBoolean showScrollToTop = new ObservableBoolean(false);
         public final ObservableBoolean showLoading = new ObservableBoolean(false);
         private final SparseBooleanArray severities = new SparseBooleanArray();
-        @Getter
-        public View last_clicked_view = null;
+        private View last_clicked_view = null;
         private String last_click_filter = "";
         private String currentFilter = null;
 
@@ -348,6 +343,10 @@ public class EventLogActivity extends BaseAppCompatActivity {
             for (int severity : severitiesList) {
                 severities.put(severity, PersistentStore.getBoolean(PREF_SEVERITY_SELECTION + severity, true));
             }
+        }
+
+        public View getLast_clicked_view() {
+            return last_clicked_view;
         }
 
         // populate initial data set
@@ -423,7 +422,7 @@ public class EventLogActivity extends BaseAppCompatActivity {
 
         // apply a filter and refresh display
         void filter(final String filter) {
-            currentFilter = filter.or(getCurrentFilter()).toLowerCase().trim();
+            currentFilter = ExtensionMethods.or(filter, getCurrentFilter()).toLowerCase().trim();
             visible.clear();
             synchronized (items) {
                 // skip filter on initial defaults for speed
@@ -442,7 +441,7 @@ public class EventLogActivity extends BaseAppCompatActivity {
 
         // apply filter just to some new items and update accordingly
         private void insertFilteredNewItems(final String filter, int count) {
-            currentFilter = filter.or(getCurrentFilter()).toLowerCase().trim();
+            currentFilter = ExtensionMethods.or(filter, getCurrentFilter()).toLowerCase().trim();
             int c = 0;
             int added = 0;
             synchronized (items) {
@@ -466,13 +465,13 @@ public class EventLogActivity extends BaseAppCompatActivity {
 
         // check if current filter is the out-of-the-box default
         public boolean isDefaultFilters() {
-            return ((currentFilter.or("").length() == 0) && allSeveritiesEnabled());
+            return ((ExtensionMethods.or(currentFilter, "").length() == 0) && allSeveritiesEnabled());
         }
 
         // check severity enabled and case insensitive contains match using optimized extension method
         public boolean filterMatch(final UserError item) {
             return severities.get(item.severity)
-                    && (item.shortError.containsIgnoreCaseF(currentFilter) || (item.message.containsIgnoreCaseF(currentFilter)));
+                    && (ExtensionMethods.containsIgnoreCaseF(item.shortError, currentFilter) || (ExtensionMethods.containsIgnoreCaseF(item.message, currentFilter)));
         }
 
 
@@ -614,17 +613,20 @@ public class EventLogActivity extends BaseAppCompatActivity {
     }
 
     // scale gesture listener to handler element pinch zoom
-    @RequiredArgsConstructor
     public class SimpleOnScaleGestureListener extends
             ScaleGestureDetector.SimpleOnScaleGestureListener {
 
         private final ViewModel viewModel;
 
+        public SimpleOnScaleGestureListener(ViewModel viewModel) {
+            this.viewModel = viewModel;
+        }
+
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
             float factor = detector.getScaleFactor();
-            if (viewModel.last_clicked_view != null) {
-                ((TextView) viewModel.last_clicked_view).setTextSize(TypedValue.COMPLEX_UNIT_PX, ((TextView) viewModel.last_clicked_view).getTextSize() * factor);
+            if (viewModel.getLast_clicked_view() != null) {
+                ((TextView) viewModel.getLast_clicked_view()).setTextSize(TypedValue.COMPLEX_UNIT_PX, ((TextView) viewModel.getLast_clicked_view()).getTextSize() * factor);
             }
             return true;
         }
@@ -650,4 +652,3 @@ public class EventLogActivity extends BaseAppCompatActivity {
 
     }
 }
-

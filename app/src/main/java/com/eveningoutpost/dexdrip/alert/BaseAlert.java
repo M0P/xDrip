@@ -7,9 +7,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import lombok.Getter;
-import lombok.val;
-
 /**
  * JamOrHam
  *
@@ -19,10 +16,8 @@ import lombok.val;
 public abstract class BaseAlert implements Condition, Action, Pollable {
 
     @Expose
-    @Getter
     private final String name;
     @Expose
-    @Getter
     private final List<When> when = new ArrayList<>();
 
     @Expose
@@ -36,6 +31,14 @@ public abstract class BaseAlert implements Condition, Action, Pollable {
         this.when.addAll(Arrays.asList(when));
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public List<When> getWhen() {
+        return when;
+    }
+
     public BaseAlert setOneShot(final boolean oneShot) {
         this.oneShot = oneShot;
         return this;
@@ -47,11 +50,11 @@ public abstract class BaseAlert implements Condition, Action, Pollable {
 
     @Override
     public PollResult poll(final When event) {
-        val ret = new PollResult();
+        final PollResult ret = new PollResult();
         if (when.contains(event)) {
             lastEvent = event;
             if (isMet()) {
-                val result = activate();
+                final boolean result = activate();
                 ret.triggered = true;
                 log("Activated: " + result); // TODO i18n?
                 ret.remove = oneShot;

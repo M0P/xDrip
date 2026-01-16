@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.eveningoutpost.dexdrip"
     android:installLocation="internalOnly"
     tools:ignore="InnerclassSeparator">
 
@@ -22,18 +21,10 @@
     <uses-permission android:name="android.permission.NFC" />
     <uses-permission android:name="com.google.android.permission.PROVIDE_BACKGROUND" />
 
-    <!-- Remove library-modified permissions -->
-    <uses-permission
-        android:name="android.permission.BLUETOOTH"
-        tools:node="remove" />
-
-    <uses-permission
-        android:name="android.permission.BLUETOOTH_ADMIN"
-        tools:node="remove" />
-
-
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -60,7 +51,8 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.BATTERY_STATS" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
-    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
     <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
@@ -96,18 +88,6 @@
     <uses-permission android:name="android.permission.health.READ_WHEELCHAIR_PUSHES" />
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
 
-
-    <!-- Remove permission added by library -->
-    <uses-permission
-        android:name="android.permission.BLUETOOTH_SCAN"
-        tools:node="remove" />
-
-    <!-- Remove permission added by library -->
-    <uses-permission
-        android:name="android.permission.BLUETOOTH_CONNECT"
-        tools:node="remove" />
-
-
     <application
         android:name=".xdrip"
         android:allowBackup="false"
@@ -116,8 +96,8 @@
         android:largeHeap="true"
         android:maxAspectRatio="2.1"
         android:theme="@style/AppTheme"
-        tools:replace="android:appComponentFactory"
-        android:appComponentFactory="android.support.v4.app.CoreComponentFactory"
+        tools:replace="android:appComponentFactory,android:allowBackup"
+        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
         android:requestLegacyExternalStorage="true"
         android:usesCleartextTraffic="true">
         <activity
@@ -189,6 +169,7 @@
 
         <activity
             android:name=".Home"
+            android:exported="true"
             android:label="@string/app_name_launcher"
             android:launchMode="singleTask">
             <intent-filter>
@@ -275,18 +256,18 @@
             android:configChanges="orientation|screenSize"
             android:label="@string/note_search" />
 
-        <receiver android:name=".AutoStart">
+        <receiver android:name=".AutoStart" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".utils.PowerStateReceiver">
+        <receiver android:name=".utils.PowerStateReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
                 <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".utils.HeadsetStateReceiver">
+        <receiver android:name=".utils.HeadsetStateReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="android.bluetooth.headset.profile.action.CONNECTION_STATE_CHANGED" />
                 <action android:name="android.bluetooth.headset.profile.action.AUDIO_STATE_CHANGED" />
@@ -299,19 +280,20 @@
                 <action android:name="com.eveningoutpost.dexdrip.ExternalStatusline" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".utils.DisconnectReceiver">
+        <receiver android:name=".utils.DisconnectReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".utils.bt.ConnectReceiver">
+        <receiver android:name=".utils.bt.ConnectReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
             </intent-filter>
         </receiver>
         <receiver
             android:name=".utils.framework.IncomingCallsReceiver"
-            android:enabled="true">
+            android:enabled="true"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.PHONE_STATE" />
             </intent-filter>
@@ -321,16 +303,16 @@
             android:name=".tables.CalibrationDataTable"
             android:label="@string/calibration_data_table" />
 
-        <service android:name=".GcmListenerSvc">
+        <service android:name=".GcmListenerSvc" android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-        <service android:name=".MyInstanceIDListenerService">
-            <intent-filter>
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
-            </intent-filter>
-        </service>
+<!--        <service android:name=".MyInstanceIDListenerService" android:exported="false">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />-->
+<!--            </intent-filter>-->
+<!--        </service>-->
         <service
             android:name=".RegistrationIntentService"
             android:exported="false" />
@@ -346,7 +328,8 @@
         <service
             android:name=".services.UiBasedCollector"
             android:label="UiBasedCollector"
-            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
@@ -408,7 +391,7 @@
             android:label="@string/settings"
             android:theme="@style/OldAppTheme" />
 
-        <receiver android:name=".xDripWidget">
+        <receiver android:name=".xDripWidget" android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -466,7 +449,7 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".NSClientReceiver">
+        <receiver android:name=".NSClientReceiver" android:exported="true">
             <intent-filter>
                 <action android:name="info.nightscout.client.NS_BRIDGE" />
             </intent-filter>
@@ -496,7 +479,7 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".NSEmulatorReceiver">
+        <receiver android:name=".NSEmulatorReceiver" android:exported="true">
             <intent-filter>
                 <action android:name="com.eveningoutpost.dexdrip.NS_EMULATOR" />
                 <action android:name="com.eveningoutpost.dexdrip.OOP2_DECODE_FARM_RESULT" />
@@ -505,7 +488,7 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".utilitymodels.BroadcastSnoozeReceiver">
+        <receiver android:name=".utilitymodels.BroadcastSnoozeReceiver" android:exported="true">
             <intent-filter>
                 <action android:name="com.eveningoutpost.dexdrip.Snooze" />
             </intent-filter>
@@ -517,14 +500,14 @@
                 <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".utilitymodels.CompatibleApps">
+        <receiver android:name=".utilitymodels.CompatibleApps" android:exported="true">
             <intent-filter android:priority="100">
                 <action android:name="android.intent.action.PACKAGE_ADDED" />
 
                 <data android:scheme="package" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".utils.framework.WakeLockTrampoline" />
+        <receiver android:name=".utils.framework.WakeLockTrampoline" android:exported="false"/>
 
         <receiver
             android:name=".receiver.ReminderReceiver"
@@ -533,7 +516,8 @@
 
         <service
             android:name=".services.AlwaysOnDisplayService"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
@@ -617,7 +601,8 @@
             android:label="Nightscout xDrip+" />
         <activity
             android:name=".WearVoiceActivity"
-            android:label="Simulation handheld">
+            android:label="Simulation handheld"
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.google.android.gm.action.AUTO_SEND" />
 

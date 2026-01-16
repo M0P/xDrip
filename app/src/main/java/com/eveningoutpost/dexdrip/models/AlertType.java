@@ -24,9 +24,6 @@ import java.util.UUID;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
-import com.google.gson.internal.bind.DateTypeAdapter;
-
-import lombok.val;
 
 /**
  * Created by Emma Black on 1/14/15.
@@ -193,7 +190,7 @@ public class AlertType extends Model {
     private static AlertType get_highest_active_alert_helper(double bg, SharedPreferences prefs) {
         // Chcek the low alerts
 
-        final double offset = ActivityRecognizedService.raise_limit_due_to_vehicle_mode() ? ActivityRecognizedService.getVehicle_mode_adjust_mgdl() : 0;
+        final double offset = 0;
 
         if(prefs.getLong("low_alerts_disabled_until", 0) > new Date().getTime()){
             Log.i("NOTIFICATIONS", "get_highest_active_alert_helper: Low alerts are currently disabled!! Skipping low alerts");
@@ -378,7 +375,7 @@ public class AlertType extends Model {
     public String toS() {
         Gson gson = new GsonBuilder()
                 .excludeFieldsWithoutExposeAnnotation()
-                .registerTypeAdapter(Date.class, new DateTypeAdapter())
+                //.registerTypeAdapter(Date.class, new DateTypeAdapter())
                 .serializeSpecialFloatingPointValues()
                 .create();
         return gson.toJson(this);
@@ -445,10 +442,10 @@ public class AlertType extends Model {
     }
 
     public static AlertType getMostExtremeAlert(boolean highAlerts) {
-        val alerts = getAll(highAlerts);
+        List<AlertType> alerts = getAll(highAlerts);
         if (alerts == null) return null;
-        val filtered = new ArrayList<AlertType>();
-        for (val alert : alerts) {
+        ArrayList<AlertType> filtered = new ArrayList<AlertType>();
+        for (AlertType alert : alerts) {
             if (alert.active && alert.in_time_frame()) {    // remove alerts which are not live now
                 filtered.add(alert);
             }
@@ -637,7 +634,7 @@ public class AlertType extends Model {
 
         Gson gson = new GsonBuilder()
                 .excludeFieldsWithoutExposeAnnotation()
-                .registerTypeAdapter(Date.class, new DateTypeAdapter())
+                
                 .serializeSpecialFloatingPointValues()
                 .create();
         String output =  gson.toJson(alerts);

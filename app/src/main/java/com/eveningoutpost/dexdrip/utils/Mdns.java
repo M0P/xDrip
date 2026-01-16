@@ -459,7 +459,7 @@ public class Mdns {
     // showcase info
     private static void startupInfo(Context context) {
 
-        if (MegaStatus.runnableView == null) return;
+//        if (MegaStatus.runnableView == null) return;
         if (JoH.quietratelimit("mdns-showcase", 60)) {
             final boolean oneshot = true;
             final int option = Home.SHOWCASE_MDNS;
@@ -470,7 +470,7 @@ public class Mdns {
             final int size2 = 70;
             final String title = "Tap to add or remove";
             final String message = "Devices discovered on the local network can be added or removed as collectors by tapping on them.";
-            final ViewTarget target = new ViewTarget(MegaStatus.runnableView);
+//            final ViewTarget target = new ViewTarget(MegaStatus.runnableView);
             final Activity activity = (Activity) context;
 
             JoH.runOnUiThreadDelayed(new Runnable() {
@@ -478,7 +478,7 @@ public class Mdns {
                                          public void run() {
                                              final ShowcaseView myShowcase = new ShowcaseView.Builder(activity)
 
-                                                     .setTarget(target)
+//                                                     .setTarget(target)
                                                      .setStyle(R.style.CustomShowcaseTheme2)
                                                      .setContentTitle(title)
                                                      .setContentText("\n" + message)

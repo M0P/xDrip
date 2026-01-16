@@ -7,7 +7,6 @@ import com.eveningoutpost.dexdrip.services.G5CollectionService;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import lombok.NoArgsConstructor;
 
 /**
  * Created by jamorham on 25/11/2016.
@@ -17,13 +16,14 @@ import lombok.NoArgsConstructor;
  * initial packet structure cribbed from Loopkit
  */
 
-@NoArgsConstructor
 public class GlucoseRxMessage extends BaseGlucoseRxMessage {
 
     private final static String TAG = G5CollectionService.TAG; // meh
 
     public static final byte opcode = 0x31;
 
+    public GlucoseRxMessage() {
+    }
 
     public GlucoseRxMessage(byte[] packet) {
         UserError.Log.d(TAG, "GlucoseRX dbg: " + JoH.bytesToHex(packet));

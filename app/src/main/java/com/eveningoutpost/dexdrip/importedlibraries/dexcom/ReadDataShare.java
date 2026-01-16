@@ -8,8 +8,8 @@ import com.eveningoutpost.dexdrip.importedlibraries.dexcom.records.GenericXMLRec
 import com.eveningoutpost.dexdrip.importedlibraries.dexcom.records.MeterRecord;
 import com.eveningoutpost.dexdrip.importedlibraries.dexcom.records.PageHeader;
 import com.eveningoutpost.dexdrip.importedlibraries.dexcom.records.SensorRecord;
-import com.eveningoutpost.dexdrip.services.DexShareCollectionService;
-import com.eveningoutpost.dexdrip.ShareTest;
+//import com.eveningoutpost.dexdrip.services.DexShareCollectionService;
+//import com.eveningoutpost.dexdrip.ShareTest;
 
 import org.w3c.dom.Element;
 
@@ -30,15 +30,15 @@ import rx.functions.Action1;
 
 public class ReadDataShare {
     byte[] accumulatedResponse;
-    private ShareTest mShareTest;
-    private DexShareCollectionService mCollectionService;
-
-    public ReadDataShare(ShareTest aShareTest){
-        mShareTest = aShareTest;
-    }
-    public ReadDataShare(DexShareCollectionService collectionService){
-        mCollectionService = collectionService;
-    }
+//    private ShareTest mShareTest;
+//    private DexShareCollectionService mCollectionService;
+//
+//    public ReadDataShare(ShareTest aShareTest){
+//        mShareTest = aShareTest;
+//    }
+//    public ReadDataShare(DexShareCollectionService collectionService){
+//        mCollectionService = collectionService;
+//    }
 
     public void getRecentEGVs(final Action1<EGVRecord[]> recordListener) {
         final int recordType = Dex_Constants.RECORD_TYPES.EGV_DATA.ordinal();
@@ -212,14 +212,14 @@ public class ReadDataShare {
 
     private void writeCommand(int command, ArrayList<Byte> payload, Action1<byte[]> responseListener) {
         List<byte[]> packets = new PacketBuilder(command, payload).composeList();
-        if(mShareTest != null) { mShareTest.writeCommand(packets, 0, responseListener); }
-        else if (mCollectionService != null) { mCollectionService.writeCommand(packets, 0, responseListener); }
+//        if(mShareTest != null) { mShareTest.writeCommand(packets, 0, responseListener); }
+//        else if (mCollectionService != null) { mCollectionService.writeCommand(packets, 0, responseListener); }
     }
 
     private void writeCommand(int command, Action1<byte[]> responseListener) {
         List<byte[]> packets = new PacketBuilder(command).composeList();
-        if(mShareTest != null) { mShareTest.writeCommand(packets, 0, responseListener); }
-        else if (mCollectionService != null) { mCollectionService.writeCommand(packets, 0, responseListener); }
+//        if(mShareTest != null) { mShareTest.writeCommand(packets, 0, responseListener); }
+//        else if (mCollectionService != null) { mCollectionService.writeCommand(packets, 0, responseListener); }
     }
 
     private ReadPacket read(int numOfBytes, byte[] readPacket) {

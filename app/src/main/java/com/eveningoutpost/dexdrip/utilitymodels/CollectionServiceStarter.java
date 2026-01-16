@@ -13,13 +13,13 @@ import com.eveningoutpost.dexdrip.Home;
 import com.eveningoutpost.dexdrip.models.JoH;
 import com.eveningoutpost.dexdrip.models.UserError.Log;
 import com.eveningoutpost.dexdrip.services.DexCollectionService;
-import com.eveningoutpost.dexdrip.services.DexShareCollectionService;
+//import com.eveningoutpost.dexdrip.services.DexShareCollectionService;
 import com.eveningoutpost.dexdrip.services.DoNothingService;
 import com.eveningoutpost.dexdrip.services.G5CollectionService;
 import com.eveningoutpost.dexdrip.services.Ob1G5CollectionService;
-import com.eveningoutpost.dexdrip.services.WifiCollectionService;
-import com.eveningoutpost.dexdrip.utilitymodels.pebble.PebbleUtil;
-import com.eveningoutpost.dexdrip.utilitymodels.pebble.PebbleWatchSync;
+//import com.eveningoutpost.dexdrip.services.WifiCollectionService;
+//import com.eveningoutpost.dexdrip.utilitymodels.pebble.PebbleUtil;
+//import com.eveningoutpost.dexdrip.utilitymodels.pebble.PebbleWatchSync;
 import com.eveningoutpost.dexdrip.utils.DexCollectionType;
 import com.eveningoutpost.dexdrip.wearintegration.WatchUpdaterService;
 import com.eveningoutpost.dexdrip.xdrip;
@@ -224,9 +224,9 @@ public class CollectionServiceStarter {
 
     private void stopAll() {
         Log.d(TAG, "stop all");
-        stopBtShareService();
+        // stopBtShareService();
         stopBtWixelService();
-        stopWifWixelThread();
+        // stopWifWixelThread();
         stopFollowerThread();
         stopG5Service();
         JoH.stopService(getCollectorServiceClass(Medtrum));
@@ -245,8 +245,6 @@ public class CollectionServiceStarter {
 
         if (isBTWixelOrLimiTTer(collection_method) || isDexbridgeWixel(collection_method)) {
             Log.d("DexDrip", "Starting bt wixel collector");
-            stopWifWixelThread();
-            stopBtShareService();
             stopFollowerThread();
             stopG5Service();
 
@@ -260,37 +258,9 @@ public class CollectionServiceStarter {
             } else {
                 startBtWixelService();
             }
-        } else if (isWifiWixel(collection_method) || isWifiLibre(collection_method)) {
-            Log.d("DexDrip", "Starting wifi wixel collector");
-            stopBtWixelService();
-            stopFollowerThread();
-            stopBtShareService();
-            stopG5Service();
-
-            startWifWixelThread();
-        } else if (isBTShare(collection_method)) {
-            Log.d("DexDrip", "Starting bt share collector");
-            stopBtWixelService();
-            stopFollowerThread();
-            stopWifWixelThread();
-            stopG5Service();
-
-            if (prefs.getBoolean("wear_sync", false)) {//KS
-                boolean enable_wearG5 = prefs.getBoolean("enable_wearG5", false);
-                boolean force_wearG5 = prefs.getBoolean("force_wearG5", false);
-                startServiceCompat(new Intent(context, WatchUpdaterService.class));
-                if (!enable_wearG5 || (enable_wearG5 && !force_wearG5)) { //don't start if Wear G5 Collector Service is active
-                    startBtShareService();
-                }
-            } else {
-                startBtShareService();
-            }
-
         } else if (isBTG5(collection_method)) {
             Log.d(TAG, "Starting G5 collector");
             stopBtWixelService();
-            stopWifWixelThread();
-            stopBtShareService();
 
             if (prefs.getBoolean("wear_sync", false)) {//KS
                 boolean enable_wearG5 = prefs.getBoolean("enable_wearG5", false);
@@ -298,39 +268,13 @@ public class CollectionServiceStarter {
                 startServiceCompat(new Intent(context, WatchUpdaterService.class));
                 if (!enable_wearG5 || (enable_wearG5 && !force_wearG5)) { //don't start if Wear G5 Collector Service is active
                     startBtG5Service();
-                } else {
-                    Log.d(TAG, "Not starting because of force wear");
                 }
             } else {
-                startBtG5Service();
+                Log.d(TAG, "Not starting because of force wear");
             }
+            startBtG5Service();
 
-        } else if (isWifiandBTWixel(context) || isWifiandDexBridge() || isWifiandBTLibre(context)) {
-            Log.d("DexDrip", "Starting wifi and bt wixel collector");
-            stopBtWixelService();
-            stopFollowerThread();
-            stopWifWixelThread();
-            stopBtShareService();
-            stopG5Service();
-
-            // start both
-            Log.d("DexDrip", "Starting wifi wixel collector first");
-            startWifWixelThread();
-            Log.d("DexDrip", "Starting bt wixel collector second");
-            if (prefs.getBoolean("wear_sync", false)) {//KS
-                boolean enable_wearG5 = prefs.getBoolean("enable_wearG5", false);
-                boolean force_wearG5 = prefs.getBoolean("force_wearG5", false);
-                startServiceCompat(new Intent(context, WatchUpdaterService.class));
-                if (!enable_wearG5 || (enable_wearG5 && !force_wearG5)) { //don't start if Wear G5 Collector Service is active
-                    startBtWixelService();
-                }
-            } else {
-                startBtWixelService();
-            }
-            Log.d("DexDrip", "Started wifi and bt wixel collector");
         } else if (isFollower(collection_method) || isLibre2App(collection_method)) {
-            stopWifWixelThread();
-            stopBtShareService();
             stopBtWixelService();
             stopG5Service();
 
@@ -340,10 +284,6 @@ public class CollectionServiceStarter {
                 Log.d(TAG, "Starting service based on collector lookup");
                 startServiceCompat(new Intent(context, DexCollectionType.getCollectorServiceClass()));
             }
-        }
-
-        if (prefs.getBoolean("broadcast_to_pebble", false) && (PebbleUtil.getCurrentPebbleSyncType() != 1)) {
-            startPebbleSyncService();
         }
 
         //startSyncService(); // TODO do we need to actually do this here?
@@ -381,7 +321,7 @@ public class CollectionServiceStarter {
         final CollectionServiceStarter collectionServiceStarter = new CollectionServiceStarter(context);
         switch (DexCollectionType.getDexCollectionType()) {
             case DexcomShare:
-                collectionServiceStarter.startBtShareService();
+                // collectionServiceStarter.startBtShareService();
                 break;
             case DexcomG5:
                 collectionServiceStarter.startBtG5Service();
@@ -397,7 +337,7 @@ public class CollectionServiceStarter {
     public static void stopBtService(Context context) {
         Log.d(TAG, "stopBtService call stopService");
         final CollectionServiceStarter collectionServiceStarter = new CollectionServiceStarter(context);
-        collectionServiceStarter.stopBtShareService();
+        // collectionServiceStarter.stopBtShareService();
         collectionServiceStarter.stopBtWixelService();
         collectionServiceStarter.stopG5Service();
         Log.d(TAG, "stopBtService should have called onDestroy");
@@ -415,12 +355,19 @@ public class CollectionServiceStarter {
         this.mContext.stopService(new Intent(this.mContext, DexCollectionService.class));
     }
 
+    /*
     private void startBtShareService() {
         Log.d(TAG, "starting bt share service");
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR2) {
             startServiceCompat(new Intent(this.mContext, DexShareCollectionService.class));
         }
     }
+
+    private void stopBtShareService() {
+        Log.d(TAG, "stopping bt share service");
+        this.mContext.stopService(new Intent(this.mContext, DexShareCollectionService.class));
+    }
+    */
 
     private void startBtG5Service() {
         // Log.d(TAG,"stopping G5 service");
@@ -437,10 +384,12 @@ public class CollectionServiceStarter {
         //}
     }
 
+    /*
     private void startPebbleSyncService() {
         Log.d(TAG, "starting PebbleWatchSync service");
         startServiceCompat(new Intent(this.mContext, PebbleWatchSync.class));
     }
+    */
 
     /*private void startSyncService() {
         Log.d(TAG, "starting Sync service");
@@ -465,11 +414,14 @@ public class CollectionServiceStarter {
         am.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pi);
     }*/
 
+    /*
     private void stopBtShareService() {
         Log.d(TAG, "stopping bt share service");
         this.mContext.stopService(new Intent(this.mContext, DexShareCollectionService.class));
     }
+    */
 
+    /*
     private void startWifWixelThread() {
         Log.d(TAG, "starting wifi wixel service");
         startServiceCompat(new Intent(this.mContext, WifiCollectionService.class));
@@ -479,6 +431,7 @@ public class CollectionServiceStarter {
         Log.d(TAG, "stopping wifi wixel service");
         this.mContext.stopService(new Intent(this.mContext, WifiCollectionService.class));
     }
+    */
 
     private void startFollowerThread() {
         Log.d(TAG, "starting follower service");

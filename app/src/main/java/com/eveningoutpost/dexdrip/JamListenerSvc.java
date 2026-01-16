@@ -4,18 +4,19 @@ package com.eveningoutpost.dexdrip;
 
 import android.content.Context;
 
-import com.google.firebase.messaging.FirebaseMessagingService;
+//import com.google.firebase.messaging.FirebaseMessagingService;
 
-import lombok.Getter;
+public class JamListenerSvc {
 
-public class JamListenerSvc extends FirebaseMessagingService {
-
-    @Getter
     private boolean injectable;
 
-    @Override
+    public boolean isInjectable() {
+        return injectable;
+    }
+
+//    @Override
     protected void attachBaseContext(Context base) {
-      super.attachBaseContext(base);
+//      super.attachBaseContext(base);
     }
 
     public void setInjectable() {

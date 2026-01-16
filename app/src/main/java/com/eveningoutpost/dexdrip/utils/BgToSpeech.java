@@ -10,7 +10,6 @@ import com.eveningoutpost.dexdrip.utilitymodels.Constants;
 import com.eveningoutpost.dexdrip.utilitymodels.PersistentStore;
 import com.eveningoutpost.dexdrip.utilitymodels.Pref;
 import com.eveningoutpost.dexdrip.utilitymodels.SpeechUtil;
-import com.eveningoutpost.dexdrip.utilitymodels.VehicleMode;
 import com.eveningoutpost.dexdrip.xdrip;
 
 import java.text.DecimalFormat;
@@ -51,7 +50,7 @@ public class BgToSpeech implements NamedSliderProcessor {
 
         // TODO As we check for this in new data observer should we only check for ongoing call here?
         // check if speech is enabled and extra check for ongoing call
-        if (!(Pref.getBooleanDefaultFalse(BG_TO_SPEECH_PREF) || VehicleMode.shouldSpeak()) || JoH.isOngoingCall()) {
+        if (!(Pref.getBooleanDefaultFalse(BG_TO_SPEECH_PREF) || JoH.isOngoingCall())) {
             return;
         }
 

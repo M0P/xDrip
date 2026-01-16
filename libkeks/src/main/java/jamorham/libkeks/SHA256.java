@@ -29,8 +29,6 @@ import static java.lang.System.arraycopy;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
-import lombok.val;
-
 public class SHA256 {
 
     private static final int[] K = {
@@ -104,12 +102,12 @@ public class SHA256 {
         final IntBuffer result = IntBuffer.allocate(blockCount * (BLOCK_BYTES / 4));
 
         // copy as much of the message as possible
-        val buf = ByteBuffer.wrap(message);
+        ByteBuffer buf = ByteBuffer.wrap(message);
         for (int i = 0, n = message.length / 4; i < n; ++i) {
             result.put(buf.getInt());
         }
         // copy the remaining bytes (less than 4) and append 1 bit (rest is zero)
-        val remainder = ByteBuffer.allocate(4);
+        ByteBuffer remainder = ByteBuffer.allocate(4);
         remainder.put(buf).put((byte) 0b10000000).rewind();
         result.put(remainder.getInt());
 

@@ -7,14 +7,14 @@ import com.eveningoutpost.dexdrip.HexTestTools;
 
 import org.junit.Test;
 
-import lombok.val;
+import java.util.List;
 
 public class T4ReadTest extends HexTestTools {
 
     @Test
     public void encodeForMtuTest() {
 
-        val list = T4Read.builder().offset(2).length(259).build().encodeForMtu(255);
+        final List<byte[]> list = T4Read.builder().offset(2).length(259).build().encodeForMtu(255);
 
         assertWithMessage("list not null").that(list).isNotNull();
         assertWithMessage("list len").that(list.size()).isEqualTo(2);

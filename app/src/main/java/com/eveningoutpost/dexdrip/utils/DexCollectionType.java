@@ -1,19 +1,19 @@
 package com.eveningoutpost.dexdrip.utils;
 
-import com.eveningoutpost.dexdrip.cgm.glupro.GluProService;
+//import com.eveningoutpost.dexdrip.cgm.glupro.GluProService;
 import com.eveningoutpost.dexdrip.services.DexCollectionService;
-import com.eveningoutpost.dexdrip.services.DexShareCollectionService;
+//import com.eveningoutpost.dexdrip.services.DexShareCollectionService;
 import com.eveningoutpost.dexdrip.services.DoNothingService;
 import com.eveningoutpost.dexdrip.services.G5CollectionService;
 import com.eveningoutpost.dexdrip.services.Ob1G5CollectionService;
 import com.eveningoutpost.dexdrip.services.UiBasedCollector;
-import com.eveningoutpost.dexdrip.services.WifiCollectionService;
+//import com.eveningoutpost.dexdrip.services.WifiCollectionService;
 import com.eveningoutpost.dexdrip.utilitymodels.Pref;
-import com.eveningoutpost.dexdrip.cgm.medtrum.MedtrumCollectionService;
-import com.eveningoutpost.dexdrip.cgm.nsfollow.NightscoutFollowService;
-import com.eveningoutpost.dexdrip.cgm.sharefollow.ShareFollowService;
-import com.eveningoutpost.dexdrip.cgm.webfollow.WebFollowService;
-import com.eveningoutpost.dexdrip.cgm.carelinkfollow.CareLinkFollowService;
+//import com.eveningoutpost.dexdrip.cgm.medtrum.MedtrumCollectionService;
+//import com.eveningoutpost.dexdrip.cgm.nsfollow.NightscoutFollowService;
+//import com.eveningoutpost.dexdrip.cgm.sharefollow.ShareFollowService;
+//import com.eveningoutpost.dexdrip.cgm.webfollow.WebFollowService;
+//import com.eveningoutpost.dexdrip.cgm.carelinkfollow.CareLinkFollowService;
 
 import static com.eveningoutpost.dexdrip.g5model.Ob1G5StateMachine.shortTxId;
 
@@ -22,8 +22,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-
-import lombok.Getter;
 
 /**
  * Created by andy on 01/06/16.
@@ -58,8 +56,7 @@ public enum DexCollectionType {
     LibreReceiver("LibreReceiver"),
     AidexReceiver("AidexReceiver");
 
-    @Getter
-    String internalName;
+    final String internalName;
     private static final Map<String, DexCollectionType> mapToInternalName;
     private static final HashSet<DexCollectionType> usesBluetooth = new HashSet<>();
     private static final HashSet<DexCollectionType> usesBluetoothScan = new HashSet<>();
@@ -109,6 +106,9 @@ public enum DexCollectionType {
         this.internalName = name;
     }
 
+    public String getInternalName() {
+        return internalName;
+    }
 
     public static DexCollectionType getType(String dexCollectionType) {
 
@@ -219,7 +219,7 @@ public enum DexCollectionType {
                 } else {
                     return G5CollectionService.class;
                 }
-            case DexcomShare:
+            /*case DexcomShare:
                 return DexShareCollectionService.class;
             case WifiWixel:
             case Mock:
@@ -240,7 +240,7 @@ public enum DexCollectionType {
             case CLFollow:
                 return CareLinkFollowService.class;
             case GluPro:
-                return GluProService.class;
+                return GluProService.class;*/
             default:
                 return DexCollectionService.class;
         }

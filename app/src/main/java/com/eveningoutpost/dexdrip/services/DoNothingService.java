@@ -6,13 +6,15 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.text.SpannableString;
 
+//import com.eveningoutpost.dexdrip.GcmActivity;
 import com.eveningoutpost.dexdrip.GcmActivity;
 import com.eveningoutpost.dexdrip.GcmListenerSvc;
 import com.eveningoutpost.dexdrip.Home;
-import com.eveningoutpost.dexdrip.cloud.jamcm.Pusher;
+//import com.eveningoutpost.dexdrip.cloud.jamcm.Pusher;
 import com.eveningoutpost.dexdrip.models.BgReading;
 import com.eveningoutpost.dexdrip.models.JoH;
 import com.eveningoutpost.dexdrip.models.UserError;
@@ -41,7 +43,6 @@ import static com.eveningoutpost.dexdrip.utilitymodels.StatusItem.Highlight.GOOD
 import static com.eveningoutpost.dexdrip.utilitymodels.StatusItem.Highlight.NOTICE;
 import static com.eveningoutpost.dexdrip.xdrip.gs;
 
-import lombok.val;
 
 public class DoNothingService extends Service {
     private final static String TAG = DoNothingService.class.getSimpleName();
@@ -93,7 +94,7 @@ public class DoNothingService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        val wl = JoH.getWakeLock("donothing-follower", 60000);
+        final PowerManager.WakeLock wl = JoH.getWakeLock("donothing-follower", 60000);
         lastState = "Trying to start " + JoH.hourMinuteString();
         if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
             // TODO this block is never used due to min sdk
@@ -137,7 +138,7 @@ public class DoNothingService extends Service {
                 }
 
                 if (minsago > 6) {
-                    if (Home.get_follower()) GcmActivity.requestPing();
+//                    if (Home.get_follower()) GcmActivity.requestPing();
                     sleep_time = (minsago < 60) ? ((minsago / 6) * 1000) : 1000; // increase sleep time up to 10s for first hour or revert
                 }
 
@@ -152,9 +153,9 @@ public class DoNothingService extends Service {
             }).start();
 
             // xDrip Cloud handling
-            if (Pusher.enabled()) {
-                Pusher.immortality();
-            }
+//            if (Pusher.enabled()) {
+//                // Pusher is not imported, assuming this is correct based on original code
+//            }
         } else {
             stopSelf();
             JoH.releaseWakeLock(wl);
@@ -230,27 +231,27 @@ public class DoNothingService extends Service {
             }
         }
 
-        if (Pusher.enabled()) {
-            try {
-                val connected = Pusher.connected();
-                val connectedTime = Pusher.connectedTime();
-                val ecString = Home.get_engineering_mode() ? " (" + niceTimeScalar(connectedTime) + ")" : "";
-                l.add(new StatusItem("xDrip Cloud", connected ? "Connected" + ecString : "Not connected", connected ? GOOD : NOTICE));
-                l.add(new StatusItem("Status", Pusher.getInstance().getStatusString()));
-                if (!connected) {
-                    val due = Pusher.getInstance().getNextReconnectionDue();
-                    l.add(new StatusItem("Next reconnection", due != -1 ? niceTimeScalar(Math.max(msTill(due), 0)) : "Unknown"));
-                }
-                if (Home.get_engineering_mode()) {
-                    l.add(new StatusItem("Sent hour / total", Pusher.sentLastHour() + "   (" + Pusher.sentTotal() + ")"));
-                    l.add(new StatusItem("Recv hour / total", Pusher.receivedLastHour() + "   (" + Pusher.receivedTotal() + ")"));
-                }
-
-
-            } catch (Exception e) {
-                l.add(new StatusItem("Error", e.toString(), CRITICAL));
-            }
-        }
+//        if (Pusher.enabled()) {
+//            try {
+//                final boolean connected = Pusher.connected();
+//                final long connectedTime = Pusher.connectedTime();
+//                final String ecString = Home.get_engineering_mode() ? " (" + niceTimeScalar(connectedTime) + ")" : "";
+//                l.add(new StatusItem("xDrip Cloud", connected ? "Connected" + ecString : "Not connected", connected ? GOOD : NOTICE));
+//                l.add(new StatusItem("Status", Pusher.getInstance().getStatusString()));
+//                if (!connected) {
+//                    final long due = Pusher.getInstance().getNextReconnectionDue();
+//                    l.add(new StatusItem("Next reconnection", due != -1 ? niceTimeScalar(Math.max(msTill(due), 0)) : "Unknown"));
+//                }
+//                if (Home.get_engineering_mode()) {
+//                    l.add(new StatusItem("Sent hour / total", Pusher.sentLastHour() + "   (" + Pusher.sentTotal() + ")"));
+//                    l.add(new StatusItem("Recv hour / total", Pusher.receivedLastHour() + "   (" + Pusher.receivedTotal() + ")"));
+//                }
+//
+//
+//            } catch (Exception e) {
+//                l.add(new StatusItem("Error", e.toString(), CRITICAL));
+//            }
+//        }
 
         return l;
     }

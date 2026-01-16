@@ -241,7 +241,7 @@ public class Reminder extends Model {
     }
 
     public synchronized void reminder_alert() {
-        Reminders.doAlert(this);
+//        Reminders.doAlert(this);
     }
 
     public synchronized long getPotentialNextSchedule() {

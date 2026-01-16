@@ -12,8 +12,7 @@ import com.google.gson.GsonBuilder;
 
 import java.util.Collections;
 import java.util.HashMap;
-
-import lombok.val;
+import java.util.List;
 
 /**
  * JamOrHam
@@ -26,7 +25,7 @@ public class ImportAapsProfile {
 
     public static AapsProfile importFromJson(final String json) {
         if (json == null) return null;
-        val pjo = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create().fromJson(json, AapsProfile.class);
+        final AapsProfile pjo = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create().fromJson(json, AapsProfile.class);
         if (pjo != null) {
 
             if (pjo.basal != null) {
@@ -45,7 +44,7 @@ public class ImportAapsProfile {
     public static AapsProfile importFromMap(final HashMap<String, Object> tmap) {
 
         // TODO sanity check mills ?
-        val profileJson = (String) tmap.get("profileJson");
+        final String profileJson = (String) tmap.get("profileJson");
         if (profileJson != null) {
             return importFromJson(profileJson);
         } else {
@@ -55,11 +54,11 @@ public class ImportAapsProfile {
     }
 
     public static void importAndSaveFromMap(final HashMap<String, Object> tmap) {
-        val pjo = importFromMap(tmap);
+        final AapsProfile pjo = importFromMap(tmap);
         if (pjo != null && pjo.looksReasonable()) {
             BasalProfile.save(BasalProfile.getActiveRateName(), consolidate(pjo.getBasalByMinute(), 24));
             if (pjo.usingMgdl() == Unitized.usingMgDl()) {
-                val profile = pjo.getXdripMergedProfileList();
+                final List<?> profile = pjo.getXdripMergedProfileList();
                 if (profile.size() > 0) {
                     ProfileEditor.saveProfileJson(JoH.defaultGsonInstance().toJson(profile));
                 } else {

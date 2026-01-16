@@ -19,7 +19,7 @@ import com.eveningoutpost.dexdrip.models.JoH;
 import com.eveningoutpost.dexdrip.models.UserError;
 import com.eveningoutpost.dexdrip.models.UserError.Log;
 import com.eveningoutpost.dexdrip.NewDataObserver;
-import com.eveningoutpost.dexdrip.services.SyncService;
+//import com.eveningoutpost.dexdrip.services.SyncService;
 import com.eveningoutpost.dexdrip.WidgetUpdateService;
 import com.eveningoutpost.dexdrip.calibrations.PluggableCalibration;
 import com.eveningoutpost.dexdrip.xDripWidget;
@@ -162,7 +162,7 @@ public class BgSendQueue extends Model {
 
             // process the uploader queue
             if (JoH.ratelimit("start-sync-service", 30)) {
-                JoH.startService(SyncService.class);
+                // JoH.startService(SyncService.class);
             }
 
 

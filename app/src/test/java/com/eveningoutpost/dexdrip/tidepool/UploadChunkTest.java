@@ -14,9 +14,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.TimeZone;
-
-import lombok.val;
 
 public class UploadChunkTest extends RobolectricTestWithConfig {
 
@@ -230,19 +229,19 @@ public class UploadChunkTest extends RobolectricTestWithConfig {
     public void setupDb() {
         oldTimeZone = TimeZone.getDefault();
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-        val values = testData.split("\n");
+        final String[] values = testData.split("\n");
         BasalRepository.clearRates();
         assertWithMessage("db test data state okay").that(values.length).isEqualTo(200);
         APStatus.updateDB();
         APStatus.cleanup(0);
-        for (val record : values) {
-            val fields = record.split("\\|");
-            val aps = new APStatus(Long.parseLong(fields[2]), Integer.parseInt(fields[1]), -1d);
+        for (final String record : values) {
+            final String[] fields = record.split("\\|");
+            final APStatus aps = new APStatus(Long.parseLong(fields[2]), Integer.parseInt(fields[1]), -1d);
             //System.out.println(aps.toS());
             aps.save();
         }
 
-        val fl = new ArrayList<Double>();
+        final ArrayList<Double> fl = new ArrayList<Double>();
         fl.add(1.0d);
         BasalProfile.save("1", fl);
     }
@@ -255,30 +254,30 @@ public class UploadChunkTest extends RobolectricTestWithConfig {
 
     @Test
     public void getBasalsTest() {
-        val res = APStatus.latestForGraph(16000, 0, 2651220547453L);
+        final List<APStatus> res = APStatus.latestForGraph(16000, 0, 2651220547453L);
         assertWithMessage("db initial state okay").that(res.size()).isEqualTo(200);
-        val ebas = UploadChunk.getBasals(0, 2651220547453L);
+        final List ebas = UploadChunk.getBasals(0, 2651220547453L);
 
         if (D) {
-            for (val b : ebas) {
+            for (final Object b : ebas) {
                 System.out.println(b.toS());
             }
         }
 
-        val starttime = 1651207381000L + Constants.HOUR_IN_MS;
-        val endtime = 1651211461000L + Constants.HOUR_IN_MS;
+        final long starttime = 1651207381000L + Constants.HOUR_IN_MS;
+        final long endtime = 1651211461000L + Constants.HOUR_IN_MS;
 
-        val ebas2 = UploadChunk.getBasals(starttime, endtime);
+        final List ebas2 = UploadChunk.getBasals(starttime, endtime);
 
         if (D) {
             System.out.println(JoH.dateTimeText(starttime));
             System.out.println(JoH.dateTimeText(endtime));
-            for (val b : ebas2) {
+            for (final Object b : ebas2) {
                 System.out.println(b.toS());
             }
         }
 
-        val json = JoH.defaultGsonInstance().toJson(ebas2);
+        final String json = JoH.defaultGsonInstance().toJson(ebas2);
         assertWithMessage("segment matches expected head/tail slice").that(json).isEqualTo("[{\"deliveryType\":\"automated\",\"duration\":1165333,\"rate\":1.0,\"scheduleName\":\"AAPS\",\"clockDriftOffset\":0,\"conversionOffset\":0,\"deviceTime\":\"2022-04-29T05:43:01\",\"time\":\"2022-04-29T05:43:01.0000000Z\",\"timezoneOffset\":0,\"type\":\"basal\",\"origin\":{\"id\":\"fb89faeb-8b51-359b-9935-63b7d33f0dfc\"}},{\"deliveryType\":\"automated\",\"duration\":299560,\"rate\":0.0,\"scheduleName\":\"AAPS\",\"clockDriftOffset\":0,\"conversionOffset\":0,\"deviceTime\":\"2022-04-29T06:02:26\",\"time\":\"2022-04-29T06:02:26.3330000Z\",\"timezoneOffset\":0,\"type\":\"basal\",\"origin\":{\"id\":\"08e1715a-485e-3151-a34a-9f57318149c8\"}},{\"deliveryType\":\"automated\",\"duration\":601248,\"rate\":1.0,\"scheduleName\":\"AAPS\",\"clockDriftOffset\":0,\"conversionOffset\":0,\"deviceTime\":\"2022-04-29T06:07:25\",\"time\":\"2022-04-29T06:07:25.8930000Z\",\"timezoneOffset\":0,\"type\":\"basal\",\"origin\":{\"id\":\"d754c3bb-fea8-3992-b9e9-3c6d9fdbf475\"}},{\"deliveryType\":\"automated\",\"duration\":1499750,\"rate\":2.5,\"scheduleName\":\"AAPS\",\"clockDriftOffset\":0,\"conversionOffset\":0,\"deviceTime\":\"2022-04-29T06:17:27\",\"time\":\"2022-04-29T06:17:27.1410000Z\",\"timezoneOffset\":0,\"type\":\"basal\",\"origin\":{\"id\":\"d9f5fb5a-bd7e-30a1-99f0-2e66c9a10527\"}},{\"deliveryType\":\"automated\",\"duration\":299434,\"rate\":1.7,\"scheduleName\":\"AAPS\",\"clockDriftOffset\":0,\"conversionOffset\":0,\"deviceTime\":\"2022-04-29T06:42:26\",\"time\":\"2022-04-29T06:42:26.8910000Z\",\"timezoneOffset\":0,\"type\":\"basal\",\"origin\":{\"id\":\"ba1b40eb-bba9-35dd-84fd-f7afe5286bc0\"}},{\"deliveryType\":\"automated\",\"duration\":214675,\"rate\":2.2,\"scheduleName\":\"AAPS\",\"clockDriftOffset\":0,\"conversionOffset\":0,\"deviceTime\":\"2022-04-29T06:47:26\",\"time\":\"2022-04-29T06:47:26.3250000Z\",\"timezoneOffset\":0,\"type\":\"basal\",\"origin\":{\"id\":\"2227b260-664f-3e29-8893-db4532cdb0e3\"}}]");
 
     }

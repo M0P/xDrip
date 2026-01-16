@@ -1,60 +1,71 @@
 package com.eveningoutpost.dexdrip.g5model;
 
+import com.eveningoutpost.dexdrip.models.JoH;
+import com.eveningoutpost.dexdrip.models.UserError;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Locale;
 
-import lombok.Getter;
-import lombok.val;
 
 /**
  * Created by jamorham on 25/11/2016.
  */
 
-
 public class VersionRequest2RxMessage extends BaseMessage {
 
     public static final byte opcode = 0x53;
-    public static final byte opcode2 = 0x52;
+    public static final byte opcode2 = 0x54;
 
-    public int status;
-    public int typicalSensorDays;
-    public int featureBits;
-    public long lifeSeconds;
-    public int warmupSeconds;
-    public int version1;
-    public int version2;
-    @Getter
-    public boolean type2;
+    private int status;
+    private int warmupSeconds;
+    private int hardExpirationDays;
+    private int typicalSensorDays;
+    private boolean type2;
 
+    public int getStatus() {
+        return status;
+    }
+
+    public int getWarmupSeconds() {
+        return warmupSeconds;
+    }
+
+    public int getHardExpirationDays() {
+        return hardExpirationDays;
+    }
+
+    public int getTypicalSensorDays() {
+        return typicalSensorDays;
+    }
+
+    public boolean isType2() {
+        return type2;
+    }
 
     public VersionRequest2RxMessage(byte[] packet) {
-        type2 = packet.length == 9;
-        if (packet.length >= 9) {
-            // TODO check CRC??
+        UserError.Log.d("VR2RX", "Processing: " + JoH.bytesToHex(packet));
+        if (packet.length >= 7) {
             data = ByteBuffer.wrap(packet).order(ByteOrder.LITTLE_ENDIAN);
-            val op = data.get();
+            byte op = data.get();
             status = data.get();
             if (op == opcode) {
-                typicalSensorDays = getUnsignedByte(data);
-                featureBits = getUnsignedShort(data);
-                warmupSeconds = getUnsignedShort(data); // only valid in type 2
-                // 12 more bytes of unknown data
-                // crc
-            }
-            if (op == opcode2) {
-                lifeSeconds = getUnsignedInt(data);
                 warmupSeconds = getUnsignedShort(data);
-                version1 = (int) getUnsignedInt(data);
-                version2 = getUnsignedByte(data);
-                typicalSensorDays =  (int) Math.min(getUnsignedShort(data), lifeSeconds / 86400);
+                hardExpirationDays = getUnsignedShort(data);
+                typicalSensorDays = getUnsignedShort(data);
+                // crc
+            } else if (op == opcode2) {
+                type2 = true;
+                warmupSeconds = getUnsignedShort(data);
+                hardExpirationDays = getUnsignedShort(data);
+                typicalSensorDays = getUnsignedShort(data);
             }
         }
     }
 
     public String toString() {
-        return String.format(Locale.US, "Status: %s / Typical Days: %d / : Feature Bits %d",
-                TransmitterStatus.getBatteryLevel(status).toString(), typicalSensorDays, featureBits);
+        return String.format(Locale.US, "Status: %s / Warmup: %d / Expiration: %d / Typical: %d",
+                TransmitterStatus.getBatteryLevel(status).toString(), warmupSeconds, hardExpirationDays, typicalSensorDays);
     }
 
 }

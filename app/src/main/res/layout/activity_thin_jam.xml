@@ -5,8 +5,6 @@
 
     <data>
 
-        <import type="me.tatarka.bindingcollectionadapter2.LayoutManagers" />
-
         <variable
             name="vm"
             type="com.eveningoutpost.dexdrip.ui.activities.ThinJamActivity.ViewModel" />
@@ -36,7 +34,7 @@
                 android:paddingBottom="10dp"
                 app:itemBinding="@{vm.itemBinding}"
                 app:items="@{vm.items}"
-                app:layoutManager="@{LayoutManagers.linear()}" />
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
             <ImageButton
 
@@ -190,7 +188,7 @@
 
                 <Button
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android_layout_height="wrap_content"
                     android:layout_weight="1"
                     android:onClick="@{() -> vm.doAction(`launchhelp`)}"
                     android:text="Web Help" />

@@ -7,8 +7,6 @@ import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
-import lombok.val;
-
 /**
  * JamOrHam
  *
@@ -31,15 +29,15 @@ public class Util {
     }
 
     public static byte[] arrayAppend(byte[] existing, byte[] addon) {
-        val newLength = existing.length + addon.length;
-        val bigger = Arrays.copyOf(existing, newLength);
+        int newLength = existing.length + addon.length;
+        byte[] bigger = Arrays.copyOf(existing, newLength);
         arraycopy(addon, 0, bigger, existing.length, addon.length);
         return bigger;
     }
 
     public static byte[] arrayReduce(byte[] existing, final int length) {
         if (existing == null) return null;
-        val dest = new byte[length];
+        byte[] dest = new byte[length];
         arraycopy(existing, 0, dest, 0, length);
         return dest;
     }
@@ -51,7 +49,7 @@ public class Util {
     public static byte[] hexStringToByteArray(String str) {
         try {
             str = str.toUpperCase().trim();
-            if (str.length() == 0) return null;
+            if (str.isEmpty()) return null;
             final int len = str.length();
             byte[] data = new byte[len / 2];
             for (int i = 0; i < len; i += 2) {
@@ -68,8 +66,8 @@ public class Util {
     }
 
     public static byte[] getRandomKey() {
-        val keybytes = new byte[16];
-        val sr = new SecureRandom();
+        byte[] keybytes = new byte[16];
+        SecureRandom sr = new SecureRandom();
         sr.nextBytes(keybytes);
         return keybytes;
     }

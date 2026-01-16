@@ -17,8 +17,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
-import lombok.val;
-
 public class SaveCompletedTest extends RobolectricTestWithConfig {
 
     private final boolean d = false;
@@ -31,9 +29,9 @@ public class SaveCompletedTest extends RobolectricTestWithConfig {
     private List<Treatments> getCacheSpec() {
         Treatments.delete_all();
         final List<Treatments> cache = new LinkedList<>();
-        val tx = tsl();
+        final long tx = tsl();
         for (int i = 0; i < 10; i++) {
-            val treatment = Treatments.create(0d, 1d, tx + i, UUID.randomUUID().toString());
+            final Treatments treatment = Treatments.create(0d, 1d, tx + i, UUID.randomUUID().toString());
             treatment.notes = "test";
             cache.add(treatment);
         }
@@ -63,7 +61,7 @@ public class SaveCompletedTest extends RobolectricTestWithConfig {
 
     @Test
     public void isPrimingDoseTest1() {
-        val answers = new SparseArray<Boolean>();
+        final SparseArray<Boolean> answers = new SparseArray<Boolean>();
         answers.put(0, true);
         answers.put(3, true);
         answers.put(6, true);
@@ -72,7 +70,7 @@ public class SaveCompletedTest extends RobolectricTestWithConfig {
 
     @Test
     public void isPrimingDoseTest2() {
-        val answers = new SparseArray<Boolean>();
+        final SparseArray<Boolean> answers = new SparseArray<Boolean>();
         answers.put(0, true);
         verify(answers, getCacheSpec(), 2, 30);
     }

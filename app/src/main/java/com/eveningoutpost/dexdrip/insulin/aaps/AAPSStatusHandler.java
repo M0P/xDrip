@@ -8,7 +8,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import info.nightscout.sdk.localmodel.devicestatus.NSDeviceStatus;
-import lombok.val;
+//import info.nightscout.sdk.localmodel.devicestatus.Pump;
 
 /**
  * JamOrHam
@@ -25,39 +25,39 @@ public class AAPSStatusHandler {
     private static volatile NSDeviceStatus last;
 
     // process and store received json in to object and maintain persistent time limited cache
-    public static void processDeviceStatus(final String json) {
-        synchronized (AAPSStatusHandler.class) {
-            try {
-                last = gson.fromJson(json, NSDeviceStatus.class);
-                Log.d(TAG, "DEBUG: got device status: " + last.toString());
-                if (last != null) {
-                    store.set(json);
-                    val pump = last.getPump();
-                    if (pump != null) {
-                        val r = pump.getReservoir();
-                        if (r != null) {
-                            PumpStatus.setReservoir(r);
-                        }
-                        val b = pump.getBattery();
-                        if (b != null) {
-                            val pc = b.getPercent();
-                            if (pc != null) {
-                                PumpStatus.setBattery(pc);
-                            }
-                        }
-                    }
-                    PumpStatus.syncUpdate();
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Error processing device status: " + e + " json: " + json);
-            }
-        }
-    }
+//    public static void processDeviceStatus(final String json) {
+//        synchronized (AAPSStatusHandler.class) {
+//            try {
+//                last = gson.fromJson(json, NSDeviceStatus.class);
+//                Log.d(TAG, "DEBUG: got device status: " + last.toString());
+//                if (last != null) {
+//                    store.set(json);
+//                    final Pump pump = last.getPump();
+//                    if (pump != null) {
+//                        final Double r = pump.getReservoir();
+//                        if (r != null) {
+//                            PumpStatus.setReservoir(r);
+//                        }
+//                        final Pump.Battery b = pump.getBattery();
+//                        if (b != null) {
+//                            final Integer pc = b.getPercent();
+//                            if (pc != null) {
+//                                PumpStatus.setBattery(pc);
+//                            }
+//                        }
+//                    }
+//                    PumpStatus.syncUpdate();
+//                }
+//            } catch (Exception e) {
+//                Log.e(TAG, "Error processing device status: " + e + " json: " + json);
+//            }
+//        }
+//    }
 
     // get instance either from cache or persistent store if still valid
     public static NSDeviceStatus get() {
         synchronized (AAPSStatusHandler.class) {
-            val json = store.get(); // local copy
+            final String json = store.get(); // local copy
             if (json != null) {
                 if (last == null) {
                     // needs reconstructing

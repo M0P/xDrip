@@ -3,13 +3,10 @@ package com.eveningoutpost.dexdrip.utilitymodels;
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
 
-import lombok.Data;
-
 /**
  * Created by jamorham on 16/03/2018.
  */
 
-@Data
 public class BridgeResponse {
 
     private final LinkedList<ByteBuffer> send;
@@ -20,6 +17,42 @@ public class BridgeResponse {
 
     public BridgeResponse() {
         send = new LinkedList<>();
+    }
+
+    public LinkedList<ByteBuffer> getSend() {
+        return send;
+    }
+
+    public String getError_message() {
+        return error_message;
+    }
+
+    public void setError_message(String error_message) {
+        this.error_message = error_message;
+    }
+
+    public long getDelay() {
+        return delay;
+    }
+
+    public void setDelay(long delay) {
+        this.delay = delay;
+    }
+
+    public boolean isStill_waiting_for_data() {
+        return still_waiting_for_data;
+    }
+
+    public void setStill_waiting_for_data(boolean still_waiting_for_data) {
+        this.still_waiting_for_data = still_waiting_for_data;
+    }
+
+    public boolean isGot_all_data() {
+        return got_all_data;
+    }
+
+    public void setGot_all_data(boolean got_all_data) {
+        this.got_all_data = got_all_data;
     }
 
     public boolean hasError() {
@@ -33,22 +66,21 @@ public class BridgeResponse {
     public boolean shouldDelay() {
         return delay > 0;
     }
-    
+
     public boolean StillWaitingForData() {
         return still_waiting_for_data;
     }
+
     public void SetStillWaitingForData() {
         still_waiting_for_data = true;
     }
-    
+
     public boolean GotAllData() {
         return got_all_data;
     }
-    
+
     public void SetGotAllData() {
         got_all_data = true;
     }
-    
+
 }
-
-

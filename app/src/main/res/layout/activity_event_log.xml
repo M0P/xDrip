@@ -6,8 +6,6 @@
 
     <data>
 
-        <import type="me.tatarka.bindingcollectionadapter2.LayoutManagers" />
-
         <variable
             name="viewModel"
             type="com.eveningoutpost.dexdrip.EventLogActivity.ViewModel" />
@@ -109,7 +107,7 @@
             app:adapter="@{viewModel.adapterChain}"
             app:itemBinding="@{viewModel.itemBinding}"
             app:items="@{viewModel.visible}"
-            app:layoutManager="@{LayoutManagers.linear()}"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintBottom_toTopOf="@+id/event_log_buttons"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

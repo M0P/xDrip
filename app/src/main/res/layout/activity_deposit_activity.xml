@@ -1,12 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:card_view="http://schemas.android.com/tools">
 
     <data>
-
-        <variable
-            name="vm"
-            type="com.eveningoutpost.dexdrip.deposit.DepositActivity.ViewModel" />
 
         <variable
             name="prefs"
@@ -54,8 +51,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="100dp"
                         android:gravity="center"
-                        android:padding="10dp"
-                        android:text="@{vm.statusString, default=`Status message here`}" />
+                        android:padding="10dp" />
 
                 </LinearLayout>
 
@@ -86,8 +82,7 @@
                         android:paddingTop="15dp"
                         android:layout_gravity="center"
                         android:textSize="16sp"
-                        android:fontFamily="monospace"
-                        android:text="@{vm.startTimeString, default=`Start time`}" />
+                        android:fontFamily="monospace" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -102,8 +97,7 @@
                         android:paddingBottom="15dp"
                         android:layout_gravity="center"
                         android:fontFamily="monospace"
-                        android:textSize="16sp"
-                        android:text="@{vm.endTimeString, default=`End time`}" />
+                        android:textSize="16sp" />
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -133,8 +127,7 @@
                         android:gravity="center"
                         android:fontFamily="monospace"
                         android:padding="10dp"
-                        android:textSize="20sp"
-                        android:text="@{vm.serialInfo, default=`Serial Info`}" />
+                        android:textSize="20sp" />
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -149,8 +142,7 @@
                     android:id="@+id/progressBar4"
                     style="?android:attr/progressBarStyle"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:showIfTrue="@{!vm.showButton}" />
+                    android:layout_height="wrap_content" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -161,19 +153,14 @@
                         android:layout_width="200dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-
-                        android:onClick="@{() -> vm.depositButtonG()}"
-                        android:text="Deposit Glucose"
-                        app:showIfTrue="@{vm.showButton}" />
+                        android:text="Deposit Glucose" />
 
                     <Button
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_weight="1"
-                        android:onClick="@{() -> vm.depositButtonT()}"
-                        android:text="Deposit Treatment"
-                        app:showIfTrue="@{vm.showButton}" />
+                        android:text="Deposit Treatment" />
                 </LinearLayout>
 
 
@@ -181,10 +168,7 @@
                     android:layout_width="200dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-
-                    android:onClick="@{() -> vm.resetButton()}"
-                    android:text="!!! RESET !!!"
-                    app:showIfTrue="@{vm.showButton &amp;&amp; prefs.getbool(`engineering_mode`)}" />
+                    android:text="!!! RESET !!!" />
 
             </LinearLayout>
 

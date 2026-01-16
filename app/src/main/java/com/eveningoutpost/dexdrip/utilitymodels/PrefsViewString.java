@@ -1,14 +1,7 @@
 package com.eveningoutpost.dexdrip.utilitymodels;
 
 import androidx.annotation.NonNull;
-
 import com.eveningoutpost.dexdrip.adapters.ObservableArrayMapNoNotify;
-
-/**
- * Created by jamorham on 04/07/2018.
- *
- * Observable map with transparent persistence
- */
 
 public class PrefsViewString extends ObservableArrayMapNoNotify<String, String> {
 
@@ -21,19 +14,21 @@ public class PrefsViewString extends ObservableArrayMapNoNotify<String, String> 
         super.put(name, value);
     }
 
-    @NonNull
     @Override
     public String get(Object key) {
-        String value = super.get(key);
+        if (!(key instanceof String)) return null;
+        final String skey = (String) key;
+
+        String value = super.get(skey);
         if (value == null) {
-            value = getString((String) key);
-            super.putNoNotify((String) key, value);
+            value = getString(skey);
+            super.putNoNotify(skey, value);
         }
         return value;
     }
 
     @Override
-    public String put(String key, String value) {
+    public String put(@NonNull String key, @NonNull String value) {
         String current = super.get(key);
         if (current == null || !current.equals(value)) {
             setString(key, value);
@@ -41,5 +36,20 @@ public class PrefsViewString extends ObservableArrayMapNoNotify<String, String> 
         return value;
     }
 
+    @Override
+    public String remove(Object key) {
+        if (key instanceof String) {
+            // falls du Pref.remove(...) hast, nimm das; sonst wie bisher:
+            Pref.setString((String) key, "");
+        }
+        return super.remove(key);
+    }
 
+    @Override
+    public boolean remove(Object key, Object value) {
+        if (key instanceof String && value instanceof String) {
+            Pref.setString((String) key, "");
+        }
+        return super.remove(key, value);
+    }
 }

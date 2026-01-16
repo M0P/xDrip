@@ -7,7 +7,6 @@ import com.eveningoutpost.dexdrip.models.JoH;
 import com.eveningoutpost.dexdrip.models.UserError;
 import com.eveningoutpost.dexdrip.xdrip;
 
-import lombok.val;
 
 /**
  * Created by jamorham on 01/01/2018.
@@ -125,7 +124,7 @@ public class Pref {
 
     public static String getAsString(final String pref, String def) {
         initializePrefs();
-        val v = getValue(pref);
+        Object v = getValue(pref);
         if (v instanceof Boolean) {
             return Boolean.toString((Boolean) v);
         } else if (v instanceof  String) {

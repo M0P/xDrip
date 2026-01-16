@@ -10,8 +10,6 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 
 import jamorham.keks.util.Log;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * JamOrHam
@@ -32,12 +30,33 @@ public class Context {
     public volatile Packet[] packet = new Packet[4];
     public volatile int sequence;
 
-    @Getter @Setter
     private volatile byte[] partA;
-    @Getter @Setter
     private volatile byte[] partB;
-    @Getter @Setter
     private volatile byte[] partC;
+
+    public byte[] getPartA() {
+        return partA;
+    }
+
+    public void setPartA(byte[] partA) {
+        this.partA = partA;
+    }
+
+    public byte[] getPartB() {
+        return partB;
+    }
+
+    public void setPartB(byte[] partB) {
+        this.partB = partB;
+    }
+
+    public byte[] getPartC() {
+        return partC;
+    }
+
+    public void setPartC(byte[] partC) {
+        this.partC = partC;
+    }
 
     public boolean validateParts() {
         return partA != null && partB != null && partC != null && partA.length > 100 && partB.length > 100 && partC.length > 100;

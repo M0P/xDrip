@@ -9,9 +9,6 @@ import com.eveningoutpost.dexdrip.utilitymodels.Constants;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import lombok.Getter;
-import lombok.val;
-
 
 public class EGlucoseRxMessage2 extends BaseGlucoseRxMessage {
 
@@ -23,8 +20,11 @@ public class EGlucoseRxMessage2 extends BaseGlucoseRxMessage {
     public int age;
     public int info;
 
-    @Getter
     public boolean valid;
+
+    public boolean isValid() {
+        return valid;
+    }
 
     /**
      * JamOrHam
@@ -41,7 +41,7 @@ public class EGlucoseRxMessage2 extends BaseGlucoseRxMessage {
                 status_raw = data.get();
                 timestamp = (int) getUnsignedInt(data);
                 sequence = getUnsignedShort(data);
-                val bogus = getUnsignedShort(data);
+                int bogus = getUnsignedShort(data);
 
                 age = getUnsignedShort(data);
 
@@ -97,7 +97,7 @@ public class EGlucoseRxMessage2 extends BaseGlucoseRxMessage {
     }
 
     public String getRealSessionStartTimeString() {
-        val t = getRealSessionStartTime();
+        Long t = getRealSessionStartTime();
         if (t != null) {
             return JoH.dateTimeText(t);
         } else {
@@ -112,4 +112,3 @@ public class EGlucoseRxMessage2 extends BaseGlucoseRxMessage {
     }
 
 }
-

@@ -20,10 +20,10 @@ import com.eveningoutpost.dexdrip.models.UserError.Log;
 import com.eveningoutpost.dexdrip.utilitymodels.BgSendQueue;
 import com.eveningoutpost.dexdrip.utilitymodels.CalibrationSendQueue;
 import com.eveningoutpost.dexdrip.utilitymodels.IncompatibleApps;
-import com.eveningoutpost.dexdrip.utilitymodels.NightscoutUploader;
+//import com.eveningoutpost.dexdrip.utilitymodels.NightscoutUploader;
 import com.eveningoutpost.dexdrip.utilitymodels.Pref;
 import com.eveningoutpost.dexdrip.utilitymodels.UploaderQueue;
-import com.eveningoutpost.dexdrip.cloud.backup.Backup;
+//import com.eveningoutpost.dexdrip.cloud.backup.Backup;
 import com.eveningoutpost.dexdrip.utils.DatabaseUtil;
 import com.eveningoutpost.dexdrip.utils.Telemetry;
 import com.eveningoutpost.dexdrip.wearintegration.WatchUpdaterService;
@@ -31,7 +31,7 @@ import com.eveningoutpost.dexdrip.xdrip;
 import com.eveningoutpost.dexdrip.utilitymodels.SettingsValidation;
 
 import static com.eveningoutpost.dexdrip.Home.startWatchUpdaterService;
-import static com.eveningoutpost.dexdrip.utilitymodels.UpdateActivity.checkForAnUpdate;
+//import static com.eveningoutpost.dexdrip.utilitymodels.UpdateActivity.checkForAnUpdate;
 
 public class DailyIntentService extends IntentService {
     private final static String TAG = DailyIntentService.class.getSimpleName();
@@ -77,7 +77,7 @@ public class DailyIntentService extends IntentService {
                 }
 
                 try {
-                    Backup.doCompleteBackupIfEnabled();
+//                    Backup.doCompleteBackupIfEnabled();
                 } catch (Exception e) {
                     UserError.Log.e(TAG, "Exception with Backup: " + e);
                 }
@@ -136,22 +136,22 @@ public class DailyIntentService extends IntentService {
                 }
 
                 try {
-                    BluetoothGlucoseMeter.startIfNoRecentData();
+//                    BluetoothGlucoseMeter.startIfNoRecentData();
                 } catch (Exception e) {
                     Log.e(TAG, "DailyIntentService exception on BluetoothGlucoseMeter");
                 }
                 try {
-                    checkForAnUpdate(xdrip.getAppContext());
+//                    checkForAnUpdate(xdrip.getAppContext());
                 } catch (Exception e) {
                     Log.e(TAG, "DailyIntentService exception on checkForAnUpdate ", e);
                 }
                 try {
-                    if (Home.get_master_or_follower()) RollCall.pruneOld(0);
+//                    if (Home.get_master_or_follower()) RollCall.pruneOld(0);
                 } catch (Exception e) {
                     Log.e(TAG, "exception on RollCall prune " + e);
                 }
                 try {
-                    DesertSync.cleanup();
+//                    DesertSync.cleanup();
                 } catch (Exception e) {
                     Log.e(TAG, "Exception cleaning up DesertSync");
                 }
@@ -175,7 +175,7 @@ public class DailyIntentService extends IntentService {
                 }
 
                 try {
-                    NightscoutUploader.notifyInconsistentMultiSiteUpload();
+//                    NightscoutUploader.notifyInconsistentMultiSiteUpload();
                 } catch (Exception e) {
                     Log.e(TAG, "Exception in Nightscout multi site upload failure log: " + e);
                 }

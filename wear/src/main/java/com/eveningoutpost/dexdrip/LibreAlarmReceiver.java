@@ -38,7 +38,6 @@ import java.util.List;
 import static com.eveningoutpost.dexdrip.utilitymodels.Constants.LIBRE_MULTIPLIER;
 import static com.eveningoutpost.dexdrip.xdrip.gs;
 
-import lombok.val;
 
 /**
  * Created by jamorham on 04/09/2016.
@@ -227,7 +226,7 @@ public class LibreAlarmReceiver extends BroadcastReceiver {
     public static void CalculateFromDataTransferObject(ReadingData readingData, boolean use_smoothed_data, boolean use_raw) {
         Log.i(TAG, "CalculateFromDataTransferObject called");
         // insert any recent data we can
-        val segmentation_timeslice = DexCollectionType.getCurrentDeduplicationPeriod();
+        long segmentation_timeslice = DexCollectionType.getCurrentDeduplicationPeriod();
         final List<GlucoseData> mTrend = readingData.trend;
         if (mTrend != null && mTrend.size() > 0) {
             Collections.sort(mTrend);
@@ -289,7 +288,7 @@ public class LibreAlarmReceiver extends BroadcastReceiver {
 
 
     public static void insertFromHistory(final List<GlucoseData> mHistory, final boolean use_raw) {
-        val timeslice = DexCollectionType.getCurrentDeduplicationPeriod();
+        long timeslice = DexCollectionType.getCurrentDeduplicationPeriod();
             if ((mHistory != null) && (mHistory.size() > 1)) {
                 Collections.sort(mHistory);
                 //applyTimeShift(mTrend, shiftx);
@@ -310,7 +309,7 @@ public class LibreAlarmReceiver extends BroadcastReceiver {
                     }
                 }
 
-            val period = DexCollectionType.getCurrentSamplePeriod();
+            long period = DexCollectionType.getCurrentSamplePeriod();
 
                 //ConstrainedSplineInterpolator splineInterp = new ConstrainedSplineInterpolator();
                 final SplineInterpolator splineInterp = new SplineInterpolator();
@@ -359,4 +358,3 @@ public class LibreAlarmReceiver extends BroadcastReceiver {
         return 0;
     }
 }
-

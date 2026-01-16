@@ -56,13 +56,13 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
-import lombok.val;
 
 @Table(name = "BgReadings", id = BaseColumns._ID)
 public class BgReading extends Model implements ShareUploadableBg {
@@ -840,11 +840,11 @@ public class BgReading extends Model implements ShareUploadableBg {
     }
 
     public static List<BgReading> latestDeduplicateToPeriod(final int number, final boolean is_follower, final long period) {
-        val input = latest(number * 6, is_follower);
+        List<BgReading> input = latest(number * 6, is_follower);
         if (input == null) return null;
-        val output = new ArrayList<BgReading>(number);
+        ArrayList<BgReading> output = new ArrayList<BgReading>(number);
         long last = -1L;
-        for (val item : input) {
+        for (BgReading item : input) {
             if (Math.abs(item.timestamp - last) >= period) {
                 output.add(item);
                 if (output.size() >= number) break;
@@ -1328,7 +1328,7 @@ public class BgReading extends Model implements ShareUploadableBg {
         // TODO sanity check data!
 
         if ((value <= 0) || (timestamp <= 0)) {
-            Log.e(TAG, "Invalid data fed to InsertFromInt");
+            Log.e(TAG, "Invalid data fed to InsertFromInt " + value + " " + JoH.dateTimeText(timestamp));
             return;
         }
 
@@ -1346,6 +1346,8 @@ public class BgReading extends Model implements ShareUploadableBg {
             bgr.raw_data = value;
             bgr.age_adjusted_raw_value = value;
             bgr.filtered_data = value;
+
+            bgr.source_info = "";
 
             final Sensor forced_sensor = Sensor.currentSensor();
             if (forced_sensor != null) {
@@ -1834,10 +1836,8 @@ public class BgReading extends Model implements ShareUploadableBg {
             final long since = now - last.get(0).timestamp;
             // only process if last reading <10 mins
             if (since < 600000) {
-                // check if exceeding high
-                if (last.get(0).calculated_value >
-                        Home.convertToMgDlIfMmol(
-                                JoH.tolerantParseDouble(Pref.getString("highValue", "170")))) {
+                // check if exceeding persistent high threshold
+                if (last.get(0).calculated_value > persistentHighThreshold) {
 
                     final double this_slope = last.get(0).calculated_value_slope * 60000;
                     //Log.d(TAG, "CheckForPersistentHigh: Slope: " + JoH.qs(this_slope));
@@ -2147,7 +2147,7 @@ public class BgReading extends Model implements ShareUploadableBg {
     public static Long getTimeSinceLastReading() {
         BgReading bgReading = BgReading.last();
         if (bgReading != null) {
-            return (new Date().getTime() - bgReading.timestamp);
+            return (new Date().getTime() - bgReading.timestamp); // TODO should be tsl
         }
         return (long) 0;
     }

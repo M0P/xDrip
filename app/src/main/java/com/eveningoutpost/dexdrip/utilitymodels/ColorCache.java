@@ -10,8 +10,6 @@ import com.eveningoutpost.dexdrip.xdrip;
 
 import java.util.EnumMap;
 
-import lombok.Getter;
-
 /**
  * Created by jamorham on 11/03/2016.
  */
@@ -101,11 +99,14 @@ public class ColorCache {
         color_low_predicted_critical_note("color_low_predicted_critical_note"),
         ;
 
-        @Getter
-        String internalName;
+        final String internalName;
 
         X(String name) {
             this.internalName = name;
+        }
+
+        public String getInternalName() {
+            return internalName;
         }
     }
 }

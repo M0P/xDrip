@@ -3,14 +3,11 @@ package com.eveningoutpost.dexdrip.g5model;
 import static com.eveningoutpost.dexdrip.models.JoH.tsl;
 
 import com.eveningoutpost.dexdrip.models.JoH;
-import com.eveningoutpost.dexdrip.models.UserError;
 import com.eveningoutpost.dexdrip.utilitymodels.Constants;
+import com.eveningoutpost.dexdrip.models.UserError;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-
-import lombok.Getter;
-import lombok.val;
 
 
 public class EGlucoseRxMessage2 extends BaseGlucoseRxMessage {
@@ -20,11 +17,9 @@ public class EGlucoseRxMessage2 extends BaseGlucoseRxMessage {
 
     private Integer predicted_glucose;
 
-    @Getter
     public int age;
     public int info;
 
-    @Getter
     public boolean valid;
 
     /**
@@ -42,7 +37,7 @@ public class EGlucoseRxMessage2 extends BaseGlucoseRxMessage {
                 status_raw = data.get();
                 timestamp = (int) getUnsignedInt(data);
                 sequence = getUnsignedShort(data);
-                val bogus = getUnsignedShort(data);
+                final int bogus = getUnsignedShort(data);
 
                 age = getUnsignedShort(data);
 
@@ -81,6 +76,14 @@ public class EGlucoseRxMessage2 extends BaseGlucoseRxMessage {
 
     }
 
+    public int getAge() {
+        return age;
+    }
+
+    public boolean isValid() {
+        return valid;
+    }
+
     public Integer getPredictedGlucose() {
         return predicted_glucose;
     }
@@ -102,7 +105,7 @@ public class EGlucoseRxMessage2 extends BaseGlucoseRxMessage {
     }
 
     public String getRealSessionStartTimeString() {
-        val t = getRealSessionStartTime();
+        final Long t = getRealSessionStartTime();
         if (t != null) {
             return JoH.dateTimeText(t);
         } else {
@@ -117,4 +120,3 @@ public class EGlucoseRxMessage2 extends BaseGlucoseRxMessage {
     }
 
 }
-

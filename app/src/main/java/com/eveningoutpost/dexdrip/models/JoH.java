@@ -25,6 +25,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.content.res.AssetFileDescriptor;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -119,7 +120,6 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 
 import io.sentry.Sentry;
-import lombok.val;
 
 /**
  * Created by jamorham on 06/01/16.
@@ -430,9 +430,9 @@ public class JoH {
 
     public static String readLine(final InputStream stream) {
         try {
-            val buffer = new byte[512];
+            byte[] buffer = new byte[512];
             for (int i = 0; i < buffer.length; i++) {
-                val b = stream.read();
+                int b = stream.read();
                 if (b == -1) return null;
                 if (b == '\n') {
                     return new String(buffer, 0, i, StandardCharsets.UTF_8);
@@ -469,11 +469,11 @@ public class JoH {
     public static String getFieldFromURI(final String column, final Uri contentUri) {
         try {
             final String[] projection = { column };
-            val loader = new CursorLoader(xdrip.getAppContext(), contentUri, projection, null, null, null);
-            val cursor = loader.loadInBackground();
-            val column_index = cursor.getColumnIndexOrThrow(column);
+            CursorLoader loader = new CursorLoader(xdrip.getAppContext(), contentUri, projection, null, null, null);
+            Cursor cursor = loader.loadInBackground();
+            int column_index = cursor.getColumnIndexOrThrow(column);
             cursor.moveToFirst();
-            val result = cursor.getString(column_index);
+            String result = cursor.getString(column_index);
             cursor.close();
             return result;
         } catch (Exception e) {
@@ -904,7 +904,7 @@ public class JoH {
             UserError.Log.wtf(TAG, "File does not exist: " + file.getAbsolutePath()+ " using fallback sound");
             return Uri.parse("content://settings/system/notification_sound");
         }
-        val context = xdrip.getAppContext();
+        Context context = xdrip.getAppContext();
         return FileProvider.getUriForFile(
                 context,
                 context.getPackageName() + ".provider",
@@ -913,7 +913,7 @@ public class JoH {
     }
 
     public static String normalizeNumber(final String str) {
-        val normalized = new StringBuilder();
+        StringBuilder normalized = new StringBuilder();
 
         for (char ch : str.toCharArray()) {
             if (Character.isDigit(ch)) {
@@ -1263,7 +1263,7 @@ public class JoH {
                 mp.setDataSource(context, uri);
             } else {
                 UserError.Log.d(TAG, "Setting new style uri: " + uri);
-                val pfd = context.getContentResolver().openFileDescriptor(uri, "r");
+                android.os.ParcelFileDescriptor pfd = context.getContentResolver().openFileDescriptor(uri, "r");
                 mp.setDataSource(pfd.getFileDescriptor());
                 pfd.close();
             }
@@ -1482,12 +1482,12 @@ public class JoH {
     }
 
     public static Bitmap getBitmapFromView(final View root, final int width, final int height) {
-        val params = new ViewGroup.LayoutParams(width, height);
+        ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(width, height);
         root.setLayoutParams(params);
-        val measuredWidth = View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY);
-        val measuredHeight = View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY);
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        val canvas = new Canvas(bitmap);
+        int measuredWidth = View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY);
+        int measuredHeight = View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY);
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
         canvas.drawColor(Color.WHITE);
         root.destroyDrawingCache();
         root.measure(measuredWidth, measuredHeight);

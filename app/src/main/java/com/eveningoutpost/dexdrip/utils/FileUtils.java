@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import lombok.val;
 
 public class FileUtils {
 
@@ -64,7 +63,7 @@ public class FileUtils {
     }
 
     public static byte[] readFromFile(final String TAG, final String fileName) {
-        val fl = new File(fileName);
+        final File fl = new File(fileName);
         return readFromFile(TAG, fl);
     }
 
@@ -73,9 +72,9 @@ public class FileUtils {
             UserError.Log.e(TAG, "File does not exist " + fl.getName());
             return null;
         }
-        val data = new byte[(int) fl.length()];
+        final byte[] data = new byte[(int) fl.length()];
         try {
-            val f = new FileInputStream(fl);
+            final FileInputStream f = new FileInputStream(fl);
             int size = f.read(data);
             f.close();
             if (size != data.length) {

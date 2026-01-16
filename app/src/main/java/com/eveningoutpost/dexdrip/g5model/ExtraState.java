@@ -1,7 +1,5 @@
 package com.eveningoutpost.dexdrip.g5model;
 
-import lombok.val;
-
 /**
  * JamOrHam
  */
@@ -17,7 +15,7 @@ public class ExtraState {
 
     public static ExtraState parse(byte state) {
 
-        val es = new ExtraState();
+        ExtraState es = new ExtraState();
         es.p = (state & 0x01) != 0;
         es.t = (state & 0x02) != 0;
         es.l = (state & 0x04) != 0;

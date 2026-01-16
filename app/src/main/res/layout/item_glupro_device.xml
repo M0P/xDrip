@@ -5,14 +5,6 @@
 
     <data>
 
-        <variable
-            name="device"
-            type="lwld.glucose.profile.iface.Device" />
-
-        <variable
-            name="viewModel"
-            type="com.eveningoutpost.dexdrip.cgm.glupro.ViewModel" />
-
         <import type="android.view.View" />
     </data>
 
@@ -35,7 +27,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginLeft="4dp"
                 android:gravity="center_vertical"
-                android:text="@{device.name, default=`Device name`}"
+                android:text="Device name"
                 android:textSize="16sp"
                 android:layout_weight="1"
                 android:textStyle="bold" />
@@ -45,7 +37,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginLeft="4dp"
-                android:text="@{device.address, default=`Device address`}"
+                android:text="Device address"
                 android:textSize="16sp"
                 android:visibility="gone"
                 android:textStyle="bold" />
@@ -54,7 +46,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
-                android:onClick="@{() -> viewModel.select(device.name, device.address)}"
                 android:text="Connect" />
 
         </LinearLayout>

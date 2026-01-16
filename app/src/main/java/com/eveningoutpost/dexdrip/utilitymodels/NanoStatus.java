@@ -18,7 +18,7 @@ import android.util.Log;
 
 import com.eveningoutpost.dexdrip.BuildConfig;
 import com.eveningoutpost.dexdrip.g5model.SensorDays;
-import com.eveningoutpost.dexdrip.GcmActivity;
+//import com.eveningoutpost.dexdrip.GcmActivity;
 import com.eveningoutpost.dexdrip.Home;
 import com.eveningoutpost.dexdrip.models.JoH;
 import com.eveningoutpost.dexdrip.models.UserError;
@@ -28,8 +28,6 @@ import com.eveningoutpost.dexdrip.utils.DexCollectionType;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
-import lombok.Setter;
-import lombok.val;
 
 import static com.eveningoutpost.dexdrip.models.JoH.emptyString;
 
@@ -46,8 +44,13 @@ public class NanoStatus {
     private final SpannableString empty = new SpannableString("");
     private volatile boolean running = false;
     private volatile Thread myThread;
-    @Setter
+
     private Runnable doveTail;
+
+    public void setDoveTail(Runnable doveTail) {
+        this.doveTail = doveTail;
+    }
+
     public final ObservableField<String> watch = new ObservableField<>();
     public final ObservableField<SpannableString> color_watch = new ObservableField<>();
 
@@ -161,7 +164,7 @@ public class NanoStatus {
                 }
 
             } catch (Exception e) {
-              val exceptionString = e + " " + service.getSimpleName();
+              final String exceptionString = e + " " + service.getSimpleName();
                 if (!exceptionString.equals(lastException)) {
                     Log.d(TAG, "reflection exception: " + exceptionString);
                     lastException = exceptionString;
@@ -188,8 +191,9 @@ public class NanoStatus {
                 if (rateLimit == 0 || JoH.pratelimit("keep-follower-updated" + prefix, rateLimit)) {
                     final String serialized = SpannableSerializer.serializeSpannableString(nanoStatusColor(prefix.equals("") ? "collector" : prefix));
                     if (PersistentStore.updateStringIfDifferent(LAST_COLLECTOR_STATUS_STORE + prefix, serialized)) {
-                        Inevitable.task("update-follower-to-nanostatus" + prefix, 500, () ->
-                                GcmActivity.sendNanoStatusUpdate(prefix, PersistentStore.getString(LAST_COLLECTOR_STATUS_STORE + prefix)));
+                        // Need to manually resolve GcmActivity to use it
+                        // Inevitable.task("update-follower-to-nanostatus" + prefix, 500, () ->
+                        //        GcmActivity.sendNanoStatusUpdate(prefix, PersistentStore.getString(LAST_COLLECTOR_STATUS_STORE + prefix)));
                     }
                 } else {
                     UserError.Log.d(TAG, "Ratelimiting keepFollowerUpdated check on " + prefix + " @ " + rateLimit);
@@ -219,7 +223,7 @@ public class NanoStatus {
 
         // TODO apply timeout?
         try {
-            val result = PersistentStore.getString(REMOTE_COLLECTOR_STATUS_STORE + prefix);
+            final String result = PersistentStore.getString(REMOTE_COLLECTOR_STATUS_STORE + prefix);
             if (emptyString(result)) return new SpannableString("");
             return SpannableSerializer.unserializeSpannableString(result);
         } catch (Exception e) {

@@ -8,7 +8,6 @@ import com.eveningoutpost.dexdrip.xdrip;
 
 import java.io.File;
 
-import lombok.val;
 
 /**
  * JamOrHam
@@ -39,21 +38,21 @@ public class Cache {
 
     private static String checkPath(final String path, final PluginDef def, final boolean erase) {
         try {
-            val f = new File(path, def.name + ".dex");
+            File f = new File(path, def.name + ".dex");
             if (f.exists()) {
                 if (erase) {
                     f.delete();
                     return null;
                 }
-                val fs = new File(path, def.name + ".sig");
+                File fs = new File(path, def.name + ".sig");
                 if (fs.exists()) {
-                    val fv = new File(path, def.name + ".ver");
+                    File fv = new File(path, def.name + ".ver");
                     if (fv.exists()) {
-                        val v1 = new String(readFromFile(TAG, fv));
+                        String v1 = new String(readFromFile(TAG, fv));
                         if (def.version.equals(v1)) {
-                            val b1 = readFromFile(TAG, f);
-                            val b2 = readFromFile(TAG, fs);
-                            val ok = Verify.verify(b1, b2);
+                            byte[] b1 = readFromFile(TAG, f);
+                            byte[] b2 = readFromFile(TAG, fs);
+                            boolean ok = Verify.verify(b1, b2);
                             if (!ok) {
                                 Log.e(TAG, "Failed local verification " + path + " " + def.name);
                                 return null;
@@ -76,21 +75,21 @@ public class Cache {
     }
 
     private static String[] getPaths() {
-        val appDir = xdrip.getAppContext().getFilesDir().getPath();
+        String appDir = xdrip.getAppContext().getFilesDir().getPath();
         return new String[]{appDir};
     }
 
     public static String getPath(final PluginDef def) {
-        for (val c : getPaths()) {
-            val r = checkPath(c, def, false);
+        for (String c : getPaths()) {
+            String r = checkPath(c, def, false);
             if (r != null) return r;
         }
         return null;
     }
 
     public static synchronized void erase(final PluginDef def) {
-        for (val c : getPaths()) {
-            val r = checkPath(c, def, true);
+        for (String c : getPaths()) {
+            String r = checkPath(c, def, true);
         }
         Loader.clear();
     }

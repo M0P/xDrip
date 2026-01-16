@@ -38,7 +38,7 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 
-import com.eveningoutpost.dexdrip.GcmActivity;
+//import com.eveningoutpost.dexdrip.GcmActivity;
 import com.eveningoutpost.dexdrip.Home;
 import com.eveningoutpost.dexdrip.importedlibraries.usbserial.util.HexDump;
 import com.eveningoutpost.dexdrip.models.ActiveBluetoothDevice;
@@ -1840,7 +1840,7 @@ public class DexCollectionService extends Service implements BtCallBack {
                         Log.v(TAG, "setSerialDataToTransmitterRawData: Creating TransmitterData at " + timestamp);
                         processNewTransmitterData(TransmitterData.create(buffer, len, timestamp), timestamp);
                         if (Home.get_master())
-                            GcmActivity.sendBridgeBattery(Pref.getInt("bridge_battery", -1));
+//                            GcmActivity.sendBridgeBattery(Pref.getInt("bridge_battery", -1));
                         CheckBridgeBattery.checkBridgeBattery();
                     }
                 }

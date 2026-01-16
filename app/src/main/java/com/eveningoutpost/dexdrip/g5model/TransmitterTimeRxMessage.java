@@ -5,18 +5,13 @@ import com.eveningoutpost.dexdrip.models.JoH;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import lombok.Getter;
-
 /**
  * Created by joeginley on 3/28/16.
  */
 public class TransmitterTimeRxMessage extends BaseMessage {
     public static final byte opcode = 0x25;
-    @Getter
     private TransmitterStatus status;
-    @Getter
     private int currentTime;
-    @Getter
     private int sessionStartTime;
 
     public TransmitterTimeRxMessage(byte[] packet) {
@@ -30,6 +25,18 @@ public class TransmitterTimeRxMessage extends BaseMessage {
                 // TODO more bytes after this?
             }
         }
+    }
+
+    public TransmitterStatus getStatus() {
+        return status;
+    }
+
+    public int getCurrentTime() {
+        return currentTime;
+    }
+
+    public int getSessionStartTime() {
+        return sessionStartTime;
     }
 
     public boolean sessionInProgress() {

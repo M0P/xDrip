@@ -2,18 +2,25 @@ package com.eveningoutpost.dexdrip.g5model;
 
 import com.eveningoutpost.dexdrip.utilitymodels.PersistentStore;
 
-import lombok.Getter;
-
 public class G6CalibrationParameters {
 
     public static final String PREF_CURRENT_CODE = "G6-Current-Sensor-Code";
 
-    @Getter
     private final String code;
-    @Getter
     private final int paramA;
-    @Getter
     private final int paramB;
+
+    public String getCode() {
+        return code;
+    }
+
+    public int getParamA() {
+        return paramA;
+    }
+
+    public int getParamB() {
+        return paramB;
+    }
 
 
     public G6CalibrationParameters(String code) {

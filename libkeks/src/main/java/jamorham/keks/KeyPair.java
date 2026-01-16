@@ -16,9 +16,6 @@ import java.math.BigInteger;
 import java.security.PrivateKey;
 
 import jamorham.keks.util.Log;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
 
 /**
  * JamOrHam
@@ -26,25 +23,35 @@ import lombok.val;
  * KeyPair data holder
  */
 
-@RequiredArgsConstructor
 public class KeyPair {
 
-    @Getter
     public final BigInteger privateKey;
-    @Getter
     public final ECPoint publicKey;
 
+    public KeyPair(BigInteger privateKey, ECPoint publicKey) {
+        this.privateKey = privateKey;
+        this.publicKey = publicKey;
+    }
+
+    public BigInteger getPrivateKey() {
+        return privateKey;
+    }
+
+    public ECPoint getPublicKey() {
+        return publicKey;
+    }
+
     public KeyPair(final byte[] publicBytes, final byte[] privateBytes) throws IOException {
-        val keyFactorySpi = new KeyFactorySpi.EC();
+        KeyFactorySpi.EC keyFactorySpi = new KeyFactorySpi.EC();
         this.publicKey = ((BCECPublicKey) keyFactorySpi.generatePublic(SubjectPublicKeyInfo.getInstance(publicBytes))).getQ();
         this.privateKey = new BigInteger(((BCECPrivateKey) keyFactorySpi.generatePrivate(PrivateKeyInfo.getInstance(privateBytes))).getD().toString());
     }
 
     public KeyPair() {
         try {
-            val keyPairGenerator = new KeyPairGeneratorSpi.EC();
+            KeyPairGeneratorSpi.EC keyPairGenerator = new KeyPairGeneratorSpi.EC();
             keyPairGenerator.initialize(curveSpec);
-            val keyPair = keyPairGenerator.genKeyPair();
+            java.security.KeyPair keyPair = keyPairGenerator.genKeyPair();
             publicKey = ((BCECPublicKey)keyPair.getPublic()).getQ();
             privateKey = ((BCECPrivateKey)keyPair.getPrivate()).getD();
         } catch (Exception e) {
@@ -67,7 +74,7 @@ public class KeyPair {
 
     public static PrivateKey fromBytes(byte[] privateBytes) {
         try {
-            val ecKeyFac = new KeyFactorySpi.EC();
+            KeyFactorySpi.EC ecKeyFac = new KeyFactorySpi.EC();
             return ecKeyFac.generatePrivate(PrivateKeyInfo.getInstance(privateBytes));
         } catch (Exception e) {
             Log.l("Failure to generate Key from bytes array");

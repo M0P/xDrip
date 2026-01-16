@@ -25,7 +25,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
 
-import lombok.val;
+//import lombok.val;
 
 public class BitmapUtil {
 
@@ -203,13 +203,13 @@ public class BitmapUtil {
 
     public static Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
         if (bm == null) return null;
-        val width = bm.getWidth();
-        val height = bm.getHeight();
-        val scaleWidth = ((float) newWidth) / width;
-        val scaleHeight = ((float) newHeight) / height;
-        val matrix = new Matrix();
+        int width = bm.getWidth();
+        int height = bm.getHeight();
+        float scaleWidth = ((float) newWidth) / width;
+        float scaleHeight = ((float) newHeight) / height;
+        Matrix matrix = new Matrix();
         matrix.postScale(scaleWidth, scaleHeight);
-        val resizedBitmap = Bitmap.createBitmap(bm, 0, 0, width, height, matrix, false);
+        Bitmap resizedBitmap = Bitmap.createBitmap(bm, 0, 0, width, height, matrix, false);
         bm.recycle();
         return resizedBitmap;
     }

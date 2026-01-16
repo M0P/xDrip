@@ -14,7 +14,7 @@ import org.robolectric.shadows.ShadowSystemClock;
 
 import java.time.Duration;
 
-import lombok.val;
+//import lombok.val;
 
 @Config(instrumentedPackages = {"com.eveningoutpost.dexdrip.models.JoH"})
 public class PersistTest extends RobolectricTestWithConfig {
@@ -22,14 +22,14 @@ public class PersistTest extends RobolectricTestWithConfig {
     @Test
     public void testTimeoutString() {
 
-        val PREF_NAME = "TEST_TIMEOUT_STRING";
-        val testString = "Hello world";
+        String PREF_NAME = "TEST_TIMEOUT_STRING";
+        String testString = "Hello world";
 
         // setup
         PersistentStore.removeItem(PREF_NAME);
         ShadowSystemClock.advanceBy(Duration.ofHours(100));
 
-        val store =
+        Persist.StringTimeout store =
                 new Persist.StringTimeout(PREF_NAME, Constants.MINUTE_IN_MS * 21);
 
         assertWithMessage("Time not zero").that(JoH.tsl()).isGreaterThan(Constants.HOUR_IN_MS);
@@ -53,14 +53,14 @@ public class PersistTest extends RobolectricTestWithConfig {
     @Test
     public void testTimeoutDouble() {
 
-        val PREF_NAME = "TEST_TIMEOUT_DOUBLE";
-        val testDouble = Double.valueOf(123.123);
+        String PREF_NAME = "TEST_TIMEOUT_DOUBLE";
+        Double testDouble = Double.valueOf(123.123);
 
         // setup
         PersistentStore.removeItem(PREF_NAME);
         ShadowSystemClock.advanceBy(Duration.ofHours(100));
 
-        val store =
+        Persist.DoubleTimeout store =
                 new Persist.DoubleTimeout(PREF_NAME, Constants.MINUTE_IN_MS * 21);
 
         assertWithMessage("Time not zero").that(JoH.tsl()).isGreaterThan(Constants.HOUR_IN_MS);

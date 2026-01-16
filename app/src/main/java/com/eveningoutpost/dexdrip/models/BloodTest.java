@@ -10,9 +10,9 @@ import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
 import com.activeandroid.util.SQLiteUtils;
 import com.eveningoutpost.dexdrip.AddCalibration;
-import com.eveningoutpost.dexdrip.glucosemeter.GlucoseReadingRx;
+//import com.eveningoutpost.dexdrip.glucosemeter.GlucoseReadingRx;
 import com.eveningoutpost.dexdrip.Home;
-import com.eveningoutpost.dexdrip.services.SyncService;
+//import com.eveningoutpost.dexdrip.services.SyncService;
 import com.eveningoutpost.dexdrip.utilitymodels.BgGraphBuilder;
 import com.eveningoutpost.dexdrip.utilitymodels.Constants;
 import com.eveningoutpost.dexdrip.utilitymodels.PersistentStore;
@@ -80,7 +80,7 @@ public class BloodTest extends Model {
     public String uuid;
 
 
-    public GlucoseReadingRx glucoseReadingRx;
+//    public GlucoseReadingRx glucoseReadingRx;
 
     // patches and saves
     public Long saveit() {
@@ -162,7 +162,7 @@ public class BloodTest extends Model {
             bt.source = source;
             bt.saveit();
             if (UploaderQueue.newEntry("insert", bt) != null) {
-                SyncService.startSyncService(3000); // sync in 3 seconds
+//                SyncService.startSyncService(3000); // sync in 3 seconds
             }
 
             if (Pref.getBooleanDefaultFalse("bluetooth_meter_for_calibrations_auto")) {
@@ -204,7 +204,7 @@ public class BloodTest extends Model {
         Log.d(TAG, "pushTreatmentSyncToWatch Add treatment to UploaderQueue.");
         if (Pref.getBooleanDefaultFalse("wear_sync")) {
             if (UploaderQueue.newEntryForWatch(is_new ? "insert" : "update", bt) != null) {
-                SyncService.startSyncService(3000); // sync in 3 seconds
+//                SyncService.startSyncService(3000); // sync in 3 seconds
             }
         }
     }
@@ -330,7 +330,7 @@ public class BloodTest extends Model {
             if (is_new) { // cannot handle updates yet
                 if (UploaderQueue.newEntry(is_new ? "insert" : "update", bt) != null) {
                     if (JoH.quietratelimit("start-sync-service", 5)) {
-                        SyncService.startSyncService(3000); // sync in 3 seconds
+//                        SyncService.startSyncService(3000); // sync in 3 seconds
                     }
                 }
             }

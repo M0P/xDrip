@@ -1,9 +1,10 @@
 package com.eveningoutpost.dexdrip.g5model;
 
 
+import android.content.Context;
 import android.text.SpannableString;
 
-import com.eveningoutpost.dexdrip.cgm.glupro.GluProService;
+//import com.eveningoutpost.dexdrip.cgm.glupro.GluProService;
 import com.eveningoutpost.dexdrip.models.Sensor;
 import com.eveningoutpost.dexdrip.R;
 import com.eveningoutpost.dexdrip.utilitymodels.Constants;
@@ -19,8 +20,6 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Locale;
 
-import lombok.Getter;
-import lombok.val;
 
 import static com.eveningoutpost.dexdrip.g5model.FirmwareCapability.isDeviceAlt2;
 import static com.eveningoutpost.dexdrip.g5model.Ob1G5StateMachine.getFirmwareXDetails;
@@ -58,17 +57,19 @@ public class SensorDays {
 
     private static final HashMap<String, SensorDays> cache = new HashMap<>();
 
-    @Getter
     private long period = UNKNOWN;
-    @Getter
     private long warmupMs = 2 * HOUR_IN_MS;
     private long created = 0;
     private int strategy = 0;
 
+    public long getPeriod() { return period; }
+    public long getWarmupMs() { return warmupMs; }
+
+
     // load current config and compute
     public static SensorDays get() {
-        val type = getDexCollectionType();
-        val tx_id = getTransmitterID();
+        final DexCollectionType type = getDexCollectionType();
+        final String tx_id = getTransmitterID();
         return get(type, tx_id);
     }
 
@@ -78,10 +79,10 @@ public class SensorDays {
         if (type == null) type = None;  // obscure workaround
 
         // get cached result
-        val result = cache.get(type + tx_id);
+        final SensorDays result = cache.get(type + tx_id);
         if (result != null && result.cacheValid()) return result;
 
-        val ths = new SensorDays();
+        final SensorDays ths = new SensorDays();
 
         if (hasLibre(type)) {
             String libreVersion = PersistentStore.getString("LibreVersion");
@@ -94,7 +95,7 @@ public class SensorDays {
 
         } else if (hasDexcomRaw(type)) {
             ths.strategy = USE_DEXCOM_STRATEGY;
-            val vr2 = (VersionRequest2RxMessage)
+            final VersionRequest2RxMessage vr2 = (VersionRequest2RxMessage)
                     getFirmwareXDetails(tx_id, 2);
             if (vr2 != null) {
                 ths.period = DAY_IN_MS * vr2.typicalSensorDays;
@@ -105,7 +106,7 @@ public class SensorDays {
                     ths.period = DAY_IN_MS * 7; // G5
                 }
             }
-            val vr3 = (VersionRequest2RxMessage) getFirmwareXDetails(tx_id, 3);
+            final VersionRequest2RxMessage vr3 = (VersionRequest2RxMessage) getFirmwareXDetails(tx_id, 3);
             if (vr3 != null) {
                 ths.warmupMs = Math.min(Constants.SECOND_IN_MS * vr3.warmupSeconds, 2 * HOUR_IN_MS);
             } else {
@@ -121,12 +122,14 @@ public class SensorDays {
                 ths.period = DAY_IN_MS * 15 + HOUR_IN_MS * 12;
             }
 
-        } else if (type == GluPro) {
-            ths.strategy = USE_GLUPRO_STRATEGY;
-            ths.period = GluProService.getRunTime();
-            ths.warmupMs = HOUR_IN_MS;
-
-        } else {
+        } else
+//            if (type == GluPro) {
+//            ths.strategy = USE_GLUPRO_STRATEGY;
+//            ths.period = com.eveningoutpost.dexdrip.cgm.glupro.GluPro.getRunTime();
+//            ths.warmupMs = HOUR_IN_MS;
+//
+//        } else
+        {
             // unknown type
         }
         ths.created = tsl();
@@ -157,7 +160,7 @@ public class SensorDays {
 
     private long getLibreStart() {
         try {
-            val age_ms = getLibreAgeMs();
+            final long age_ms = getLibreAgeMs();
             if (age_ms > 0) {
                 return tsl() - age_ms;
             } else {
@@ -172,10 +175,10 @@ public class SensorDays {
         switch (strategy) {
             case USE_DEXCOM_STRATEGY:
                 return getDexcomStart();
-            case USE_LIBRE_STRATEGY:
-                return getLibreStart();
-            case USE_GLUPRO_STRATEGY:
-                return com.eveningoutpost.dexdrip.cgm.glupro.GluPro.getStart();
+//            case USE_LIBRE_STRATEGY:
+//                return getLibreStart();
+//            case USE_GLUPRO_STRATEGY:
+//                return com.eveningoutpost.dexdrip.cgm.glupro.GluPro.getStart();
             default:
                 return 0; // very large error default will be caught by sanity check
         }
@@ -189,7 +192,7 @@ public class SensorDays {
     public long getRemainingSensorPeriodInMs() {
         //UserError.Log.d(TAG, "Get start debug returns: " + JoH.dateTimeText(getStart()));
         if (isValid()) {
-            val elapsed = msSince(getStart());
+            final long elapsed = msSince(getStart());
             long remaining = period - elapsed;
             // sanity check
             if ((remaining < 0) || (remaining > period)) {
@@ -212,15 +215,15 @@ public class SensorDays {
     // Add resolution / update cache
     public SpannableString getSpannable() {
 
-        val expiryMs = getRemainingSensorPeriodInMs();
+        final long expiryMs = getRemainingSensorPeriodInMs();
 
         if (expiryMs > 0) {
             if (expiryMs > CAL_THRESHOLD1) {
-                val fmt = xdrip.gs(R.string.expires_days);
+                final String fmt = xdrip.gs(R.string.expires_days);
                 return new SpannableString(MessageFormat.format(fmt, roundDouble((double) expiryMs / DAY_IN_MS, 1)));
             } else {
                 // expiring soon
-                val context = xdrip.getAppContext();
+                final Context context = xdrip.getAppContext();
                 boolean is24Hour = android.text.format.DateFormat.is24HourFormat(context);
 
                 // pick skeleton based on expiry window
@@ -230,7 +233,7 @@ public class SensorDays {
                 // build best pattern for this locale + system 12h/24h setting
                 String pattern = android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton);
 
-                val dateFormat = new SimpleDateFormat(pattern, Locale.getDefault());
+                final SimpleDateFormat dateFormat = new SimpleDateFormat(pattern, Locale.getDefault());
                 String niceTime = dateFormat.format(getSensorEndTimestamp());
 
                 return Span.colorSpan(MessageFormat.format(xdrip.gs(R.string.expires_at), niceTime), expiryMs < CAL_THRESHOLD2 ? Highlight.BAD.color() : Highlight.NOTICE.color());

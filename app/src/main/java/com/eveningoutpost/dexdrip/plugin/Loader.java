@@ -9,8 +9,6 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 
 import dalvik.system.PathClassLoader;
-import lombok.AllArgsConstructor;
-import lombok.val;
 
 /**
  * JamOrHam
@@ -35,10 +33,14 @@ public class Loader {
         }
     }
 
-    @AllArgsConstructor
     public static class Environ {
         PathClassLoader virtualLoader;
         Method getInstance;
+
+        public Environ(PathClassLoader virtualLoader, Method getInstance) {
+            this.virtualLoader = virtualLoader;
+            this.getInstance = getInstance;
+        }
 
         public Environ(PathClassLoader loader) {
             this.virtualLoader = loader;
@@ -71,7 +73,7 @@ public class Loader {
             Environ environ;
             synchronized (loaderCache) {
                 if (!loaderCache.containsKey(def.name)) {
-                    val loader = new PathClassLoader(getPath(def), xdrip.getAppContext().getClassLoader());
+                    final PathClassLoader loader = new PathClassLoader(getPath(def), xdrip.getAppContext().getClassLoader());
                     loaderCache.put(def.name, new Environ(loader));
                 }
                 environ = loaderCache.get(def.name);
@@ -82,7 +84,7 @@ public class Loader {
             }
             try {
                 if (environ.getInstance == null) {
-                    val c = environ.virtualLoader.loadClass(def.pname() + TAG);
+                    final Class<?> c = environ.virtualLoader.loadClass(def.pname() + TAG);
                     UserError.Log.d(TAG, "Loaded from file: " + c.getCanonicalName());
                     environ.getInstance = c.getMethod("getInstance", String.class);
                 }

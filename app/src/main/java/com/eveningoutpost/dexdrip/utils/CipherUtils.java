@@ -7,7 +7,7 @@ package com.eveningoutpost.dexdrip.utils;
 import android.util.Base64;
 import android.util.Log;
 
-import com.eveningoutpost.dexdrip.GoogleDriveInterface;
+//import com.eveningoutpost.dexdrip.GoogleDriveInterface;
 import com.eveningoutpost.dexdrip.models.JoH;
 
 import java.io.UnsupportedEncodingException;
@@ -126,7 +126,7 @@ public class CipherUtils {
     }
 
     public static byte[] encryptBytes(byte[] plainText) {
-        byte[] keyBytes = getKeyBytes(key + GoogleDriveInterface.getDriveKeyString());
+        byte[] keyBytes = getKeyBytes(key);
         return encryptBytes(plainText, keyBytes);
     }
 
@@ -146,7 +146,7 @@ public class CipherUtils {
         return destination;
     }
     public static byte[] decryptBytes(byte[] cipherData) {
-        byte[] keyBytes = getKeyBytes(key + GoogleDriveInterface.getDriveKeyString());
+        byte[] keyBytes = getKeyBytes(key );
         return decryptBytes(cipherData,keyBytes);
     }
     public static byte[] decryptBytes(byte[] cipherData,byte[] keyBytes) {

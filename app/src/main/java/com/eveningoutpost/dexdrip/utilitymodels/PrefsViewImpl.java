@@ -1,16 +1,9 @@
 package com.eveningoutpost.dexdrip.utilitymodels;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.eveningoutpost.dexdrip.adapters.ObservableArrayMapNoNotify;
-
-import lombok.val;
-
-/**
- * Created by jamorham on 05/10/2017.
- * <p>
- * Implementation of PrefsView
- */
 
 public class PrefsViewImpl extends ObservableArrayMapNoNotify<String, Boolean> implements PrefsView {
 
@@ -18,11 +11,13 @@ public class PrefsViewImpl extends ObservableArrayMapNoNotify<String, Boolean> i
 
     public boolean getbool(String name) {
         if (name == null) return false;
-        return PrefHandle.parse(name).getBoolean();
+        PrefHandle h = PrefHandle.parse(name);
+        return h != null && h.getBoolean();
     }
 
     public void setbool(String name, boolean value) {
-        val handle = PrefHandle.parse(name);
+        final PrefHandle handle = PrefHandle.parse(name);
+        if (handle == null) return;
         Pref.setBoolean(handle.key, value);
         super.put(handle.key, value);
         doRunnable();
@@ -38,27 +33,33 @@ public class PrefsViewImpl extends ObservableArrayMapNoNotify<String, Boolean> i
     }
 
     private void doRunnable() {
-        if (runnable != null) {
-            runnable.run();
-        }
+        if (runnable != null) runnable.run();
     }
 
-    @NonNull
+    // WICHTIG für Data Binding: Map.get(Object)
     @Override
+    @Nullable
     public Boolean get(Object key) {
-        val handle = PrefHandle.parse((String) key);
+        if (!(key instanceof String)) return null;
+
+        final PrefHandle handle = PrefHandle.parse((String) key);
+        if (handle == null) return null;
+
         Boolean value = super.get(handle.key);
         if (value == null) {
-            value = getbool((String) key);
+            value = handle.getBoolean();
             super.putNoNotify(handle.key, value);
         }
         return value;
     }
 
     @Override
-    public Boolean put(String key, Boolean value) {
-        val handle = PrefHandle.parse(key);
-        if (!(super.get(handle.key).equals(value))) {
+    public Boolean put(@NonNull String key, @NonNull Boolean value) {
+        final PrefHandle handle = PrefHandle.parse(key);
+        if (handle == null) return value;
+
+        final Boolean current = super.get(handle.key);
+        if (current == null || !current.equals(value)) {
             Pref.setBoolean(handle.key, value);
             super.put(handle.key, value);
             doRunnable();
@@ -66,9 +67,14 @@ public class PrefsViewImpl extends ObservableArrayMapNoNotify<String, Boolean> i
         return value;
     }
 
+    // Optional: falls irgendwo direkt mit Object-Key gearbeitet wird
     public void put(Object key, boolean value) {
-        val handle = PrefHandle.parse((String) key);
-        if (!(super.get(handle.key).equals(value))) {
+        if (!(key instanceof String)) return;
+        final PrefHandle handle = PrefHandle.parse((String) key);
+        if (handle == null) return;
+
+        final Boolean current = super.get(handle.key);
+        if (current == null || current != value) {
             super.put(handle.key, value);
         }
     }
@@ -86,11 +92,9 @@ public class PrefsViewImpl extends ObservableArrayMapNoNotify<String, Boolean> i
             return Pref.getBoolean(key, defaultValue);
         }
 
+        @Nullable
         public static PrefHandle parse(final String identifier) {
-            if (identifier == null) {
-                return null;
-            }
-
+            if (identifier == null) return null;
             final String[] parts = identifier.split(":", 2);
             if (parts.length == 2) {
                 return new PrefHandle(parts[0], Boolean.parseBoolean(parts[1]));
@@ -99,5 +103,4 @@ public class PrefsViewImpl extends ObservableArrayMapNoNotify<String, Boolean> i
             }
         }
     }
-
 }

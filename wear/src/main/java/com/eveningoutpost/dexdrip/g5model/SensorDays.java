@@ -25,8 +25,6 @@ import com.eveningoutpost.dexdrip.utils.DexCollectionType;
 
 import java.util.HashMap;
 
-import lombok.Getter;
-import lombok.val;
 
 // jamorham
 
@@ -42,17 +40,23 @@ public class SensorDays {
 
     private static final HashMap<String, SensorDays> cache = new HashMap<>();
 
-    @Getter
     private long period = UNKNOWN;
-    @Getter
     private long warmupMs = 2 * HOUR_IN_MS;
     private long created = 0;
     private int strategy = 0;
 
+    public long getPeriod() {
+        return period;
+    }
+
+    public long getWarmupMs() {
+        return warmupMs;
+    }
+
     // load current config and compute
     public static SensorDays get() {
-        val type = getDexCollectionType();
-        val tx_id = getTransmitterID();
+        DexCollectionType type = getDexCollectionType();
+        String tx_id = getTransmitterID();
         return get(type, tx_id);
     }
 
@@ -62,10 +66,10 @@ public class SensorDays {
         if (type == null) type = None;  // obscure workaround
 
         // get cached result
-        val result = cache.get(type + tx_id);
+        SensorDays result = cache.get(type + tx_id);
         if (result != null && result.cacheValid()) return result;
 
-        val ths = new SensorDays();
+        SensorDays ths = new SensorDays();
 
         if (hasLibre(type)) {
             String libreVersion = PersistentStore.getString("LibreVersion");
@@ -78,7 +82,7 @@ public class SensorDays {
 
         } else if (hasDexcomRaw(type)) {
             ths.strategy = USE_DEXCOM_STRATEGY;
-            val vr2 = (VersionRequest2RxMessage)
+            VersionRequest2RxMessage vr2 = (VersionRequest2RxMessage)
                     getFirmwareXDetails(tx_id, 2);
             if (vr2 != null) {
                 ths.period = DAY_IN_MS * vr2.typicalSensorDays;
@@ -89,7 +93,7 @@ public class SensorDays {
                     ths.period = DAY_IN_MS * 7; // G5
                 }
             }
-            val vr3 = (VersionRequest2RxMessage) getFirmwareXDetails(tx_id, 3);
+            VersionRequest2RxMessage vr3 = (VersionRequest2RxMessage) getFirmwareXDetails(tx_id, 3);
             if (vr3 != null) {
                 ths.warmupMs = Math.min(Constants.SECOND_IN_MS * vr3.warmupSeconds, 2 * HOUR_IN_MS);
             } else {
@@ -136,7 +140,7 @@ public class SensorDays {
 
     private long getLibreStart() {
         try {
-            val age_ms = getLibreAgeMs();
+            long age_ms = getLibreAgeMs();
             if (age_ms > 0) {
                 return tsl() - age_ms;
             } else {
@@ -166,7 +170,7 @@ public class SensorDays {
     public long getRemainingSensorPeriodInMs() {
         //UserError.Log.d(TAG, "Get start debug returns: " + JoH.dateTimeText(getStart()));
         if (isValid()) {
-            val elapsed = msSince(getStart());
+            long elapsed = msSince(getStart());
             long remaining = period - elapsed;
             // sanity check
             if ((remaining < 0) || (remaining > period)) {

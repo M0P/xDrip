@@ -3,7 +3,7 @@ package com.eveningoutpost.dexdrip.receiver;
 import static com.eveningoutpost.dexdrip.utilitymodels.ColorCache.getCol;
 import static com.eveningoutpost.dexdrip.utilitymodels.NanoStatus.nanoStatus;
 import static com.eveningoutpost.dexdrip.utilitymodels.Pref.getBooleanDefaultFalse;
-import static com.eveningoutpost.dexdrip.watch.thinjam.BlueJayEntry.isNative;
+//import static com.eveningoutpost.dexdrip.watch.thinjam.BlueJayEntry.isNative;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -20,7 +20,7 @@ import androidx.annotation.Nullable;
 
 import com.eveningoutpost.dexdrip.BestGlucose;
 import com.eveningoutpost.dexdrip.BuildConfig;
-import com.eveningoutpost.dexdrip.eassist.EmergencyAssist;
+//import com.eveningoutpost.dexdrip.eassist.EmergencyAssist;
 import com.eveningoutpost.dexdrip.models.UserError;
 import com.eveningoutpost.dexdrip.utilitymodels.AlertPlayer;
 import com.eveningoutpost.dexdrip.utilitymodels.BgGraphBuilder;
@@ -79,7 +79,7 @@ public class InfoContentProvider extends ContentProvider {
 
                 case "eassist":
                     if (enabledWrite()) {
-                        EmergencyAssist.test(EmergencyAssist.Reason.REQUESTED_ASSISTANCE, Constants.MINUTE_IN_MS);
+//                        EmergencyAssist.test(EmergencyAssist.Reason.REQUESTED_ASSISTANCE, Constants.MINUTE_IN_MS);
                         UserError.Log.ueh(TAG, "Emergency assist triggered remotely");
                     }
                     break;
@@ -285,11 +285,11 @@ public class InfoContentProvider extends ContentProvider {
     }
 
     private static boolean enabled() {
-        return isNative() || xdrip.getAppContext() != null && getBooleanDefaultFalse("host_content_provider");
+        return xdrip.getAppContext() != null && getBooleanDefaultFalse("host_content_provider");
     }
 
     private static boolean enabledWrite() {
-        return enabled() && (isNative() || getBooleanDefaultFalse("content_provider_write"));
+        return enabled() && (getBooleanDefaultFalse("content_provider_write"));
     }
 
     public static void ping(String channel) {

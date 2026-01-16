@@ -17,7 +17,7 @@ import com.eveningoutpost.dexdrip.cgm.dex.g7.BackfillControlRx;
 import com.eveningoutpost.dexdrip.cgm.dex.g7.EGlucoseRxMessage;
 import com.eveningoutpost.dexdrip.utils.DexCollectionType;
 
-import lombok.val;
+import java.util.List;
 
 /**
  * JamOrHam
@@ -50,7 +50,7 @@ public class ClassifierAction {
                 break;
 
             case CONTROL:
-                val g7EGlucose = new EGlucoseRxMessage(data);
+                EGlucoseRxMessage g7EGlucose = new EGlucoseRxMessage(data);
                 if (g7EGlucose.isValid()) {
                     DexTimeKeeper.updateAge(TXID, (int) g7EGlucose.clock);
                     UserError.Log.d(TAG, "Got valid glucose: " + g7EGlucose);
@@ -79,8 +79,8 @@ public class ClassifierAction {
 
                     break;
                 } else {
-                    val bfc1 = new BackFillRxMessage(data);
-                    val bfc2 = new BackfillControlRx(data);
+                    BackFillRxMessage bfc1 = new BackFillRxMessage(data);
+                    BackfillControlRx bfc2 = new BackfillControlRx(data);
                     if (bfc1.isValid() || bfc2.isValid()) {
                         Inevitable.task("Process G6/G7 backfill", 3000, ClassifierAction::processBackfill);
                     } else {
@@ -91,7 +91,7 @@ public class ClassifierAction {
                         if (glucose.usable()) {
                             UserError.Log.d(TAG, "Updating age from timestamp: " + glucose.timestamp);
                             DexTimeKeeper.updateAge(TXID, glucose.timestamp);
-                            val ts = DexTimeKeeper.fromDexTime(TXID, glucose.timestamp);
+                            long ts = DexTimeKeeper.fromDexTime(TXID, glucose.timestamp);
                             lastReadingTimestamp = ts;
                             if (BgReading.getForPreciseTimestamp(ts, DexCollectionType.getCurrentDeduplicationPeriod(), false) == null) {
                                 final BgReading bgReading = BgReading.bgReadingInsertFromG5(glucose.glucose, ts);
@@ -117,12 +117,12 @@ public class ClassifierAction {
 
     private static void processBackfill() {
         UserError.Log.d(TAG, "Processing backfill");
-        val decoded = stream.decode();
+        List<BackFillStream.Backsie> decoded = stream.decode();
         stream.reset();
         for (BackFillStream.Backsie backsie : decoded) {
             UserError.Log.d(TAG, "Backsie: " + backsie.getDextime());
-            val time = DexTimeKeeper.fromDexTime(TXID, backsie.getDextime());
-            val since = JoH.msSince(time);
+            long time = DexTimeKeeper.fromDexTime(TXID, backsie.getDextime());
+            long since = JoH.msSince(time);
             if ((since > HOUR_IN_MS * 12) || (since < 0)) {
                 UserError.Log.wtf(TAG, "Backfill timestamp unrealistic: " + JoH.dateTimeText(time) + " (ignored)");
             } else {

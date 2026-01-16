@@ -9,7 +9,7 @@ import com.eveningoutpost.dexdrip.utilitymodels.Constants;
 
 import org.junit.Test;
 
-import lombok.val;
+//import lombok.val;
 
 public class UiBasedCollectorTest extends RobolectricTestWithConfig {
 

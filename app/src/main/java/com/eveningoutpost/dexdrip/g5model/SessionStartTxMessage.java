@@ -6,17 +6,22 @@ import com.eveningoutpost.dexdrip.models.UserError;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import lombok.Getter;
 
 // created by jamorham
 
 public class SessionStartTxMessage extends BaseMessage {
 
     final byte opcode = 0x26;
-    @Getter
     private final long startTime;
-    @Getter
     private final int dexTime;
+
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public int getDexTime() {
+        return dexTime;
+    }
 
     public SessionStartTxMessage(int dexTime) {
         this((int) (JoH.tsl() / 1000), dexTime);

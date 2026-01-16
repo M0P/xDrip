@@ -25,8 +25,6 @@ import jamorham.keks.message.AuthStatusRxMessage;
 import jamorham.keks.message.CertInfoRxMessage;
 import jamorham.keks.message.SignChallengeTxMessage;
 import jamorham.keks.util.Log;
-import lombok.Getter;
-import lombok.val;
 
 /**
  * JamOrHam
@@ -147,8 +145,11 @@ public class Plugin implements IPluginDA {
         return instance;
     }
 
-    @Getter
     private final Context context = new Context();
+
+    public Context getContext() {
+        return context;
+    }
 
     {
         context.alice = ALICE.bytes;
@@ -226,7 +227,7 @@ public class Plugin implements IPluginDA {
 
     private boolean fill(byte[] data) {
         accumulator = arrayAppend(accumulator, data);
-        val expected = expectedBytesForState();
+        int expected = expectedBytesForState();
         Log.d(TAG, "Expected byte size for state: " + stateToName(state) + " -> " + expected + " so far " + accumulator.length);
         return accumulator.length >= expectedBytesForState();
     }
@@ -249,7 +250,7 @@ public class Plugin implements IPluginDA {
                 arraycopy(data, 9, context.challenge, 0, context.challenge.length);
                 return true;
             case ChallengeReply:
-                val status = new AuthStatusRxMessage(data);
+                AuthStatusRxMessage status = new AuthStatusRxMessage(data);
                 if (status.needsRefresh()) {
                     context.reset();
                 }
@@ -291,7 +292,7 @@ public class Plugin implements IPluginDA {
                 return true;
 
             case SendCertificate1:
-                val rep = new CertInfoRxMessage(data);
+                CertInfoRxMessage rep = new CertInfoRxMessage(data);
                 if (rep.valid()) {
                     expectedSize = rep.getSize();
                     changeState(SendCertificate1);
@@ -300,7 +301,7 @@ public class Plugin implements IPluginDA {
                     throw new InvalidParameterException("Invalid QR code 1");
                 }
             case SendCertificate2:
-                val rep2 = new CertInfoRxMessage(data);
+                CertInfoRxMessage rep2 = new CertInfoRxMessage(data);
                 if (rep2.valid()) {
                     expectedSize = rep2.getSize();
                     changeState(SendCertificate2);
@@ -418,7 +419,7 @@ public class Plugin implements IPluginDA {
     @Override
     public boolean receivedData(final byte[] data) {
         Log.d(TAG, "Received data stream: " + bytesToHex(data));
-        val full = fill(data);
+        boolean full = fill(data);
         if (full) {
             context.packet[positionFromState()] = Packet.parse(accumulator);
             accumulator = EMPTY;
@@ -444,7 +445,7 @@ public class Plugin implements IPluginDA {
     @Override
     public byte[] getPersistence(int channel) {
         if (channel == 1) {
-            val key = getSharedKey();
+            byte[] key = getSharedKey();
             return key != null ? key : new byte[0];
         } else if (channel == 3) {
             if (keyToTestAgainst != null && getSharedKey() != null
@@ -509,7 +510,7 @@ public class Plugin implements IPluginDA {
     }
 
     private boolean validate() {
-        val p = context.packet[positionFromState()];
+        Packet p = context.packet[positionFromState()];
         if (p == null) {
             Log.d(TAG, "Packet is null");
             return false;
@@ -532,7 +533,7 @@ public class Plugin implements IPluginDA {
     private boolean verifyChallenge(byte[] data) {
         if (context.savedKey != null) return true;
         context.challenge = lastAuthTx2.singleUseToken;
-        val h = Calc.calculateHash(context);
+        byte[] h = Calc.calculateHash(context);
         if (h == null) return false;
         for (int i = 0; i < 8; i++) {
             if (h[i] != data[i + 1]) return false;
@@ -542,8 +543,8 @@ public class Plugin implements IPluginDA {
 
     private byte[][] sequencePacket(final byte[] Packet) {
         context.sequence++;
-        val param = parameterFromState();
-        val command = (param < 0) ? null : new byte[]{KEYCMD.bytes[0], param};
+        byte param = parameterFromState();
+        byte[] command = (param < 0) ? null : new byte[]{KEYCMD.bytes[0], param};
         return new byte[][]{command, Packet};
     }
 

@@ -7,8 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import lombok.val;
-
 /**
  * jamorham
  *
@@ -52,7 +50,7 @@ public class BlockFinder {
 
     public Block findOverlappingBlock(final int top, final int bottom) {
         if (bottom <= top) return null;
-        for (val segment : segments) {
+        for (final Block segment : segments) {
             if (segment.within(top) || segment.within(bottom)) {
                 return segment;
             }
@@ -100,7 +98,7 @@ public class BlockFinder {
 
         if (bound >= 1) {
             int tries = 200;
-            val random = new Random();
+            final Random random = new Random();
 
             while (tries-- > 0) {
                 int pos = random.nextInt(bound);
@@ -122,9 +120,9 @@ public class BlockFinder {
 
     @Override
     public String toString() {
-        val sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         sb.append("BlockFinder: ");
-        for (val segment : segments) {
+        for (final Block segment : segments) {
             sb.append(segment.toString());
             sb.append(" ");
         }

@@ -60,37 +60,37 @@ public class DesertComms {
     private static final LinkedBlockingDeque<QueueItem> queue = new LinkedBlockingDeque<>();
 
 
-    public static boolean pushToOasis(String topic, String sender, String payload) {
-        if (Home.get_follower()) {
-            final String oasisIP = getOasisIP();
-            if (oasisIP.length() == 0) return false;
-
-            final String url = HttpUrl.parse(getInitialUrl(oasisIP)).newBuilder()
-                    .addPathSegment("sync").addPathSegment("push")
-                    .addPathSegment(topic).addPathSegment(sender).addEncodedPathSegment(urlEncode(payload)) // workaround okhttp bug with path encoding containing +
-                    .build().toString();
-
-            UserError.Log.d(TAG, "To master: " + url);
-            queue.add(new QueueItem(url));
-            runInBackground();
-        } else if (Home.get_master()) {
-            UserError.Log.d(TAG, "We are master so push to followers.");
-            for (final String address : DesertSync.getActivePeers()) {
-                UserError.Log.d(TAG, "Master attempting to push to follower: " + address);
-                final String url = HttpUrl.parse(getInitialUrl(address)).newBuilder()
-                        .addPathSegment("sync").addPathSegment("push")
-                        .addPathSegment(topic).addPathSegment(sender).addEncodedPathSegment(urlEncode(payload)) // workaround okhttp bug with path encoding containing +
-                        .build().toString();
-
-                UserError.Log.d(TAG, "To follower: " + url);
-                queue.add(new QueueItem(url).setHandler(ToFollower));
-
-            }
-            runInBackground();
-        }
-        return true;
-
-    }
+//    public static boolean pushToOasis(String topic, String sender, String payload) {
+//        if (Home.get_follower()) {
+//            final String oasisIP = getOasisIP();
+//            if (oasisIP.length() == 0) return false;
+//
+//            final String url = HttpUrl.parse(getInitialUrl(oasisIP)).newBuilder()
+//                    .addPathSegment("sync").addPathSegment("push")
+//                    .addPathSegment(topic).addPathSegment(sender).addEncodedPathSegment(urlEncode(payload)) // workaround okhttp bug with path encoding containing +
+//                    .build().toString();
+//
+//            UserError.Log.d(TAG, "To master: " + url);
+//            queue.add(new QueueItem(url));
+//            runInBackground();
+//        } else if (Home.get_master()) {
+//            UserError.Log.d(TAG, "We are master so push to followers.");
+//            for (final String address : DesertSync.getActivePeers()) {
+//                UserError.Log.d(TAG, "Master attempting to push to follower: " + address);
+//                final String url = HttpUrl.parse(getInitialUrl(address)).newBuilder()
+//                        .addPathSegment("sync").addPathSegment("push")
+//                        .addPathSegment(topic).addPathSegment(sender).addEncodedPathSegment(urlEncode(payload)) // workaround okhttp bug with path encoding containing +
+//                        .build().toString();
+//
+//                UserError.Log.d(TAG, "To follower: " + url);
+//                queue.add(new QueueItem(url).setHandler(ToFollower));
+//
+//            }
+//            runInBackground();
+//        }
+//        return true;
+//
+//    }
 
     public static boolean pullFromOasis(final String topic, final long since) {
         final String oasisIP = getOasisIP();
@@ -103,7 +103,7 @@ public class DesertComms {
 
             UserError.Log.d(TAG, url);
             queue.add(new QueueItem(url).setHandler(Pull));
-            runInBackground();
+//            runInBackground();
             return true;
         } catch (NullPointerException e) {
             UserError.Log.e(TAG, "Exception parsing url: -" + oasisIP + "- probably invalid ip");
@@ -120,7 +120,7 @@ public class DesertComms {
 
             UserError.Log.d(TAG, "PROBE: " + url);
             queue.add(new QueueItem(url).setHandler(MasterPing));
-            runInBackground();
+//            runInBackground();
         } else {
             UserError.Log.e(TAG, "Probe cancelled as not follower");
         }
@@ -167,70 +167,70 @@ public class DesertComms {
     }
 
     @SuppressWarnings("NonAtomicOperationOnVolatileField")
-    private static void runInBackground() {
+//    private static void runInBackground() {
+//
+//        // TODO we should probably do this in parallel for prospective followers
+//        new Thread(() -> {
+//            if (queue.size() == 0) return;
+//            final PowerManager.WakeLock wl = getWakeLock("DesertComms send", 60000);
+//            UserError.Log.d(TAG, "Queue size: " + queue.size());
+//            try {
+//                final String result = httpNext();
+//                //UserError.Log.d(TAG, "Result: " + result);
+//                checkCommsFailures(result == null);
+//                if (((result != null) && queue.size() > 0) || Home.get_master()) {
+//                    runInBackground();
+//                }
+//            } finally {
+//                releaseWakeLock(wl);
+//            }
+//        }).start();
+//
+//    }
 
-        // TODO we should probably do this in parallel for prospective followers
-        new Thread(() -> {
-            if (queue.size() == 0) return;
-            final PowerManager.WakeLock wl = getWakeLock("DesertComms send", 60000);
-            UserError.Log.d(TAG, "Queue size: " + queue.size());
-            try {
-                final String result = httpNext();
-                //UserError.Log.d(TAG, "Result: " + result);
-                checkCommsFailures(result == null);
-                if (((result != null) && queue.size() > 0) || Home.get_master()) {
-                    runInBackground();
-                }
-            } finally {
-                releaseWakeLock(wl);
-            }
-        }).start();
-
-    }
-
-    private static String httpNext() {
-        if (queue.peekFirst() == null) return null;
-        try {
-            final QueueItem item = queue.takeFirst(); // removes from queue
-            item.retried++;
-            item.updateLastProcessed();
-            UserError.Log.d(TAG, "Next item: " + item.toS());
-            final String result = httpGet(item.getUrl(Home.get_follower() ? item.handler != MasterPing ? getOasisIP() : null : null));
-            // if (result != null) {
-            item.result = result;
-            item.handler.process(item);
-            // }
-            if (result != null || item.expired()) {
-                queue.remove(item);
-            } else {
-                //    queue.add(item); // re-add
-            }
-            return result;
-        } catch (InterruptedException e) {
-            UserError.Log.e(TAG, "Got interrupted");
-            return null;
-        }
-    }
+//    private static String httpNext() {
+//        if (queue.peekFirst() == null) return null;
+//        try {
+//            final QueueItem item = queue.takeFirst(); // removes from queue
+//            item.retried++;
+//            item.updateLastProcessed();
+//            UserError.Log.d(TAG, "Next item: " + item.toS());
+//            final String result = httpGet(item.getUrl(Home.get_follower() ? item.handler != MasterPing ? getOasisIP() : null : null));
+//            // if (result != null) {
+//            item.result = result;
+//            item.handler.process(item);
+//            // }
+//            if (result != null || item.expired()) {
+//                queue.remove(item);
+//            } else {
+//                //    queue.add(item); // re-add
+//            }
+//            return result;
+//        } catch (InterruptedException e) {
+//            UserError.Log.e(TAG, "Got interrupted");
+//            return null;
+//        }
+//    }
 
 
-    private static String httpGet(String url) {
-        if (url == null) return null;
-        final String hash = XdripWebService.hashPassword(Pref.getString(DesertSync.PREF_WEBSERVICE_SECRET, ""));
-        final Request.Builder builder = new Request.Builder().url(url).addHeader("User-Agent", "xDrip+ Desert Comms");
-        if (hash != null) builder.addHeader("api-secret", hash);
-        try (final Response response = getHttpInstance().newCall(builder.build()).execute()) {
-            if (response.isSuccessful()) {
-                return response.body().string();
-            } else {
-                if (JoH.ratelimit("desert-error-response", 180)) {
-                    UserError.Log.wtf(TAG, "Got error code: " + response.code() + " " + response.message() + " " + response.body().toString());
-                }
-                return null;
-            }
-        } catch (IOException | NullPointerException e) {
-            return null;
-        }
-    }
+//    private static String httpGet(String url) {
+//        if (url == null) return null;
+//        final String hash = XdripWebService.hashPassword(Pref.getString(DesertSync.PREF_WEBSERVICE_SECRET, ""));
+//        final Request.Builder builder = new Request.Builder().url(url).addHeader("User-Agent", "xDrip+ Desert Comms");
+//        if (hash != null) builder.addHeader("api-secret", hash);
+//        try (final Response response = getHttpInstance().newCall(builder.build()).execute()) {
+//            if (response.isSuccessful()) {
+//                return response.body().string();
+//            } else {
+//                if (JoH.ratelimit("desert-error-response", 180)) {
+//                    UserError.Log.wtf(TAG, "Got error code: " + response.code() + " " + response.message() + " " + response.body().toString());
+//                }
+//                return null;
+//            }
+//        } catch (IOException | NullPointerException e) {
+//            return null;
+//        }
+//    }
 
     private static OkHttpClient getHttpInstance() {
         if (okHttpClient == null) {
@@ -367,23 +367,23 @@ public class DesertComms {
         MasterPing,
         ToFollower;
 
-        void process(final QueueItem item) {
-            switch (this) {
-                case Pull:
-                    if (item.result == null) {
-                        DesertSync.pullFailed(item.urlIP());
-                    } else {
-                        DesertSync.fromPull(item.result);
-                    }
-                    break;
-                case ToFollower:
-                    DesertSync.checkIpChange(item.result);
-                    break;
-                case MasterPing:
-                    DesertSync.masterIdReply(item.result, item.urlIP());
-                    break;
-            }
-        }
+//        void process(final QueueItem item) {
+//            switch (this) {
+//                case Pull:
+//                    if (item.result == null) {
+//                        DesertSync.pullFailed(item.urlIP());
+//                    } else {
+//                        DesertSync.fromPull(item.result);
+//                    }
+//                    break;
+//                case ToFollower:
+//                    DesertSync.checkIpChange(item.result);
+//                    break;
+//                case MasterPing:
+//                    DesertSync.masterIdReply(item.result, item.urlIP());
+//                    break;
+//            }
+//        }
     }
 
     // megastatus

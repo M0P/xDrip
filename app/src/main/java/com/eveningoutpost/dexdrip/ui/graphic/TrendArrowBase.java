@@ -6,9 +6,6 @@ import android.widget.LinearLayout;
 
 import com.eveningoutpost.dexdrip.xdrip;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import static com.eveningoutpost.dexdrip.ui.helpers.UiHelper.convertDpToPixel;
 
 
@@ -28,18 +25,48 @@ abstract class TrendArrowBase implements ITrendArrow {
 
     static float lastRotation = -1000;
 
-    @Getter
     private ImageView myArrow;
 
-    @Getter @Setter
     private double largeChange = 2d; // some devices use 3.0
-    @Getter @Setter
     private double maxChange = 3.5d; // some devices use 3.0
-    @Getter @Setter
     private float sourceScaleAdjust = 2.0f;
-    @Getter @Setter
     private double boostScaleMaxAddition = 0.5;
 
+    public ImageView getMyArrow() {
+        return myArrow;
+    }
+
+    public double getLargeChange() {
+        return largeChange;
+    }
+
+    public void setLargeChange(double largeChange) {
+        this.largeChange = largeChange;
+    }
+
+    public double getMaxChange() {
+        return maxChange;
+    }
+
+    public void setMaxChange(double maxChange) {
+        this.maxChange = maxChange;
+    }
+
+    public float getSourceScaleAdjust() {
+        return sourceScaleAdjust;
+    }
+
+    public void setSourceScaleAdjust(float sourceScaleAdjust) {
+        this.sourceScaleAdjust = sourceScaleAdjust;
+    }
+
+    public double getBoostScaleMaxAddition() {
+        return boostScaleMaxAddition;
+    }
+
+    public void setBoostScaleMaxAddition(double boostScaleMaxAddition) {
+        this.boostScaleMaxAddition = boostScaleMaxAddition;
+    }
 
     public TrendArrowBase() {
         this(null);

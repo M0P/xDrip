@@ -15,14 +15,13 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
-
-import lombok.val;
 
 /**
  * JamOrHam
@@ -55,7 +54,7 @@ public class QRcodeUtils {
             } else if (data.startsWith(qrmarker2)) {
                 data = data.substring(qrmarker2.length());
                 Log.d(TAG, "String to uncompress: " + data + " len: " + data.length());
-                val bytes = JoH.decompressBytesToBytes(Base64.decode(data, Base64.NO_PADDING | Base64.NO_WRAP));
+                final byte[] bytes = JoH.decompressBytesToBytes(Base64.decode(data, Base64.NO_PADDING | Base64.NO_WRAP));
                 Log.d(TAG, "Json after decompression: " + bytes.length);
                 return deserializeQr2(bytes);
 
@@ -73,17 +72,17 @@ public class QRcodeUtils {
     public static byte[] serializeBinaryPrefsMap(final Map<String, byte[]> binaryPrefsMap) {
         int size = 2;
         short count = 0;
-        for (val item : binaryPrefsMap.entrySet()) {
+        for (final Map.Entry<String, byte[]> item : binaryPrefsMap.entrySet()) {
             size += item.getKey().getBytes(StandardCharsets.UTF_8).length;
             size += item.getValue().length;
             size += 4;
             count++;
         }
-        val bb = ByteBuffer.allocate(size);
+        final ByteBuffer bb = ByteBuffer.allocate(size);
         bb.putShort(count);
-        for (val item : binaryPrefsMap.entrySet()) {
-            val key = item.getKey().getBytes(StandardCharsets.UTF_8);
-            val value = item.getValue();
+        for (final Map.Entry<String, byte[]> item : binaryPrefsMap.entrySet()) {
+            final byte[] key = item.getKey().getBytes(StandardCharsets.UTF_8);
+            final byte[] value = item.getValue();
             bb.putShort((short) key.length);
             bb.put(key);
             bb.putShort((short) value.length);
@@ -95,23 +94,23 @@ public class QRcodeUtils {
 
     public static Map<String, String> deserializeQr2(final byte[] bytes) {
         if (bytes == null) return null;
-        val bb = ByteBuffer.wrap(bytes);
-        val count = bb.getShort();
+        final ByteBuffer bb = ByteBuffer.wrap(bytes);
+        final short count = bb.getShort();
         if (count < 1 || count > 100) {
-            val msg = "Count invalid on QR Code " + count;
+            final String msg = "Count invalid on QR Code " + count;
             Log.e(TAG, msg);
             static_toast_long(msg);
             return null;
         }
         Log.d(TAG, "QR code element count: " + count);
-        val reply = new HashMap<String, String>();
+        final Map<String, String> reply = new HashMap<>();
         try {
             for (int i = 0; i < count; i++) {
-                val keylen = bb.getShort();
-                val keyBytes = new byte[keylen];
+                final short keylen = bb.getShort();
+                final byte[] keyBytes = new byte[keylen];
                 bb.get(keyBytes);
-                val valuelen = bb.getShort();
-                val valueBytes = new byte[valuelen];
+                final short valuelen = bb.getShort();
+                final byte[] valueBytes = new byte[valuelen];
                 bb.get(valueBytes);
                 String keyString = new String(keyBytes, StandardCharsets.UTF_8);
                 boolean isBinary = false;
@@ -129,7 +128,7 @@ public class QRcodeUtils {
             return reply;
 
         } catch (Exception e) {
-            val msg = "QR code decoding error: " + e;
+            final String msg = "QR code decoding error: " + e;
             Log.e(TAG, msg);
             static_toast_long(msg);
         }
@@ -137,13 +136,13 @@ public class QRcodeUtils {
     }
 
     public static Bitmap createQRCodeBitmap(final byte[] data, final int width, final int height, String prefix) throws WriterException {
-        val inputData = prefix + Base64.encodeToString(data, Base64.NO_WRAP | Base64.NO_PADDING);
+        final String inputData = prefix + Base64.encodeToString(data, Base64.NO_WRAP | Base64.NO_PADDING);
         Log.d(TAG, "Input data length: " + inputData.length());
         Map<EncodeHintType, Object> hints = new EnumMap<>(EncodeHintType.class);
         hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
-        val multiFormatWriter = new MultiFormatWriter();
-        val bitMatrix = multiFormatWriter.encode(inputData, BarcodeFormat.QR_CODE, width, height, hints);
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+        final MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
+        final BitMatrix bitMatrix = multiFormatWriter.encode(inputData, BarcodeFormat.QR_CODE, width, height, hints);
+        final Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 bitmap.setPixel(i, j, bitMatrix.get(i, j) ? Color.BLACK : Color.WHITE);

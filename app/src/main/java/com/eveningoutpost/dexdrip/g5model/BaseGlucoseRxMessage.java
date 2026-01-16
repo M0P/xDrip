@@ -7,14 +7,11 @@ import com.eveningoutpost.dexdrip.models.JoH;
 import com.eveningoutpost.dexdrip.models.UserError;
 import com.eveningoutpost.dexdrip.services.G5CollectionService;
 
-import lombok.NoArgsConstructor;
-import lombok.val;
 
 /**
  * Created by jamorham on 02/07/2018.
  */
 
-@NoArgsConstructor
 public abstract class BaseGlucoseRxMessage extends BaseMessage {
 
     private final static String TAG = G5CollectionService.TAG; // meh
@@ -30,13 +27,15 @@ public abstract class BaseGlucoseRxMessage extends BaseMessage {
     public int state; //: UInt8
     public int trend; // : Int8 127 = invalid
 
+    public BaseGlucoseRxMessage() {
+    }
 
     CalibrationState calibrationState() {
         return CalibrationState.parse(state);
     }
 
     CalibrationState adjustedCalibrationState() {
-        val realState = CalibrationState.parse(state);
+        CalibrationState realState = CalibrationState.parse(state);
         if (realState == CalibrationState.Stopped) {
             if (timestamp * SECOND_IN_MS < MINUTE_IN_MS * 30) {
                 UserError.Log.e(TAG, "Reporting Warming up state when marked stopped at timestamp " + JoH.niceTimeScalar(timestamp * SECOND_IN_MS));

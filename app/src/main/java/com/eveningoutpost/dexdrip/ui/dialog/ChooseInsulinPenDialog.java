@@ -3,13 +3,13 @@ package com.eveningoutpost.dexdrip.ui.dialog;
 import android.app.Activity;
 import android.app.AlertDialog;
 
-import com.eveningoutpost.dexdrip.models.JoH;
 import com.eveningoutpost.dexdrip.R;
+import com.eveningoutpost.dexdrip.insulin.Insulin;
 import com.eveningoutpost.dexdrip.insulin.InsulinManager;
-import com.eveningoutpost.dexdrip.insulin.opennov.data.Pens;
+//import com.eveningoutpost.dexdrip.insulin.opennov.data.Pens;
+import com.eveningoutpost.dexdrip.models.JoH;
 import com.eveningoutpost.dexdrip.xdrip;
 
-import lombok.val;
 
 // JamOrHam
 
@@ -21,11 +21,11 @@ public class ChooseInsulinPenDialog {
             return;
         }
 
-        val insulinProfile1 = InsulinManager.getProfile(0);
-        val insulinProfile2 = InsulinManager.getProfile(1);
-        val insulinProfile3 = InsulinManager.getProfile(2);
+        final Insulin insulinProfile1 = InsulinManager.getProfile(0);
+        final Insulin insulinProfile2 = InsulinManager.getProfile(1);
+        final Insulin insulinProfile3 = InsulinManager.getProfile(2);
 
-        val builder = new AlertDialog.Builder(activity)
+        final AlertDialog.Builder builder = new AlertDialog.Builder(activity)
                 .setTitle(xdrip.gs(R.string.choose_type))
                 .setMessage(xdrip.gs(R.string.pen_contains_which_insulin_type, serial));
 
@@ -51,7 +51,7 @@ public class ChooseInsulinPenDialog {
                 dialog.cancel();
             });
         }
-        val dialog = builder.create();
+        final AlertDialog dialog = builder.create();
         // apparently possible dialog is already showing, probably due to hash code
         try {
             if (dialog.isShowing()) {
@@ -64,10 +64,8 @@ public class ChooseInsulinPenDialog {
     }
 
     private static void set(final String serial, final String type) {
-        Pens.load().updatePenBySerial(serial, type).save();
+        // Pens.load().updatePenBySerial(serial, type).save();
         JoH.static_toast_long(xdrip.gs(R.string.set_pen_to_format, serial, type));
     }
 
 }
-
-

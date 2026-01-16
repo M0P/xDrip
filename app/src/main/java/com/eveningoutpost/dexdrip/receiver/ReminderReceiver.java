@@ -20,9 +20,9 @@ public class ReminderReceiver extends BroadcastReceiver {
             UserError.Log.e(TAG, "Null action intent received");
             return;
         }
-        if (action.equals(Reminders.REMINDER_ACTION)) {
-            final Bundle bundle = intent.getExtras();
-            new Reminders().processIncomingBundle(bundle);
-        }
+//        if (action.equals(Reminders.REMINDER_ACTION)) {
+//            final Bundle bundle = intent.getExtras();
+//            new Reminders().processIncomingBundle(bundle);
+//        }
     }
 }

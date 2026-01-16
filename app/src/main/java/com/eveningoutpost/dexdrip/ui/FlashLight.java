@@ -5,6 +5,7 @@ import static com.eveningoutpost.dexdrip.models.JoH.tsl;
 
 import android.content.Context;
 import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
 import android.os.Build;
 
@@ -21,7 +22,6 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import lombok.val;
 
 /**
  * JamOrHam
@@ -46,29 +46,29 @@ public class FlashLight {
                 Log.e(TAG, "Already flashing flashlight - skipping");
                 return;
             }
-            val manager = (CameraManager) xdrip.getAppContext().getSystemService(Context.CAMERA_SERVICE);
+            final CameraManager manager = (CameraManager) xdrip.getAppContext().getSystemService(Context.CAMERA_SERVICE);
             if (manager == null) {
                 Log.e(TAG, "Cannot get camera manager");
                 return;
             }
 
-            val flashes = new ArrayList<String>();
-            val rnd = new SecureRandom();
+            final ArrayList<String> flashes = new ArrayList<String>();
+            final SecureRandom rnd = new SecureRandom();
 
             try {
                 running.set(true);
 
-                val cameraIds = manager.getCameraIdList();
+                final String[] cameraIds = manager.getCameraIdList();
                 // reduce list to cameras which say they have flash
-                for (val camera : cameraIds) {
-                    val characteristics = manager.getCameraCharacteristics(camera);
-                    val flashy = characteristics.get(FLASH_INFO_AVAILABLE);
+                for (final String camera : cameraIds) {
+                    final CameraCharacteristics characteristics = manager.getCameraCharacteristics(camera);
+                    final Boolean flashy = characteristics.get(FLASH_INFO_AVAILABLE);
                     if (flashy == null || flashy) {
                         flashes.add(camera);
                     }
                 }
 
-                val timeEnd = tsl() + Constants.SECOND_IN_MS * seconds;
+                final long timeEnd = tsl() + Constants.SECOND_IN_MS * seconds;
 
                 // Flash light randomly until time period is elapsed
                 int i = 0;
@@ -98,7 +98,7 @@ public class FlashLight {
     @RequiresApi(api = Build.VERSION_CODES.M)
     private static void setCameraList(final CameraManager manager, final ArrayList<String> flashes, final boolean on) {
         try {
-            for (val camera : flashes) {
+            for (final String camera : flashes) {
                 try {
                     manager.setTorchMode(camera, on);
                 } catch (CameraAccessException | IllegalArgumentException e) {

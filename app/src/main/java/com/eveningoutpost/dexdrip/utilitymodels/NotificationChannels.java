@@ -21,8 +21,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import lombok.val;
-
 /**
  * Created by jwoglom on 10/15/2017.
  * <p>
@@ -184,7 +182,7 @@ public class NotificationChannels {
         // mirror the notification parameters in the channel
         template.setGroup(temp.getChannelId());
 
-        val mNotification = getNotificationFromInsideBuilder(wip);
+        final Notification mNotification = getNotificationFromInsideBuilder(wip);
         if (mNotification != null) {
             template.setVibrationPattern(mNotification.vibrate);
             template.setSound(mNotification.sound, generic_audio);

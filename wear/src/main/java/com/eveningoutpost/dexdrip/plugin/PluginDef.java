@@ -7,15 +7,12 @@ import static com.eveningoutpost.dexdrip.plugin.PluginDef.State.Fresh;
 import static com.eveningoutpost.dexdrip.plugin.PluginDef.State.Loaded;
 import static com.eveningoutpost.dexdrip.plugin.PluginDef.State.Loading;
 
-import lombok.RequiredArgsConstructor;
-
 /**
  * JamOrHam
  *
  * Plugin meta-data and state handling
  */
 
-@RequiredArgsConstructor
 public class PluginDef {
 
     final String name;
@@ -25,12 +22,39 @@ public class PluginDef {
     private volatile State state = Fresh;
     private volatile long lastChange;
 
+    public PluginDef(String name, String author, String version, String repository) {
+        this.name = name;
+        this.author = author;
+        this.version = version;
+        this.repository = repository;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public String getRepository() {
+        return repository;
+    }
+
     public boolean isReady() {
         return state == Loaded;
     }
 
     public boolean isFresh() {
         return state == Fresh;
+    }
+
+    public boolean isLoaded() {
+        return state == Loaded;
     }
 
     public boolean loadingFailed() {

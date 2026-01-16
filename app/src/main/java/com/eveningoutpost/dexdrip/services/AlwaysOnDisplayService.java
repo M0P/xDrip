@@ -15,6 +15,8 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityWindowInfo;
 import android.widget.FrameLayout;
 import android.widget.RemoteViews;
 
@@ -25,7 +27,8 @@ import com.eveningoutpost.dexdrip.utils.math.BlockFinder;
 import com.eveningoutpost.dexdrip.xDripWidget;
 
 import androidx.annotation.RequiresApi;
-import lombok.val;
+
+import java.util.List;
 
 import static android.graphics.PixelFormat.TRANSLUCENT;
 import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
@@ -171,12 +174,12 @@ public class AlwaysOnDisplayService extends AccessibilityService {
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT_WATCH)
     private boolean isScreenOn() {
-        val displayManager = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
+        final DisplayManager displayManager = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
         if (displayManager == null) {
             UserError.Log.wtf(TAG, "Cannot get display manager");
             return true;
         }
-        for (val display : displayManager.getDisplays()) {
+        for (final Display display : displayManager.getDisplays()) {
             UserError.Log.d(TAG, "Display state: " + display.getState());
             if (display.getState() != Display.STATE_OFF) {
                 return true;
@@ -193,7 +196,7 @@ public class AlwaysOnDisplayService extends AccessibilityService {
             return;
         }
         final RemoteViews views = xDripWidget.displayCurrentInfo(this, convertDpToPixel(75), convertDpToPixel(50));
-        val oldview = aodView;
+        final View oldview = aodView;
         if (frameLayout == null) {
             frameLayout = new FrameLayout(this);
         }
@@ -222,30 +225,30 @@ public class AlwaysOnDisplayService extends AccessibilityService {
                 return;
             }
 
-            val bf = new BlockFinder();
-            val list = getWindows();
+            final BlockFinder bf = new BlockFinder();
+            final List<AccessibilityWindowInfo> list = getWindows();
             UserError.Log.d(TAG, "Windows list: " + list.size());
-            val rect = new Rect();
+            final Rect rect = new Rect();
 
             int screenMaxY = 0;
 
-            for (val window : list) {
+            for (final AccessibilityWindowInfo window : list) {
                 window.getBoundsInScreen(rect);
                 screenMaxY = Math.max(screenMaxY, rect.bottom);
 
-                val root = window.getRoot();
+                final AccessibilityNodeInfo root = window.getRoot();
                 window.getBoundsInScreen(rect);
                 UserError.Log.d(TAG, "Window bounds: " + rect.left + "," + rect.top + " " + rect.right + "," + rect.bottom + " MAX: " + screenMaxY);
 
                 if (root != null) {
-                    val children = root.getChildCount();
+                    final int children = root.getChildCount();
                     for (int i = 0; i < children; i++) {
-                        val child = root.getChild(i);
+                        final AccessibilityNodeInfo child = root.getChild(i);
                         child.getBoundsInScreen(rect);
                         if (child.getClassName().equals(LAYOUT)) {
-                            val gchildren = child.getChildCount();
+                            final int gchildren = child.getChildCount();
                             for (int j = 0; j < gchildren; j++) {
-                                val gchild = child.getChild(j);
+                                final AccessibilityNodeInfo gchild = child.getChild(j);
                                 gchild.getBoundsInScreen(rect);
                                 if (rect.top != 0 || (rect.bottom < 200)) {
                                     bf.addBlockWithMerge(rect.top, rect.bottom);

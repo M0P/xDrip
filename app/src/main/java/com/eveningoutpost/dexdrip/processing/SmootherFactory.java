@@ -8,7 +8,6 @@ import com.eveningoutpost.dexdrip.utils.DexCollectionType;
 
 import java.util.HashMap;
 
-import lombok.val;
 
 /**
  * JamOrHam
@@ -30,8 +29,8 @@ public class SmootherFactory {
      */
 
     public static JSmoother get(final String choice) {
-        val collectorPeriod = DexCollectionType.getCurrentSamplePeriod();
-        val specification = choice + unit(usingMgDl()) + collectorPeriod;
+        final long collectorPeriod = DexCollectionType.getCurrentSamplePeriod();
+        final String specification = choice + unit(usingMgDl()) + collectorPeriod;
         JSmoother instance = cache.get(specification);
         if (instance == null) {
             UserError.Log.d(TAG, "New instance for " + specification);

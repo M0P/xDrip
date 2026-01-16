@@ -15,6 +15,7 @@ import static com.eveningoutpost.dexdrip.utilitymodels.Constants.SECOND_IN_MS;
 import static com.eveningoutpost.dexdrip.utils.DexCollectionType.GluPro;
 import static com.eveningoutpost.dexdrip.utils.DexCollectionType.LibreAlarm;
 import static com.eveningoutpost.dexdrip.utils.DexCollectionType.Medtrum;
+import static com.eveningoutpost.dexdrip.utils.DexCollectionType.getDexCollectionType;
 import static com.eveningoutpost.dexdrip.xdrip.gs;
 
 import android.Manifest;
@@ -92,10 +93,9 @@ import com.eveningoutpost.dexdrip.models.Sensor;
 import com.eveningoutpost.dexdrip.models.StepCounter;
 import com.eveningoutpost.dexdrip.models.Treatments;
 import com.eveningoutpost.dexdrip.models.UserError;
-import com.eveningoutpost.dexdrip.services.ActivityRecognizedService;
 import com.eveningoutpost.dexdrip.services.DexCollectionService;
 import com.eveningoutpost.dexdrip.services.Ob1G5CollectionService;
-import com.eveningoutpost.dexdrip.services.PlusSyncService;
+//import com.eveningoutpost.dexdrip.services.PlusSyncService;
 import com.eveningoutpost.dexdrip.services.WixelReader;
 import com.eveningoutpost.dexdrip.utilitymodels.AlertPlayer;
 import com.eveningoutpost.dexdrip.utilitymodels.BgGraphBuilder;
@@ -109,32 +109,32 @@ import com.eveningoutpost.dexdrip.utilitymodels.Intents;
 import com.eveningoutpost.dexdrip.utilitymodels.JamorhamShowcaseDrawer;
 import com.eveningoutpost.dexdrip.utilitymodels.MockDataSource;
 import com.eveningoutpost.dexdrip.utilitymodels.NanoStatus;
-import com.eveningoutpost.dexdrip.utilitymodels.NightscoutUploader;
+//import com.eveningoutpost.dexdrip.utilitymodels.NightscoutUploader;
 import com.eveningoutpost.dexdrip.utilitymodels.Notifications;
 import com.eveningoutpost.dexdrip.utilitymodels.PersistentStore;
 import com.eveningoutpost.dexdrip.utilitymodels.Pref;
 import com.eveningoutpost.dexdrip.utilitymodels.PrefsViewImpl;
-import com.eveningoutpost.dexdrip.utilitymodels.SendFeedBack;
+//import com.eveningoutpost.dexdrip.utilitymodels.SendFeedBack;
 import com.eveningoutpost.dexdrip.utilitymodels.ShotStateStore;
 import com.eveningoutpost.dexdrip.utilitymodels.SourceWizard;
 import com.eveningoutpost.dexdrip.utilitymodels.StatusLine;
 import com.eveningoutpost.dexdrip.utilitymodels.UndoRedo;
-import com.eveningoutpost.dexdrip.utilitymodels.UpdateActivity;
+//import com.eveningoutpost.dexdrip.utilitymodels.UpdateActivity;
 import com.eveningoutpost.dexdrip.utilitymodels.VoiceCommands;
 import com.eveningoutpost.dexdrip.calibrations.NativeCalibrationPipe;
 import com.eveningoutpost.dexdrip.calibrations.PluggableCalibration;
-import com.eveningoutpost.dexdrip.cloud.backup.BackupActivity;
+//import com.eveningoutpost.dexdrip.cloud.backup.BackupActivity;
 import com.eveningoutpost.dexdrip.dagger.Injectors;
 import com.eveningoutpost.dexdrip.databinding.ActivityHomeBinding;
 import com.eveningoutpost.dexdrip.databinding.ActivityHomeShelfSettingsBinding;
 import com.eveningoutpost.dexdrip.databinding.PopupInitialStatusHelperBinding;
-import com.eveningoutpost.dexdrip.eassist.EmergencyAssistActivity;
+//import com.eveningoutpost.dexdrip.eassist.EmergencyAssistActivity;
 import com.eveningoutpost.dexdrip.insulin.Insulin;
 import com.eveningoutpost.dexdrip.insulin.InsulinManager;
 import com.eveningoutpost.dexdrip.insulin.MultipleInsulins;
-import com.eveningoutpost.dexdrip.insulin.inpen.InPenEntry;
-import com.eveningoutpost.dexdrip.insulin.pendiq.Pendiq;
-import com.eveningoutpost.dexdrip.nfc.NFControl;
+//import com.eveningoutpost.dexdrip.insulin.inpen.InPenEntry;
+//import com.eveningoutpost.dexdrip.insulin.pendiq.Pendiq;
+//import com.eveningoutpost.dexdrip.nfc.NFControl;
 import com.eveningoutpost.dexdrip.profileeditor.DatePickerFragment;
 import com.eveningoutpost.dexdrip.profileeditor.ProfileAdapter;
 import com.eveningoutpost.dexdrip.ui.BaseShelf;
@@ -144,7 +144,6 @@ import com.eveningoutpost.dexdrip.ui.NumberGraphic;
 import com.eveningoutpost.dexdrip.ui.UiPing;
 import com.eveningoutpost.dexdrip.ui.dialog.ChooseInsulinPenDialog;
 import com.eveningoutpost.dexdrip.ui.dialog.DidYouCancelAlarm;
-import com.eveningoutpost.dexdrip.ui.dialog.HeyFamUpdateOptInDialog;
 import com.eveningoutpost.dexdrip.ui.dialog.QuickSettingsDialogs;
 import com.eveningoutpost.dexdrip.ui.graphic.ITrendArrow;
 import com.eveningoutpost.dexdrip.ui.graphic.TrendArrowFactory;
@@ -153,7 +152,7 @@ import com.eveningoutpost.dexdrip.utils.BgToSpeech;
 import com.eveningoutpost.dexdrip.utils.DatabaseUtil;
 import com.eveningoutpost.dexdrip.utils.DexCollectionType;
 import com.eveningoutpost.dexdrip.utils.DisplayQRCode;
-import com.eveningoutpost.dexdrip.utils.LibreTrendGraph;
+//import com.eveningoutpost.dexdrip.utils.LibreTrendGraph;
 import com.eveningoutpost.dexdrip.utils.Preferences;
 import com.eveningoutpost.dexdrip.utils.SdcardImportExport;
 import com.eveningoutpost.dexdrip.utils.TestFeature;
@@ -165,13 +164,13 @@ import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.internal.bind.DateTypeAdapter;
-import static com.eveningoutpost.dexdrip.utils.DexCollectionType.DexcomG5;
+//import com.google.gson.internal.bind.DateTypeAdapter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
@@ -195,8 +194,6 @@ import lecho.lib.hellocharts.listener.ViewportChangeListener;
 import lecho.lib.hellocharts.model.Viewport;
 import lecho.lib.hellocharts.view.LineChartView;
 import lecho.lib.hellocharts.view.PreviewLineChartView;
-import lombok.Getter;
-import lombok.val;
 
 public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPermissionsResultCallback {
     private final static String TAG = "jamorham " + Home.class.getSimpleName();
@@ -339,7 +336,6 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
     private static ShowcaseView myShowcase;
     private static Activity mActivity;
 
-    @Getter
     private volatile static String statusIOB = "";
     private volatile static String statusBWP = "";
 
@@ -508,7 +504,7 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
             textInsulinSumDose.setVisibility(View.INVISIBLE);
             buttonInsulinSingleDose.setVisibility(View.INVISIBLE);
             Treatments.create(0, thisInsulinSumNumber, Treatments.getTimeStampWithOffset(thistimeoffset));
-            Pendiq.handleTreatment(thisInsulinSumNumber);
+//            Pendiq.handleTreatment(thisInsulinSumNumber);
             thisInsulinSumNumber = 0;
             reset_viewport = true;
             if (hideTreatmentButtonsIfAllDone()) {
@@ -618,7 +614,7 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
 
         checkBadSettings();
         // lower priority
-        PlusSyncService.startSyncService(getApplicationContext(), "HomeOnCreate");
+//        PlusSyncService.startSyncService(getApplicationContext(), "HomeOnCreate");
         ParakeetHelper.notifyOnNextCheckin(false);
 
         if (checkedeula && (!getString(R.string.app_name).equals("xDrip+"))) {
@@ -790,7 +786,7 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
             final String calibration_type = Pref.getString("treatment_fingerstick_calibration_usage", "ask");
             Log.d(TAG, "Creating blood test record from input data");
             BloodTest.createFromCal(glucosenumber, timeoffset, "Manual Entry");
-            GcmActivity.syncBloodTests();
+//            GcmActivity.syncBloodTests();
             if (!Pref.getBooleanDefaultFalse("bluetooth_meter_for_calibrations_auto")) { // If automatic calibration is disabled
                 if (calibration_type.equals("ask")) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -813,7 +809,7 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
 
                 } else if (calibration_type.equals("auto")) {
                     if ((!Pref.getBooleanDefaultFalse("bluetooth_meter_for_calibrations_auto"))
-                            && (DexCollectionType.getDexCollectionType() != DexCollectionType.Follower)
+//                            && (getDexCollectionType() != DexCollectionType.Follower)
                             && (JoH.pratelimit("ask_about_auto_calibration", 86400 * 30))) {
                         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
                         builder.setTitle(gs(R.string.enable_automatic_calibration));
@@ -910,7 +906,7 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
                             if (i.getProfile() == InsulinManager.getBolusProfile())
                                 pendiqInsulin = i.getUnits();
                     } else pendiqInsulin = thisInsulinSumNumber;
-                    Pendiq.handleTreatment(pendiqInsulin);
+//                    Pendiq.handleTreatment(pendiqInsulin);
                 } else {
                     Log.d(TAG, "processAndApproveTreatment Treatment already exists carbs=" + thiscarbsnumber + " insulin=" + thisInsulinSumNumber + " timestamp=" + JoH.dateTimeText(time));
                 }
@@ -928,12 +924,12 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
 // in case of multiple injections in a treatment, select the injection with the primary insulin profile defined in the profile editor; if not found, take 0
 // in case of a single injection in a treatment, assume thats the #units to send to pendiq
             double pendiqInsulin = 0;
-            if (MultipleInsulins.isEnabled() && injections.size() > 1) {
+            /*if (MultipleInsulins.isEnabled() && injections.size() > 1) {
                 for (InsulinInjection i : injections)
                     if (i.getProfile() == InsulinManager.getBolusProfile())
                         pendiqInsulin = i.getUnits();
             } else pendiqInsulin = thisInsulinSumNumber;
-            Pendiq.handleTreatment(pendiqInsulin);
+            Pendiq.handleTreatment(pendiqInsulin);*/
         }
         hideAllTreatmentButtons();
 
@@ -998,9 +994,9 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
                     Log.d(TAG, "Screen is already on so not turning on");
                 }
             } else if (bundle.getString(Home.GCM_RESOLUTION_ACTIVITY) != null) {
-                GcmActivity.checkPlayServices(this, this);
+//                GcmActivity.checkPlayServices(this, this);
             } else if (bundle.getString(Home.SNOOZE_CONFIRM_DIALOG) != null) {
-                GcmActivity.sendSnoozeToRemoteWithConfirm(this);
+//                GcmActivity.sendSnoozeToRemoteWithConfirm(this);
             } else if (bundle.getString(Home.SHOW_NOTIFICATION) != null) {
                 final Intent notificationIntent = new Intent(this, Home.class);
                 final int notification_id = bundle.getInt("notification_id");
@@ -1034,7 +1030,7 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
                             NumberGraphic.testNotification("123");
                         });
             } else if (bundle.getString("inpen-reset") != null) {
-                InPenEntry.startWithReset();
+//                InPenEntry.startWithReset();
             } else if (bundle.getString(Home.BLOOD_TEST_ACTION) != null) {
                 Log.d(TAG, "BLOOD_TEST_ACTION");
                 final AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -1052,7 +1048,7 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
                             final long time_since = msSince(bt.timestamp);
                             Home.startHomeWithExtra(xdrip.getAppContext(), Home.BLUETOOTH_METER_CALIBRATION, BgGraphBuilder.unitized_string_static(bt.mgdl), Long.toString(time_since));
                             bt.addState(BloodTest.STATE_CALIBRATION);
-                            GcmActivity.syncBloodTests();
+//                            GcmActivity.syncBloodTests();
 
                         });
 
@@ -1065,7 +1061,7 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
                                 dialog12.dismiss();
                                 bt.removeState(BloodTest.STATE_VALID);
                                 NativeCalibrationPipe.removePendingCalibration((int) bt.mgdl);
-                                GcmActivity.syncBloodTests();
+//                                GcmActivity.syncBloodTests();
                                 if (Home.get_show_wear_treatments())
                                     BloodTest.pushBloodTestSyncToWatch(bt, false);
                                 staticRefreshBGCharts();
@@ -1120,7 +1116,7 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
     }
 
     public static void startHomeWithExtra(Context context, String extra, String text, String even_more, String even_even_more) {
-        Intent intent = new Intent(context, Home.class);
+        final Intent intent = new Intent(context, Home.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(extra, text);
         intent.putExtra(extra + "2", even_more);
@@ -1129,13 +1125,8 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
         context.startActivity(intent);
     }
 
-    private boolean isAutoYPanEnabled() {
-        // When true, xDrip auto-pans the Y-axis instead of extending the range for out-of-range readings.
-        return Pref.getBooleanDefaultFalse("auto_y_pan");
-    }
-
     public void cloudBackup(MenuItem x) {
-        JoH.startActivity(BackupActivity.class);
+//        JoH.startActivity(BackupActivity.class);
     }
 
     public void crowdTranslate(MenuItem x) {
@@ -1152,7 +1143,7 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
     }
 
     public void ShowLibreTrend(MenuItem x) {
-        startActivity(new Intent(this, LibreTrendGraph.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK).putExtra("events", ""));
+//        startActivity(new Intent(this, LibreTrendGraph.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK).putExtra("events", ""));
     }
 
     private boolean hideTreatmentButtonsIfAllDone() {
@@ -1683,10 +1674,13 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
                     InsulinInjection injection = new InsulinInjection(thisinsulinprofile[i], thisinsulinnumber[i]);
                     injections.add(injection);
                 }
+//            Gson gson = new GsonBuilder()
+//                    .excludeFieldsWithoutExposeAnnotation()
+//                    .registerTypeAdapter(Date.class, new DateTypeAdapter())
+//                    .serializeSpecialFloatingPointValues()
+//                    .create();
             Gson gson = new GsonBuilder()
-                    .excludeFieldsWithoutExposeAnnotation()
-                    .registerTypeAdapter(Date.class, new DateTypeAdapter())
-                    .serializeSpecialFloatingPointValues()
+                    .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX")
                     .create();
             WatchUpdaterService.sendTreatment(
                     thiscarbsnumber,
@@ -1837,7 +1831,7 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
     public static void staticRefreshBGCharts(boolean override) {
         reset_viewport = true;
         if (activityVisible || override) {
-            Intent updateIntent = new Intent(Intents.ACTION_NEW_BG_ESTIMATE_NO_DATA);
+            final Intent updateIntent = new Intent(Intents.ACTION_NEW_BG_ESTIMATE_NO_DATA);
             if (mActivity != null) {
                 mActivity.sendBroadcast(updateIntent);
             }
@@ -1919,7 +1913,7 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
         updateCurrentBgInfo("generic on resume");
         updateHealthInfo("generic on resume");
 
-        NFControl.initNFC(this, false);
+//        NFControl.initNFC(this, false);
 
         if (get_follower() || get_master()) {
            // GcmActivity.checkSync(this);
@@ -1934,15 +1928,15 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
             }
         }
 
-        HeyFamUpdateOptInDialog.heyFam(this); // remind about updates
+//        HeyFamUpdateOptInDialog.heyFam(this); // remind about updates
         firstRunDialogs(checkedeula);
 
-        Inevitable.task("home-resume-bg", 2000, () -> {
-            InPenEntry.startIfEnabled();
+        /*Inevitable.task("home-resume-bg", 2000, () -> {
+            InPenEntry.initialStartIfEnabled();
             EmergencyAssistActivity.checkPermissionRemoved();
             NightscoutUploader.launchDownloadRest();
             Pendiq.immortality(); // Experimental testing phase
-        });
+        });*/
     }
 
     private void checkWifiSleepPolicy() {
@@ -2027,12 +2021,12 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
 
         // inject our gesture handler if it hasn't already been done
         try {
-            val gestureDetector =  ChartTouchHandler.class.getDeclaredField("gestureDetector");
+            final Field gestureDetector =  ChartTouchHandler.class.getDeclaredField("gestureDetector");
             gestureDetector.setAccessible(true);
-            val chartTouchHandler = chart.getTouchHandler();
-            val previewChartTouchHandler = previewChart.getTouchHandler();
-            val activeDetector = (GestureDetector) gestureDetector.get(chartTouchHandler);
-            val previewActiveDetector = (GestureDetector) gestureDetector.get(previewChartTouchHandler);
+            final ChartTouchHandler chartTouchHandler = chart.getTouchHandler();
+            final ChartTouchHandler previewChartTouchHandler = previewChart.getTouchHandler();
+            final GestureDetector activeDetector = (GestureDetector) gestureDetector.get(chartTouchHandler);
+            final GestureDetector previewActiveDetector = (GestureDetector) gestureDetector.get(previewChartTouchHandler);
             if (!(activeDetector instanceof InterceptingGestureHandler)) {
                 gestureDetector.set(chartTouchHandler, new InterceptingGestureHandler(this, activeDetector));
             } else {
@@ -2112,14 +2106,14 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
             float tempwidth = (float) moveViewPort.width() / 4;
             holdViewport.left = moveViewPort.right - tempwidth;
             holdViewport.right = moveViewPort.right + (moveViewPort.width() / 24);
-            if (!isAutoYPanEnabled()) {
-                holdViewport.top = moveViewPort.top;
-                holdViewport.bottom = moveViewPort.bottom;
-            } else {
+//            if (!isAutoYPanEnabled()) {
+//                holdViewport.top = moveViewPort.top;
+//                holdViewport.bottom = moveViewPort.bottom;
+//            } else {
                 Viewport v = bgGraphBuilder.computeYViewport();
                 holdViewport.top = v.top;
                 holdViewport.bottom = v.bottom;
-            }
+//            }
             chart.setCurrentViewport(holdViewport);
             previewChart.setCurrentViewport(holdViewport);
             UserError.Log.e(TAG, "SMALL HEIGHT VIEWPORT WARNING");
@@ -2152,7 +2146,7 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
     public void onPause() {
         activityVisible = false;
         super.onPause();
-        NFControl.initNFC(this, true); // disables
+//        NFControl.initNFC(this, true); // disables
         nanoStatus.setRunning(false);
         expiryStatus.setRunning(false);
         if (_broadcastReceiver != null) {
@@ -2304,10 +2298,10 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
             case "time tick":
                 if (msSince(lastViewPortPan) < 45 * SECOND_IN_MS) {
                     UserError.Log.d(TAG, "Skipping VIEWPORT adjustment as panning and data just arrived: " + holdViewport.toString());
-                    if (!isAutoYPanEnabled()) {
-                        holdViewport.top = maxViewPort.top;
-                        holdViewport.bottom = maxViewPort.bottom;
-                    }
+//                    if (!isAutoYPanEnabled()) {
+//                        holdViewport.top = maxViewPort.top;
+//                        holdViewport.bottom = maxViewPort.bottom;
+//                    }
                     chart.setCurrentViewport(holdViewport); // reuse existing
                     return;
                 }
@@ -2325,17 +2319,17 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
         UserError.Log.d(TAG, "VIEWPORT " + source + " moveviewport in setHours: asked " + hours + " vs auto " + ideal_hours_to_show + " = " + hours_to_show + " full chart width: " + bgGraphBuilder.hoursShownOnChart());
 
         double hour_width = maxViewPort.width() / bgGraphBuilder.hoursShownOnChart();
-        holdViewport.left = maxViewPort.right - hour_width * hours_to_show;
+        holdViewport.left = (float) (maxViewPort.right - hour_width * hours_to_show);
         holdViewport.right = maxViewPort.right;
-        if (!isAutoYPanEnabled()) {
-            holdViewport.top = maxViewPort.top;
-            holdViewport.bottom = maxViewPort.bottom;
-        }
+//        if (!isAutoYPanEnabled()) {
+//            holdViewport.top = maxViewPort.top;
+//            holdViewport.bottom = maxViewPort.bottom;
+//        }
 
         // if locked, center display on current bg values, not predictions
         if (homeShelf.get("time_locked_always")) {
-            holdViewport.left -= hour_width * bgGraphBuilder.getPredictivehours();
-            holdViewport.right -= hour_width * bgGraphBuilder.getPredictivehours();
+            holdViewport.left -= (float) (hour_width * bgGraphBuilder.getPredictivehours());
+            holdViewport.right -= (float) (hour_width * bgGraphBuilder.getPredictivehours());
         }
 
         if (d) {
@@ -2343,11 +2337,11 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
             UserError.Log.d(TAG, "MAX VIEWPORT " + maxViewPort);
         }
 
-        if (isAutoYPanEnabled()) {
-            Viewport v = bgGraphBuilder.computeYViewport();
-            holdViewport.top = v.top;
-            holdViewport.bottom = v.bottom;
-        }
+//        if (isAutoYPanEnabled()) {
+//            Viewport v = bgGraphBuilder.computeYViewport();
+//            holdViewport.top = v.top;
+//            holdViewport.bottom = v.bottom;
+//        }
         chart.setCurrentViewport(holdViewport);
 
     }
@@ -2458,7 +2452,7 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
             btnRedo.setVisibility(View.INVISIBLE);
         }
 
-        final DexCollectionType collector = DexCollectionType.getDexCollectionType();
+        final DexCollectionType collector = getDexCollectionType();
         // TODO unify code using DexCollectionType methods
         boolean isBTWixelOrLimiTTer = CollectionServiceStarter.isBTWixelOrLimiTTer(getApplicationContext());
         // port this lot to DexCollectionType to avoid multiple lookups of the same preference
@@ -2597,11 +2591,11 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
             last_speech_time = 0;
         }
 
-        if (ActivityRecognizedService.is_in_vehicle_mode()) {
-            btnVehicleMode.setVisibility(View.VISIBLE);
-        } else {
-            btnVehicleMode.setVisibility(View.INVISIBLE);
-        }
+//        if (ActivityRecognizedService.is_in_vehicle_mode()) {
+//            btnVehicleMode.setVisibility(View.VISIBLE);
+//        } else {
+//            btnVehicleMode.setVisibility(View.INVISIBLE);
+//        }
 
         //if (isG5Share) showcasemenu(SHOWCASE_G5FIRMWARE); // nov 2016 firmware warning resolved 15/12/2016
         //showcasemenu(1); // 3 dot menu
@@ -2657,7 +2651,7 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
 
         if (!isSensorActive) {
             // Define a variable (notConnectedToG6Yet) that is only true if Native G6 is chosen, but, transmitter days is unknown or not synced yet.
-            boolean notConnectedToG6Yet = DexCollectionType.getDexCollectionType() == DexcomG5 && Pref.getBooleanDefaultFalse("ob1_g5_use_transmitter_alg") && Pref.getBooleanDefaultFalse("using_g6") && (DexTimeKeeper.getTransmitterAgeInDays(getTransmitterID()) == -1 || !DexSyncKeeper.isReady(getTransmitterID()));
+            boolean notConnectedToG6Yet = Pref.getBooleanDefaultFalse("ob1_g5_use_transmitter_alg") && Pref.getBooleanDefaultFalse("using_g6") && (DexTimeKeeper.getTransmitterAgeInDays(getTransmitterID()) == -1 || !DexSyncKeeper.isReady(getTransmitterID()));
             if (notConnectedToG6Yet || shortTxId()) { // Only if G6 has been selected and transmitter is not synced yet, or if G7 has been selected.
                 notificationText.setText(R.string.wait_to_connect);
             } else { // Only if G6 is not selected or G6 transmitter is synced.
@@ -2673,7 +2667,7 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
                     builder.setNegativeButton(gs(R.string.no), (dialog, which) -> dialog.dismiss());
                     builder.setPositiveButton(gs(R.string.restore), (dialog, which) -> {
                         dialog.dismiss();
-                        startActivity(new Intent(context, ImportDatabaseActivity.class).putExtra("importit", Pref.getString("last-saved-database-zip", "")).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+//                        startActivity(new Intent(context, ImportDatabaseActivity.class).putExtra("importit", Pref.getString("last-saved-database-zip", "")).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
                     });
                     dialog = builder.create();
                     dialog.show();
@@ -2729,7 +2723,7 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
         }
 
         // we can't use the Dex related code below so we handle things here
-        if (DexCollectionType.getDexCollectionType() == GluPro) {
+        if (getDexCollectionType() == GluPro) {
             displayCurrentInfo();
             return;
         }
@@ -2973,7 +2967,7 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
         }
 
         final int sensor_age = Pref.getInt("nfc_sensor_age", 0);
-        if (sensor_age > 0 && (DexCollectionType.hasLibre() || hasLibreblock())) {
+        if (sensor_age > 0 && (getDexCollectionType() == DexCollectionType.LibreReceiver || hasLibreblock())) {
             final String age_problem = (Pref.getBooleanDefaultFalse("nfc_age_problem") ? " \u26A0\u26A0\u26A0" : "");
             if (Pref.getBoolean("nfc_show_age", true)) {
                 sensorAge.setText(getResources().getQuantityString(R.plurals.sensor_age, sensor_age / 1440, JoH.qs(((double) sensor_age) / 1440, 1)) + age_problem);
@@ -3007,7 +3001,7 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
             currentBgValueText.setPaintFlags(currentBgValueText.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
             dexbridgeBattery.setPaintFlags(dexbridgeBattery.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
             if (get_follower()) {
-                GcmActivity.requestPing();
+//                GcmActivity.requestPing();
             }
         }
         final BgReading lastBgReading = BgReading.lastNoSenssor();
@@ -3041,7 +3035,7 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
 
     // TODO consider moving this out of Home
     public static long stale_data_millis() {
-        if (DexCollectionType.getDexCollectionType() == LibreAlarm)
+        if (getDexCollectionType() == LibreAlarm)
             return (60000 * 13);
         return (60000 * 11);
     }
@@ -3245,23 +3239,24 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
         if (DexCollectionType.hasWifi()) {
             parakeet_menu_items = Pref.getBoolean("plus_extra_features", false);
         }
-        menu.findItem(R.id.showmap).setVisible(parakeet_menu_items);
-        menu.findItem(R.id.parakeetsetup).setVisible(parakeet_menu_items);
+//        menu.findItem(R.id.showmap).setVisible(parakeet_menu_items);
+//        menu.findItem(R.id.parakeetsetup).setVisible(parakeet_menu_items);
 
         boolean got_data = Experience.gotData();
-        menu.findItem(R.id.crowdtranslate).setVisible(got_data);
+//        menu.findItem(R.id.crowdtranslate).setVisible(got_data);
 
         menu.findItem(R.id.showreminders).setVisible(Pref.getBoolean("plus_show_reminders", true) && !is_newbie);
 
-        if (!hasLibreblock()) {
-            menu.findItem(R.id.libreLastMinutes).setVisible(false);
-        }
+//        if (!hasLibreblock()) {
+//            menu.findItem(R.id.libreLastMinutes).setVisible(false);
+//        }
 
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
         Bundle bundle = intent.getExtras();
         processIncomingBundle(bundle);
     }
@@ -3323,9 +3318,9 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
                     break;
 
                 case 1:
-                    Toolbar toolbar = (Toolbar) findViewById(R.id.my_toolbar);
+                    final Toolbar toolbar = (Toolbar) findViewById(R.id.my_toolbar);
 
-                    List<View> views = toolbar.getTouchables();
+                    final List<View> views = toolbar.getTouchables();
 
                     //Log.d("xxy", Integer.toString(views.size()));
                     for (View view : views) {
@@ -3375,7 +3370,7 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
         new AsyncTask<Void, Void, String>() {
             @Override
             protected String doInBackground(Void... params) {
-                int permissionCheck = ContextCompat.checkSelfPermission(Home.this,
+                final int permissionCheck = ContextCompat.checkSelfPermission(Home.this,
                         Manifest.permission.READ_EXTERNAL_STORAGE);
                 if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(Home.this,
@@ -3410,9 +3405,9 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
         }.execute();
     }
 
-    public void restoreDatabase(MenuItem myitem) {
-        startActivity(new Intent(this, ImportDatabaseActivity.class));
-    }
+//    public void restoreDatabase(MenuItem myitem) {
+//        startActivity(new Intent(this, ImportDatabaseActivity.class));
+//    }
 
     public void exportCSVasSiDiary(MenuItem myitem) {
         long from = Pref.getLong("sidiary_last_exportdate", 0);
@@ -3432,7 +3427,7 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
                 new AsyncTask<Void, Void, String>() {
                     @Override
                     protected String doInBackground(Void... params) {
-                        int permissionCheck = ContextCompat.checkSelfPermission(Home.this,
+                        final int permissionCheck = ContextCompat.checkSelfPermission(Home.this,
                                 Manifest.permission.READ_EXTERNAL_STORAGE);
                         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
                             ActivityCompat.requestPermissions(Home.this,
@@ -3476,12 +3471,12 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
         startActivity(new Intent(getApplicationContext(), Reminders.class));
     }
 
-    public void showAssistFromMenu(MenuItem myitem) {
-        startActivity(new Intent(getApplicationContext(), EmergencyAssistActivity.class));
-    }
+//    public void showAssistFromMenu(MenuItem myitem) {
+//        startActivity(new Intent(getApplicationContext(), EmergencyAssistActivity.class));
+//    }
 
     public void parakeetSetupMode(MenuItem myitem) {
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setMessage(R.string.are_you_sure_you_want_switch_parakeet_to_setup);
 
         alertDialogBuilder.setPositiveButton(R.string.yes_enter_setup_mode, (arg0, arg1) -> {
@@ -3492,7 +3487,7 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
 
         alertDialogBuilder.setNegativeButton(R.string.nokeep_parakeet_as_it_is, (dialog, which) -> {/* do nothing*/});
 
-        AlertDialog alertDialog = alertDialogBuilder.create();
+        final AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
     }
 
@@ -3533,8 +3528,8 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
 
     public void showNoteTextInputDialog(View myitem, final long timestamp, final double position) {
         Log.d(TAG, "showNoteTextInputDialog: ts:" + timestamp + " pos:" + position);
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-        LayoutInflater inflater = this.getLayoutInflater();
+        final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        final LayoutInflater inflater = this.getLayoutInflater();
         final View dialogView = inflater.inflate(R.layout.note_dialog_phone, null);
         dialogBuilder.setView(dialogView);
 
@@ -3593,7 +3588,7 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
     }
 
     public void doBackFillBroadcast(MenuItem myitem) {
-        GcmActivity.syncBGTable2();
+//        GcmActivity.syncBGTable2();
         toast(gs(R.string.starting_sync_to_other_devices));
     }
 
@@ -3603,13 +3598,13 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
         staticRefreshBGCharts();
     }
 
-    public void checkForUpdate(MenuItem myitem) {
-        if (JoH.ratelimit("manual-update-check", 5)) {
-            toast(getString(R.string.checking_for_update));
-            UpdateActivity.last_check_time = -1;
-            UpdateActivity.checkForAnUpdate(getApplicationContext(), true);
-        }
-    }
+//    public void checkForUpdate(MenuItem myitem) {
+//        if (JoH.ratelimit("manual-update-check", 5)) {
+//            toast(getString(R.string.checking_for_update));
+////            UpdateActivity.last_check_time = -1;
+////            UpdateActivity.checkForAnUpdate(getApplicationContext(), true);
+//        }
+//    }
 
     public void toggleSpeakReadings(MenuItem myitem) {
         Pref.toggleBoolean("bg_to_speech");
@@ -3619,9 +3614,9 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
         }
     }
 
-    public void sendFeedback(MenuItem myitem) {
-        startActivity(new Intent(getApplicationContext(), SendFeedBack.class));
-    }
+//    public void sendFeedback(MenuItem myitem) {
+//        startActivity(new Intent(getApplicationContext(), SendFeedBack.class));
+//    }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -3684,17 +3679,17 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
     public static void snackBar(int buttonString, String message, View.OnClickListener mOnClickListener, Activity activity) {
 
         // Store Snackbar in a variable
-        Snackbar snackbar = Snackbar.make(
+        final Snackbar snackbar = Snackbar.make(
                         activity.findViewById(android.R.id.content),
                         message, Snackbar.LENGTH_LONG)
                 .setAction(buttonString, mOnClickListener);
 
         // Disable ALL CAPS on the action button
-        Button b = snackbar.getView().findViewById(com.google.android.material.R.id.snackbar_action);
+        final Button b = snackbar.getView().findViewById(com.google.android.material.R.id.snackbar_action);
         if (b != null) b.setAllCaps(false);
 
         // Maximum number of lines to wrap into
-        TextView t = snackbar.getView().findViewById(com.google.android.material.R.id.snackbar_text);
+        final TextView t = snackbar.getView().findViewById(com.google.android.material.R.id.snackbar_text);
         if (t != null) t.setMaxLines(5);
 
         snackbar.show();
@@ -3707,6 +3702,10 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
         } else {
             JoH.releaseOrientation(context);
         }
+    }
+
+    public static String getStatusIOB() {
+        return statusIOB;
     }
 
     // classes
@@ -3794,7 +3793,7 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
 
     private View.OnClickListener makeSnackBarUriLauncher(final Uri uri, final String text) {
         return v -> {
-            Intent shareIntent = new Intent();
+            final Intent shareIntent = new Intent();
             shareIntent.setAction(Intent.ACTION_SEND);
             shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
             shareIntent.setType("application/octet-stream");
@@ -3842,10 +3841,10 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
 
         @Override
         public Point getPoint() {
-            int[] location = new int[2];
+            final int[] location = new int[2];
             mView.getLocationInWindow(location);
-            int x = location[0] + mView.getWidth() / 2;
-            int y = location[1] + mView.getHeight() / 2;
+            final int x = location[0] + mView.getWidth() / 2;
+            final int y = location[1] + mView.getHeight() / 2;
             return new Point(x + xoffset, y + yoffset);
         }
     }
@@ -3854,6 +3853,7 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         // automatically restore settings backup if we just approved a request coming from that
         if (requestCode == SdcardImportExport.TRIGGER_RESTORE_PERMISSIONS_REQUEST_STORAGE
                 && permissions.length > 0 && grantResults.length > 0

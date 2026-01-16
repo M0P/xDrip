@@ -42,20 +42,14 @@ import com.eveningoutpost.dexdrip.utils.LocationHelper;
 import com.eveningoutpost.dexdrip.utils.Preferences;
 import com.eveningoutpost.dexdrip.utils.bt.BtCallBack2;
 import com.eveningoutpost.dexdrip.utils.bt.ScanMeister;
-import com.eveningoutpost.dexdrip.watch.thinjam.BlueJay;
-import com.eveningoutpost.dexdrip.watch.thinjam.BlueJayEntry;
-import com.eveningoutpost.dexdrip.watch.thinjam.BlueJayService;
+
 import com.eveningoutpost.dexdrip.xdrip;
 import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 import com.polidea.rxandroidble2.scan.ScanFilter;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
 import me.tatarka.bindingcollectionadapter2.ItemBinding;
 
-import static com.eveningoutpost.dexdrip.watch.thinjam.Const.THINJAM_HUNT_MASK_STRING;
-import static com.eveningoutpost.dexdrip.watch.thinjam.Const.THINJAM_HUNT_SERVICE_STRING;
 
 // jamorham
 
@@ -70,22 +64,24 @@ public class ThinJamActivity extends AppCompatActivity implements BtCallBack2, A
     private static final String REQUEST_QR = "REQUEST_QR";
     private static final String SCAN_QR = "SCAN_QR";
 
-    @Getter
     private static final boolean D = false;
+
+    public static boolean isD() {
+        return D;
+    }
 
     private ActivityThinJamBinding binding;
     private final ScanMeister scanMeister = new ScanMeister();
-    private final ScanFilter customFilter = new ScanFilter.Builder().setServiceUuid(ParcelUuid.fromString(THINJAM_HUNT_SERVICE_STRING), ParcelUuid.fromString(THINJAM_HUNT_MASK_STRING)).build();
     private final ScanFilter nullFilter = new ScanFilter.Builder().build();
 
-    private BlueJayService thinJam;
+    // private BlueJayService thinJam;
     private boolean mBound = false;
     private volatile Bundle savedExtras = null;
 
     private final Observable.OnPropertyChangedCallback changeRelayAdapter = new Observable.OnPropertyChangedCallback() {
         @Override
         public void onPropertyChanged(Observable sender, int propertyId) {
-            binding.getVm().textWindow.set(((ObservableField<String>) sender).get());
+            // binding.getVm().textWindow.set(((ObservableField<String>) sender).get());
         }
     };
 
@@ -94,10 +90,10 @@ public class ThinJamActivity extends AppCompatActivity implements BtCallBack2, A
         @Override
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
-            final BlueJayService.LocalBinder binder = (BlueJayService.LocalBinder) service;
-            thinJam = binder.getService();
-            thinJam.stringObservableField.removeOnPropertyChangedCallback(changeRelayAdapter);
-            thinJam.stringObservableField.addOnPropertyChangedCallback(changeRelayAdapter); // TODO can this leak? Better way to use same observable field?
+            // final BlueJayService.LocalBinder binder = (BlueJayService.LocalBinder) service;
+            // thinJam = binder.getService();
+            // thinJam.stringObservableField.removeOnPropertyChangedCallback(changeRelayAdapter);
+            // thinJam.stringObservableField.addOnPropertyChangedCallback(changeRelayAdapter); // TODO can this leak? Better way to use same observable field?
             mBound = true;
             UserError.Log.d(TAG, "Connected to service");
             processIncomingBundle(savedExtras);
@@ -117,7 +113,7 @@ public class ThinJamActivity extends AppCompatActivity implements BtCallBack2, A
         setContentView(binding.getRoot());
         JoH.fixActionBar(this);
 
-        scanMeister.setFilter(customFilter);
+        scanMeister.setFilter(nullFilter);
         scanMeister.allowWide().unlimitedMatches();
         scanMeister.addCallBack2(this, TAG);
 
@@ -133,7 +129,7 @@ public class ThinJamActivity extends AppCompatActivity implements BtCallBack2, A
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_thinjam, menu);
+//        getMenuInflater().inflate(R.menu.menu_thinjam, menu);
         return true;
     }
 
@@ -143,7 +139,7 @@ public class ThinJamActivity extends AppCompatActivity implements BtCallBack2, A
                 "Are you sure you want to put the watch in to Standby mode?\n\nLong Press Watch Button to wake it again.",
                 () -> {
                     // call standby
-                    thinJam.standby();
+                    // thinJam.standby();
                 });
 
     }
@@ -151,18 +147,18 @@ public class ThinJamActivity extends AppCompatActivity implements BtCallBack2, A
     @Override
     protected void onStart() {
         super.onStart();
-        bindService();
+        // bindService();
     }
 
     private void bindService() {
-        final Intent intent = new Intent(this, BlueJayService.class);
-        bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        // final Intent intent = new Intent(this, BlueJayService.class);
+        // bindService(intent, connection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
     protected void onStop() {
-        thinJam.stringObservableField.removeOnPropertyChangedCallback(changeRelayAdapter);
-        unbindService(connection);
+        // thinJam.stringObservableField.removeOnPropertyChangedCallback(changeRelayAdapter);
+        // unbindService(connection);
         mBound = false;
         super.onStop();
     }
@@ -210,7 +206,6 @@ public class ThinJamActivity extends AppCompatActivity implements BtCallBack2, A
     }
 
     // bound view model
-    @RequiredArgsConstructor
     public class ViewModel {
         Activity activity;
 
@@ -260,22 +255,22 @@ public class ThinJamActivity extends AppCompatActivity implements BtCallBack2, A
 
                 case "showqrcode":
                     JoH.static_toast_long("Showing QR code on watch");
-                    thinJam.showQrCode();
+                    // thinJam.showQrCode();
                     break;
 
                 case "easyauth":
                     JoH.static_toast_long("Doing non-QR code Easy Auth");
-                    thinJam.easyAuth();
+                    // thinJam.easyAuth();
                     break;
 
                 case "reboot":
                     JoH.static_toast_long("Rebooting");
-                    thinJam.reboot();
+                    // thinJam.reboot();
                     break;
 
                 case "factoryreset":
                     JoH.static_toast_long("Factory Resetting");
-                    thinJam.factoryReset();
+                    // thinJam.factoryReset();
                     break;
 
                 case "launchstatus":
@@ -305,28 +300,28 @@ public class ThinJamActivity extends AppCompatActivity implements BtCallBack2, A
                 if (legacy) {
                     scanMeister.setFilter(nullFilter).scan();
                 } else {
-                    scanMeister.setFilter(customFilter).scan();
+                    scanMeister.setFilter(nullFilter).scan();
                 }
             }
             return false;
         }
 
         public void getStatus() {
-            thinJam.getStatus();
+            // thinJam.getStatus();
         }
 
         // boolean for long click
         public boolean unitTesting(final String test) {
             // call external test suite
             if (test.startsWith("confirm")) {
-                val subtest = test.substring(7,test.length());
+                final String subtest = test.substring(7,test.length());
                 GenericConfirmDialog.show(this.activity, "Confirm:", "Please confirm when ready for: " + subtest, () -> {
-                    thinJam.setProgressIndicator(progressBar);
-                    thinJam.getDebug().processTestSuite(subtest);
+                    // thinJam.setProgressIndicator(progressBar);
+                    // thinJam.getDebug().processTestSuite(subtest);
                 });
             } else {
-                thinJam.setProgressIndicator(progressBar);
-                thinJam.getDebug().processTestSuite(test);
+                // thinJam.setProgressIndicator(progressBar);
+                // thinJam.getDebug().processTestSuite(test);
             }
             return true;
         }
@@ -349,24 +344,24 @@ public class ThinJamActivity extends AppCompatActivity implements BtCallBack2, A
             if (txid.length() > 6) {
                 txid = "";
             }
-            thinJam.setSettings(txid);
-            thinJam.setTime();
+            // thinJam.setSettings(txid);
+            // thinJam.setTime();
         }
 
 
         // long click needs boolean
         public boolean doOtaC(View v) {
-            thinJam.setProgressIndicator(progressBar);
+            // thinJam.setProgressIndicator(progressBar);
             JoH.static_toast_long("Doing OTA CORE");
-            Inevitable.task("do-ota-tj", 500, () -> thinJam.doOtaCore());
+            Inevitable.task("do-ota-tj", 500, () -> {}); // thinJam.doOtaCore());
             return false;
         }
 
         // long click needs boolean
         public void doOtaM(View v) {
-            thinJam.setProgressIndicator(progressBar);
+            // thinJam.setProgressIndicator(progressBar);
             //  JoH.static_toast_long("Doing OTA CORE");
-            Inevitable.task("do-ota-tj", 500, () -> thinJam.doOtaMain());
+            Inevitable.task("do-ota-tj", 500, () -> {}); // thinJam.doOtaMain());
         }
 
         // long click needs boolean
@@ -403,11 +398,11 @@ public class ThinJamActivity extends AppCompatActivity implements BtCallBack2, A
             connectedDevice.set(item.mac + " " + item.name);
             setMac(item.mac);
             saveConnectedDevice();
-            BlueJayEntry.setEnabled();
-            thinJam.emptyQueue();
-            thinJam.stringObservableField.set("");
-            thinJam.notificationString.setLength(0);
-            refreshFromStoredMac();
+            // BlueJayEntry.setEnabled();
+            // thinJam.emptyQueue();
+            // thinJam.stringObservableField.set("");
+            // thinJam.notificationString.setLength(0);
+            // refreshFromStoredMac();
         }
 
         private static final String PREF_CONNECTED_DEVICE_INFO = "TJ_CONNECTED_DEVICE_INFO";
@@ -431,11 +426,11 @@ public class ThinJamActivity extends AppCompatActivity implements BtCallBack2, A
         private void setMac(final String mac) {
             if (mac == null) return;
             this.mac = mac;
-            thinJam.setMac(mac);
+            // thinJam.setMac(mac);
         }
 
         private void identify() {
-          thinJam.identify();
+          // thinJam.identify();
         }
 
     } // end view model class
@@ -485,8 +480,8 @@ public class ThinJamActivity extends AppCompatActivity implements BtCallBack2, A
             if (command != null) {
                 switch (command) {
                     case REFRESH_FROM_STORED_MAC:
-                        binding.getVm().connectedDevice.set(BlueJay.getMac());
-                        binding.getVm().setMac(BlueJay.getMac()); // TODO this doesn't handle name
+                        // binding.getVm().connectedDevice.set(BlueJay.getMac());
+                        // binding.getVm().setMac(BlueJay.getMac()); // TODO this doesn't handle name
                         binding.getVm().identify(); // re(do) identification.
                         break;
                     case INSTALL_CORE:
@@ -535,7 +530,7 @@ public class ThinJamActivity extends AppCompatActivity implements BtCallBack2, A
             for (int i = 0; i < permissions.length; i++) {
                 if (permissions[i].equals(android.Manifest.permission.ACCESS_FINE_LOCATION)) {
                     if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-                        refreshFromStoredMac();
+                        // refreshFromStoredMac();
                     }
                 }
             }
@@ -544,7 +539,7 @@ public class ThinJamActivity extends AppCompatActivity implements BtCallBack2, A
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        val scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        final IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
 
         if (scanResult == null || scanResult.getContents() == null) {
             return;
@@ -552,7 +547,7 @@ public class ThinJamActivity extends AppCompatActivity implements BtCallBack2, A
         if (scanResult.getFormatName().equals("QR_CODE")) {
 
             try {
-                BlueJay.processQRCode(scanResult.getRawBytes());
+                // BlueJay.processQRCode(scanResult.getRawBytes());
             } catch (Exception e) {
                 // meh
             }
@@ -560,8 +555,3 @@ public class ThinJamActivity extends AppCompatActivity implements BtCallBack2, A
         }
     }
 }
-
-
-
-
-

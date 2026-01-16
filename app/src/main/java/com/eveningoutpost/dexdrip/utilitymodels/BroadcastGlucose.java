@@ -22,7 +22,6 @@ import com.eveningoutpost.dexdrip.models.Sensor;
 import com.eveningoutpost.dexdrip.models.UserError;
 import com.eveningoutpost.dexdrip.utils.DexCollectionType;
 
-import lombok.val;
 
 // created by jamorham
 
@@ -45,7 +44,7 @@ public class BroadcastGlucose {
                 }
 
                 if (Math.abs(bgReading.timestamp - lastTimestamp) < MINUTE_IN_MS) {
-                    val msg = String.format("Refusing to broadcast a reading with close timestamp to last broadcast:  %s (%d) vs %s (%d) ", dateTimeText(lastTimestamp), lastTimestamp, dateTimeText(bgReading.timestamp), bgReading.timestamp);
+                    final String msg = String.format("Refusing to broadcast a reading with close timestamp to last broadcast:  %s (%d) vs %s (%d) ", dateTimeText(lastTimestamp), lastTimestamp, dateTimeText(bgReading.timestamp), bgReading.timestamp);
                     if (bgReading.timestamp == lastTimestamp) {
                         UserError.Log.d(TAG, msg);
                     } else {
@@ -54,7 +53,7 @@ public class BroadcastGlucose {
                     return;
                 }
 
-                val sensor = Sensor.currentSensor();
+                final Sensor sensor = Sensor.currentSensor();
                 if (sensor == null) {
                     UserError.Log.wtf(TAG, "Refusing to broadcast a reading as no sensor is active");
                     return;

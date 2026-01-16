@@ -4,7 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.PowerManager;
 
-import com.eveningoutpost.dexdrip.GcmActivity;
+//import com.eveningoutpost.dexdrip.GcmActivity;
 import com.eveningoutpost.dexdrip.Home;
 import com.eveningoutpost.dexdrip.MapsActivity;
 import com.eveningoutpost.dexdrip.models.BgReading;
@@ -22,9 +22,9 @@ import com.eveningoutpost.dexdrip.utils.CheckBridgeBattery;
 import com.eveningoutpost.dexdrip.utils.DexCollectionType;
 import com.eveningoutpost.dexdrip.utils.Mdns;
 import com.google.gson.Gson;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
+//import com.squareup.okhttp.OkHttpClient;
+//import com.squareup.okhttp.Request;
+//import com.squareup.okhttp.Response;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -49,7 +49,7 @@ public class WixelReader extends AsyncTask<String, Void, Void> {
 
     private final static String TAG = WixelReader.class.getSimpleName();
 
-    private static OkHttpClient httpClient = null;
+//    private static OkHttpClient httpClient = null;
     private static final HashMap<String, String> hostStatus = new HashMap<>();
     private static final HashMap<String, Long> hostStatusTime = new HashMap<>();
 
@@ -234,82 +234,82 @@ public class WixelReader extends AsyncTask<String, Void, Void> {
         long newest_timestamp = 0;
         try {
 
-            if (httpClient == null) {
-                httpClient = new OkHttpClient();
-                // suitable for GPRS
-                httpClient.setConnectTimeout(30, TimeUnit.SECONDS);
-                httpClient.setReadTimeout(60, TimeUnit.SECONDS);
-                httpClient.setWriteTimeout(20, TimeUnit.SECONDS);
-            }
+//            if (httpClient == null) {
+//                httpClient = new OkHttpClient();
+//                // suitable for GPRS
+//                httpClient.setConnectTimeout(30, TimeUnit.SECONDS);
+//                httpClient.setReadTimeout(60, TimeUnit.SECONDS);
+//                httpClient.setWriteTimeout(20, TimeUnit.SECONDS);
+//            }
 
 
             // simple HTTP GET request
             // n=numberOfRecords for backfilling
             // r=sequence number to avoid any cache
             // expecting json reply like the standard json server in dexterity / python pi usb / parakeet
-            final Request request = new Request.Builder()
-
-                    // Mozilla header facilitates compression
-                    .header("User-Agent", "Mozilla/5.0")
-                    .header("Connection", "close")
-                    .url(url + "?n=" + Integer.toString(numberOfRecords)
-                            + "&r=" + Long.toString((System.currentTimeMillis() / 1000) % 9999999))
-                    .build();
-
-            final Response response = httpClient.newCall(request).execute();
+//            final Request request = new Request.Builder()
+//
+//                    // Mozilla header facilitates compression
+//                    .header("User-Agent", "Mozilla/5.0")
+//                    .header("Connection", "close")
+//                    .url(url + "?n=" + Integer.toString(numberOfRecords)
+//                            + "&r=" + Long.toString((System.currentTimeMillis() / 1000) % 9999999))
+//                    .build();
+//
+//            final Response response = httpClient.newCall(request).execute();
             // if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-            if (response.isSuccessful()) {
-
-                String lines[] = response.body().string().split("\\r?\\n");
-
-                for (String data : lines) {
-
-                    if (data == null) {
-                        Log.d(TAG, "received null continuing");
-                        continue;
-                    }
-                    if (data.equals("")) {
-                        Log.d(TAG, "received \"\" continuing");
-                        continue;
-                    }
-
-                    final TransmitterRawData trd = gson.fromJson(data, TransmitterRawData.class);
-                    trd.CaptureDateTime = System.currentTimeMillis() - trd.RelativeTime;
-
-                    // Versions of the Python USB script after 20th May 2016 will
-                    // submit a bogus geolocation in the middle of the ocean to differentiate
-                    // themselves from actual parakeet data even though both can coexist on the
-                    // parakeet web service.
-
-                   // if (JoH.ratelimit("parakeet-check-notification", 9)) {
-                        ParakeetHelper.checkParakeetNotifications(trd.CaptureDateTime, trd.GeoLocation);
-                    //}
-                    if ((trd.GeoLocation != null)) {
-                        if (!trd.GeoLocation.equals("-15,-15")) {
-                            try {
-                                MapsActivity.newMapLocation(trd.GeoLocation, trd.CaptureDateTime);
-                            } catch (Exception e) {
-                                Log.e(TAG, "Exception with maps activity: " + e.toString());
-                            }
-                        } else {
-                            // look a little further if we see usb-wixel data on parakeet app engine
-                            processNumberOfRecords = numberOfRecords + 1;
-                        }
-                    }
-                    if (newest_timestamp < trd.getCaptureDateTime()) {
-                        statusLog(url, JoH.hourMinuteString() + " OK data from:", trd.getCaptureDateTime());
-                        newest_timestamp = trd.CaptureDateTime;
-                    }
-                    trd_list.add(0, trd);
-                    //  System.out.println( trd.toTableString());
-                    if (trd_list.size() == processNumberOfRecords) {
-                        // We have the data we want, let's get out
-                        break;
-                    }
-                }
-
-                Log.i(TAG, "Success getting http json with end size: " + Integer.toString(trd_list.size()));
-            }
+//            if (response.isSuccessful()) {
+//
+//                String lines[] = response.body().string().split("\\r?\\n");
+//
+//                for (String data : lines) {
+//
+//                    if (data == null) {
+//                        Log.d(TAG, "received null continuing");
+//                        continue;
+//                    }
+//                    if (data.equals("")) {
+//                        Log.d(TAG, "received \"\" continuing");
+//                        continue;
+//                    }
+//
+//                    final TransmitterRawData trd = gson.fromJson(data, TransmitterRawData.class);
+//                    trd.CaptureDateTime = System.currentTimeMillis() - trd.RelativeTime;
+//
+//                    // Versions of the Python USB script after 20th May 2016 will
+//                    // submit a bogus geolocation in the middle of the ocean to differentiate
+//                    // themselves from actual parakeet data even though both can coexist on the
+//                    // parakeet web service.
+//
+//                   // if (JoH.ratelimit("parakeet-check-notification", 9)) {
+//                        ParakeetHelper.checkParakeetNotifications(trd.CaptureDateTime, trd.GeoLocation);
+//                    //}
+//                    if ((trd.GeoLocation != null)) {
+//                        if (!trd.GeoLocation.equals("-15,-15")) {
+//                            try {
+//                                MapsActivity.newMapLocation(trd.GeoLocation, trd.CaptureDateTime);
+//                            } catch (Exception e) {
+//                                Log.e(TAG, "Exception with maps activity: " + e.toString());
+//                            }
+//                        } else {
+//                            // look a little further if we see usb-wixel data on parakeet app engine
+//                            processNumberOfRecords = numberOfRecords + 1;
+//                        }
+//                    }
+//                    if (newest_timestamp < trd.getCaptureDateTime()) {
+//                        statusLog(url, JoH.hourMinuteString() + " OK data from:", trd.getCaptureDateTime());
+//                        newest_timestamp = trd.CaptureDateTime;
+//                    }
+//                    trd_list.add(0, trd);
+//                    //  System.out.println( trd.toTableString());
+//                    if (trd_list.size() == processNumberOfRecords) {
+//                        // We have the data we want, let's get out
+//                        break;
+//                    }
+//                }
+//
+//                Log.i(TAG, "Success getting http json with end size: " + Integer.toString(trd_list.size()));
+//            }
 
         } catch (Exception e) {
             Log.e(TAG, "caught Exception in reading http json data " + e.toString());
@@ -495,12 +495,12 @@ public class WixelReader extends AsyncTask<String, Void, Void> {
             return 30000L;
         }
 
-        if (httpClient == null) {
+//        if (httpClient == null) {
             return (DEXCOM_PERIOD - gapTime) + 2000;
-        } else {
+//        } else {
             // compensate for parakeet gprs lag
-            return (DEXCOM_PERIOD - gapTime) + 12000;
-        }
+//            return (DEXCOM_PERIOD - gapTime) + 12000;
+//        }
     }
 
     public Void doInBackground(String... urls) {
@@ -596,7 +596,7 @@ public class WixelReader extends AsyncTask<String, Void, Void> {
                     Pref.setInt("parakeet_battery", LastReading.UploaderBatteryLife);
                     CheckBridgeBattery.checkParakeetBattery();
                     if (Home.get_master()) {
-                        GcmActivity.sendParakeetBattery(LastReading.UploaderBatteryLife);
+//                        GcmActivity.sendParakeetBattery(LastReading.UploaderBatteryLife);
                     }
                 }
 

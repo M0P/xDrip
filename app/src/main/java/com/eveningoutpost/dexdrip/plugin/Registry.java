@@ -3,8 +3,7 @@ package com.eveningoutpost.dexdrip.plugin;
 import static com.eveningoutpost.dexdrip.plugin.Cache.erase;
 
 import java.util.HashMap;
-
-import lombok.val;
+import java.util.Map;
 
 /**
  * JamOrHam
@@ -31,7 +30,7 @@ public class Registry {
     }
 
     public static synchronized void eraseAll() {
-       for (val p : registry.entrySet()) {
+       for (final Map.Entry<String, PluginDef> p : registry.entrySet()) {
            erase(p.getValue());
            p.getValue().reset();
        }

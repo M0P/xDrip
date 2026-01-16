@@ -11,8 +11,6 @@ import com.eveningoutpost.dexdrip.models.JoH;
 import com.eveningoutpost.dexdrip.models.UserError;
 import com.eveningoutpost.dexdrip.R;
 
-import lombok.val;
-
 /**
  * JamOrHam
  * <p>
@@ -25,11 +23,11 @@ public class DoNotDisturb {
 
     public static void checkAndAskForDoNotDisturbAccess(final Activity activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val mNotificationManager = (NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
+            final NotificationManager mNotificationManager = (NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
             try {
                 if (!mNotificationManager.isNotificationPolicyAccessGranted()) {
                     JoH.show_ok_dialog(activity, activity.getString(R.string.please_allow_permission), activity.getString(R.string.allow_do_not_disturb_text), () -> {
-                        val intent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
+                        final Intent intent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
                                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         activity.startActivity(intent);
                     });

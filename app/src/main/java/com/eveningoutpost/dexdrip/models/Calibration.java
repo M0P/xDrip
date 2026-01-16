@@ -34,7 +34,6 @@ import com.eveningoutpost.dexdrip.xdrip;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
-import com.google.gson.internal.bind.DateTypeAdapter;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -440,7 +439,7 @@ public class Calibration extends Model {
                 if (((firstCalRecord.getCalSubrecords()[i] != null && Calibration.is_new(firstCalRecord.getCalSubrecords()[i], addativeOffset))) || (i == 0 && override)) {
                     CalSubrecord calSubrecord = firstCalRecord.getCalSubrecords()[i];
 
-                    Calibration calibration = new Calibration();
+                    final Calibration calibration = new Calibration();
                     calibration.bg = calSubrecord.getCalBGL();
                     calibration.timestamp = calSubrecord.getDateEntered().getTime() + addativeOffset;
                     calibration.raw_timestamp = calibration.timestamp;
@@ -493,10 +492,10 @@ public class Calibration extends Model {
         Calibration calibration = new Select()
                 .from(Calibration.class)
                 .where("Sensor = ? ", sensor.getId())
-                .where("timestamp <= ?", calSubrecord.getDateEntered().getTime() + addativeOffset + (1000 * 60 * 2))
+                .where("timestamp <= ?", calSubrecord.getDateEntered().getTime() + addativeOffset + (1000 * 60 * 2L))
                 .orderBy("timestamp desc")
                 .executeSingle();
-        if (calibration != null && Math.abs(calibration.timestamp - (calSubrecord.getDateEntered().getTime() + addativeOffset)) < (4 * 60 * 1000)) {
+        if (calibration != null && Math.abs(calibration.timestamp - (calSubrecord.getDateEntered().getTime() + addativeOffset)) < (4 * 60 * 1000L)) {
             Log.d("CAL CHECK IN ", "Already have that calibration!");
             return false;
         } else {
@@ -582,18 +581,18 @@ public class Calibration extends Model {
                 bgReading = BgReading.last(is_follower);
             } else {
                 // get closest bg reading we can find with a cut off at 15 minutes max time
-                bgReading = BgReading.getForPreciseTimestamp(new Date().getTime() - ((timeoffset - estimatedInterstitialLagSeconds) * 1000 ), (15 * 60 * 1000));
+                bgReading = BgReading.getForPreciseTimestamp(new Date().getTime() - ((timeoffset - estimatedInterstitialLagSeconds) * 1000L ), (15 * 60 * 1000L));
             }
             if (bgReading != null) {
                 if (SensorSanity.isRawValueSane(bgReading.raw_data, DexCollectionType.getDexCollectionType(), true)) {
                     calibration.sensor = sensor;
                     calibration.bg = bg;
                     calibration.check_in = false;
-                    calibration.timestamp = new Date().getTime() - (timeoffset * 1000); //  potential historical bg readings
+                    calibration.timestamp = new Date().getTime() - (timeoffset * 1000L);
                     calibration.raw_value = bgReading.raw_data;
                     calibration.adjusted_raw_value = bgReading.age_adjusted_raw_value;
                     calibration.sensor_uuid = sensor.uuid;
-                    calibration.slope_confidence = Math.min(Math.max(((4 - Math.abs((bgReading.calculated_value_slope) * 60000)) / 4), 0), 1);
+                    calibration.slope_confidence = Math.min(Math.max(((4 - Math.abs((bgReading.calculated_value_slope) * 60000L)) / 4), 0), 1);
 
                     double estimated_raw_bg = BgReading.estimated_raw_bg(new Date().getTime());
                     calibration.raw_timestamp = bgReading.timestamp;
@@ -670,7 +669,7 @@ public class Calibration extends Model {
                 .where("Sensor = ? ", sensor.getId())
                 .where("slope_confidence != 0")
                 .where("sensor_confidence != 0")
-                .where("timestamp > ?", (new Date().getTime() - (60000 * 60 * 24 * 5)))
+                .where("timestamp > ?", (new Date().getTime() - (60000L * 60 * 24 * 5)))
                 .orderBy("timestamp desc")
                 .execute();
     }
@@ -802,7 +801,8 @@ public class Calibration extends Model {
                     newFingerStickData();
                 }
             }
-        } else {
+        }
+        else {
             Log.d(TAG, "NO Current active sensor found!!");
         }
     }
@@ -817,7 +817,8 @@ public class Calibration extends Model {
         if (CollectionServiceStarter.isLimitter()) {
             if (Pref.getBooleanDefaultFalse("use_non_fixed_li_parameters")) {
                 return new LiParametersNonFixed();
-            } else {
+            }
+            else {
                 return new LiParameters();
             }
         }
@@ -846,11 +847,12 @@ public class Calibration extends Model {
                         && (calibrations.get(1).slope != 0)
                         && (calibrations.get(1).possible_bad != null && calibrations.get(1).possible_bad == true)) {
                     return calibrations.get(1).slope;
-                } else {
-                    return Math.max(((-0.048) * (thisCalibration.sensor_age_at_time_of_estimation / (60000 * 60 * 24))) + 1.1, sParams.getDefaultLowSlopeLow());
+                }
+                else {
+                    return Math.max(((-0.048) * (thisCalibration.sensor_age_at_time_of_estimation / (60000L * 60 * 24))) + 1.1, sParams.getDefaultLowSlopeLow());
                 }
             } else if (calibrations.size() == 2) {
-                return Math.max(((-0.048) * (thisCalibration.sensor_age_at_time_of_estimation / (60000 * 60 * 24))) + 1.1, sParams.getDefaultLowSlopeHigh());
+                return Math.max(((-0.048) * (thisCalibration.sensor_age_at_time_of_estimation / (60000L * 60 * 24))) + 1.1, sParams.getDefaultLowSlopeHigh());
             }
             return sParams.getDefaultSlope();
         } else {
@@ -859,10 +861,12 @@ public class Calibration extends Model {
                         && (calibrations.get(1).slope != 0)
                         && (calibrations.get(1).possible_bad != null && calibrations.get(1).possible_bad == true)) {
                     return calibrations.get(1).slope;
-                } else {
+                }
+                else {
                     return sParams.getDefaultHighSlopeHigh();
                 }
-            } else if (calibrations.size() == 2) {
+            }
+            else if (calibrations.size() == 2) {
                 return sParams.getDefaulHighSlopeLow();
             }
         }
@@ -928,7 +932,8 @@ public class Calibration extends Model {
                         Log.d(TAG, "History Rewrite: Ignoring BgReading without calibration from: " + JoH.dateTimeText(bgReading.timestamp));
                     }
                 }
-            } catch (NullPointerException e) {
+            }
+            catch (NullPointerException e) {
                 Log.wtf(TAG, "Null pointer in AdjustRecentReadings >=3: " + e);
             }
             // initial calibration
@@ -946,7 +951,8 @@ public class Calibration extends Model {
                     bgReading.save();
                     BgReading.pushBgReadingSyncToWatch(bgReading, false);
                 }
-            } catch (NullPointerException e) {
+            }
+            catch (NullPointerException e) {
                 Log.wtf(TAG, "Null pointer in AdjustRecentReadings ==2: " + e);
             }
         }
@@ -956,7 +962,8 @@ public class Calibration extends Model {
             bgReadings.get(0).find_new_raw_curve();
             bgReadings.get(0).find_new_curve();
             BgReading.pushBgReadingSyncToWatch(bgReadings.get(0), false);
-        } catch (NullPointerException e) {
+        }
+        catch (NullPointerException e) {
             Log.wtf(TAG, "Got null pointer exception in adjustRecentBgReadings");
         }
     }
@@ -1016,7 +1023,8 @@ public class Calibration extends Model {
             calibration.invalidate();
             CalibrationSendQueue.addToQueue(calibration, xdrip.getAppContext());
             newFingerStickData();
-        } else {
+        }
+        else {
             Log.d(TAG,"Could not find calibration to clear: "+uuid);
         }
     }
@@ -1026,7 +1034,6 @@ public class Calibration extends Model {
     public String toS() {
         Gson gson = new GsonBuilder()
                 .excludeFieldsWithoutExposeAnnotation()
-                .registerTypeAdapter(Date.class, new DateTypeAdapter())
                 .serializeSpecialFloatingPointValues()
                 .create();
         return gson.toJson(this);
@@ -1078,7 +1085,8 @@ public class Calibration extends Model {
                 Log.d(TAG, "saving new calibration record. sensor uuid =" + jsonCalibration.sensor_uuid + " calibration uuid = " + jsonCalibration.uuid);
                 jsonCalibration.sensor = sensor;
                 jsonCalibration.save();
-            } else {
+            }
+            else {
                 Log.d(TAG, "updating existing calibration record: " + jsonCalibration.uuid);
                 existingCalibration.sensor = sensor;
                 existingCalibration.timestamp = jsonCalibration.timestamp;
@@ -1109,7 +1117,8 @@ public class Calibration extends Model {
 
                 existingCalibration.save();
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             Log.e(TAG, "Could not save Calibration: " + e.toString());
         }
     }
@@ -1162,12 +1171,13 @@ public class Calibration extends Model {
                 .where("Sensor = ? ", sensor.getId())
                 .where("slope_confidence != 0")
                 .where("sensor_confidence != 0")
-                .where("timestamp > ?", (new Date().getTime() - (60000 * 60 * 24 * 4)))
+                .where("timestamp > ?", (new Date().getTime() - (60000L * 60 * 24 * 4)))
                 .orderBy("bg desc")
                 .executeSingle();
         if (calibration != null) {
             return calibration.bg;
-        } else {
+        }
+        else {
             return 120;
         }
     }
@@ -1179,7 +1189,7 @@ public class Calibration extends Model {
                 .where("Sensor = ? ", sensor.getId())
                 .where("slope_confidence != 0")
                 .where("sensor_confidence != 0")
-                .where("timestamp > ?", (new Date().getTime() - (60000 * 60 * 24 * 4)))
+                .where("timestamp > ?", (new Date().getTime() - (60000L * 60 * 24 * 4)))
                 .orderBy("bg asc")
                 .executeSingle();
         if (calibration != null) {
@@ -1281,7 +1291,7 @@ public class Calibration extends Model {
                 .where("Sensor = ? ", sensor.getId())
                 .where("slope_confidence != 0")
                 .where("sensor_confidence != 0")
-                .where("timestamp > ?", (new Date().getTime() - (60000 * 60 * 24 * 4)))
+                .where("timestamp > ?", (new Date().getTime() - (60000L * 60 * 24 * 4)))
                 .orderBy("timestamp desc")
                 .execute();
     }
@@ -1326,7 +1336,8 @@ public class Calibration extends Model {
                 && (calibration.sensor_confidence == 0)
                 && (calibration.intercept == 0)) {
             return true;
-        } else {
+        }
+        else {
             return false;
         }
     }
@@ -1338,7 +1349,8 @@ public class Calibration extends Model {
                 && (calibration.slope != 0)
                 && (calibration.intercept != 0)) {
             return true;
-        } else {
+        }
+        else {
             return false;
         }
     }

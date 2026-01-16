@@ -29,8 +29,6 @@ import com.google.gson.GsonBuilder;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
-import lombok.Setter;
-
 public class NanoStatus {
 
     private static final String TAG = "NanoStatus";
@@ -45,8 +43,12 @@ public class NanoStatus {
     private final SpannableString empty = new SpannableString("");
     private volatile boolean running = false;
     private volatile Thread myThread;
-    @Setter
     private Runnable doveTail;
+
+    public void setDoveTail(Runnable doveTail) {
+        this.doveTail = doveTail;
+    }
+
     public ObservableField<String> watch = new ObservableField<>();
     public ObservableField<SpannableString> color_watch = new ObservableField<>();
 

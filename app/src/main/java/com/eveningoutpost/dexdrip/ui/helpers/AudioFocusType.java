@@ -4,8 +4,6 @@ import android.media.AudioManager;
 
 import com.eveningoutpost.dexdrip.utilitymodels.Pref;
 
-import lombok.val;
-
 /**
  * JamOrHam - convert preference to audio manager type
  */
@@ -13,7 +11,7 @@ import lombok.val;
 public class AudioFocusType {
 
     public static int getAlarmAudioFocusType() {
-        val pref = Pref.getString("alert_audio_focus", "AUDIOFOCUS_NONE");
+        final String pref = Pref.getString("alert_audio_focus", "AUDIOFOCUS_NONE");
 
         switch (pref) {
             case "AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK":

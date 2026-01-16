@@ -3,7 +3,6 @@ package com.eveningoutpost.dexdrip.g5model;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import lombok.Getter;
 
 // created by jamorham
 
@@ -11,7 +10,6 @@ public class SessionStopRxMessage extends BaseMessage {
 
     public static final byte opcode = 0x29;
     final byte length = 17;
-    @Getter
     private byte status = (byte)0xFF;
     private byte received = (byte)0xFF;
     final String transmitterId;
@@ -19,6 +17,10 @@ public class SessionStopRxMessage extends BaseMessage {
     int sessionStopTime =0;
     int transitterTime=0;
     boolean valid = false;
+
+    public byte getStatus() {
+        return status;
+    }
 
     public SessionStopRxMessage(byte[] packet,String transmitterId) {
         this.transmitterId = transmitterId;

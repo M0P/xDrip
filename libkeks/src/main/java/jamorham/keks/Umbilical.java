@@ -2,7 +2,6 @@ package jamorham.keks;
 
 import androidx.annotation.Keep;
 
-import lombok.val;
 
 /**
  * JamOrHam
@@ -14,7 +13,7 @@ import lombok.val;
 public class Umbilical {
 
     public void unitTest() {
-        val s = Plugin.getInstance("");
+        Plugin s = Plugin.getInstance("");
         s.amConnected();
         s.receivedResponse(null);
         s.receivedResponse2(null);

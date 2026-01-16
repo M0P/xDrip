@@ -12,8 +12,6 @@ import java.util.List;
 
 import static com.eveningoutpost.dexdrip.utilitymodels.Constants.INCOMPATIBLE_BASE_ID;
 
-import lombok.val;
-
 /**
  * Created by jamorham on 01/11/2017.
  */
@@ -61,7 +59,7 @@ public class IncompatibleApps {
 
         final List<String> speedApps = new ArrayList<>();
         speedApps.add("com.mediatek.duraspeed");
-        for (val app : speedApps) {
+        for (final String app : speedApps) {
             if (InstalledApps.checkPackageExists(context, app)) {
                 if (JoH.pratelimit(app + NOTIFY_MARKER, RENOTIFY_TIME)) {
                     id = notify2("Nasty Power Manager", app, "DuraSpeed" + " " + xdrip.getAppContext().getString(R.string.aggressive_power_manager), id);

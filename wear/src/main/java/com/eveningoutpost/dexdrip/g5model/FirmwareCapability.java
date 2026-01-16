@@ -9,7 +9,6 @@ import static com.eveningoutpost.dexdrip.models.JoH.emptyString;
 import com.eveningoutpost.dexdrip.utilitymodels.Constants;
 import com.google.common.collect.ImmutableSet;
 
-import lombok.val;
 
 public class FirmwareCapability {
 
@@ -93,7 +92,7 @@ public class FirmwareCapability {
     }
 
     public static boolean isTransmitterModified(final String tx_id) {
-        val vr1 = (VersionRequest1RxMessage) getFirmwareXDetails(tx_id, 1);
+        VersionRequest1RxMessage vr1 = (VersionRequest1RxMessage) getFirmwareXDetails(tx_id, 1);
         if (vr1 != null) {
             return vr1.max_runtime_days >= 180;
         }
@@ -137,12 +136,12 @@ public class FirmwareCapability {
     }
 
     public static boolean doWeHaveVersion(final String tx_id) {
-        val firmware_version = getRawFirmwareVersionString(tx_id);
+        String firmware_version = getRawFirmwareVersionString(tx_id);
         return !emptyString(firmware_version) && !firmware_version.equals("error");
     }
 
     public static boolean isTransmitterRawIncapable(final String tx_id) {
-        val firmware_version = getRawFirmwareVersionString(tx_id);
+        String firmware_version = getRawFirmwareVersionString(tx_id);
         return doWeHaveVersion(tx_id) && isKnownFirmware(firmware_version) && !isFirmwareRawCapable(firmware_version);
     }
 

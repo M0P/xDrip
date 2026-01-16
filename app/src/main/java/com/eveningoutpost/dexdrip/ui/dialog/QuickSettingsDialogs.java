@@ -13,7 +13,7 @@ import android.widget.TextView;
 import com.eveningoutpost.dexdrip.models.UserError;
 import com.eveningoutpost.dexdrip.R;
 import com.eveningoutpost.dexdrip.utilitymodels.Pref;
-import com.eveningoutpost.dexdrip.watch.thinjam.BlueJayEntry;
+//import com.eveningoutpost.dexdrip.watch.thinjam.BlueJayEntry;
 
 // jamorham
 
@@ -113,22 +113,22 @@ public class QuickSettingsDialogs {
             });
         }
 
-        if (!BlueJayEntry.isNative()) {
-            dialog.setOnShowListener(d -> {
-                try {
-                    edt.requestFocus();
-                    edt.post(() -> {
-                        // Move cursor to end of text
-                        edt.setSelection(edt.getText().length());
-                        // show keyboard automatically
-                        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-                        imm.showSoftInput(edt, InputMethodManager.SHOW_IMPLICIT);
-                    });
-                  } catch (Exception e) {
-                    UserError.Log.e(TAG, "Error setting input method focus: " + e);
-                }
-            });
-        }
+//        if (!BlueJayEntry.isNative()) {
+//            dialog.setOnShowListener(d -> {
+//                try {
+//                    edt.requestFocus();
+//                    edt.post(() -> {
+//                        // Move cursor to end of text
+//                        edt.setSelection(edt.getText().length());
+//                        // show keyboard automatically
+//                        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+//                        imm.showSoftInput(edt, InputMethodManager.SHOW_IMPLICIT);
+//                    });
+//                  } catch (Exception e) {
+//                    UserError.Log.e(TAG, "Error setting input method focus: " + e);
+//                }
+//            });
+//        }
 
         try {
             dialog.show();

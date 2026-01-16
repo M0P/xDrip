@@ -62,12 +62,11 @@ import java.util.Set;
 
 
 import kotlin.reflect.KClass;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
+
 
 // jamorham
 
-@RequiredArgsConstructor
+
 @RequiresApi(api = Build.VERSION_CODES.O)
 @SuppressWarnings("unchecked")
 public class HealthGamut {
@@ -121,6 +120,10 @@ public class HealthGamut {
 
     private final Coroutines coroutines = Coroutines.INSTANCE;
 
+    public HealthGamut(final Context context) {
+        this.context = context;
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     public boolean init() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
@@ -161,12 +164,12 @@ public class HealthGamut {
         } else {
             Log.e(TAG, "Companion app not available - asking for installation");
 
-            val url = Uri.parse("market://details")
+            final Uri url = Uri.parse("market://details")
                     .buildUpon()
                     .appendQueryParameter("id", "com.google.android.apps.healthdata")
                     .appendQueryParameter("url", "healthconnect://onboarding")
                     .build();
-            val intent = new Intent(Intent.ACTION_VIEW, url);
+            final Intent intent = new Intent(Intent.ACTION_VIEW, url);
 
             JoH.runOnUiThread(() -> {
                 if (context instanceof Activity) {
@@ -182,7 +185,7 @@ public class HealthGamut {
     }
 
     private void askPermsNew() {
-        val permsIntent = PermissionController.createRequestPermissionResultContract().createIntent(context, permissions);
+        final Intent permsIntent = PermissionController.createRequestPermissionResultContract().createIntent(context, permissions);
         JoH.runOnUiThread(() -> {
             try {
                 if (context instanceof Activity) {
@@ -198,7 +201,7 @@ public class HealthGamut {
     }
 
     private void askPermsOld() {
-        val permsIntent = PermissionController.createRequestPermissionResultContract().createIntent(context, permissions);
+        final Intent permsIntent = PermissionController.createRequestPermissionResultContract().createIntent(context, permissions);
         JoH.runOnUiThread(() -> {
             try {
                 if (context instanceof Activity) {
@@ -217,12 +220,12 @@ public class HealthGamut {
             try {
                 if (context instanceof Activity) {
                     if (Build.VERSION.SDK_INT >= 34) {
-                        val intent =
+                        final Intent intent =
                                 new Intent("android.health.connect.action.MANAGE_HEALTH_PERMISSIONS")
                                         .putExtra(Intent.EXTRA_PACKAGE_NAME, BuildConfig.APPLICATION_ID);
                         ((Activity) context).startActivity(intent);
                     } else {
-                        val intent = new Intent("androidx.health.ACTION_HEALTH_CONNECT_SETTINGS");
+                        final Intent intent = new Intent("androidx.health.ACTION_HEALTH_CONNECT_SETTINGS");
                         ((Activity) context).startActivity(intent);
                     }
 
@@ -236,7 +239,7 @@ public class HealthGamut {
     }
 
     public static HealthGamut init(Activity activity) {
-        val instance = new HealthGamut(activity);
+        final HealthGamut instance = new HealthGamut(activity);
         instance.init();
         return instance;
     }
@@ -258,9 +261,9 @@ public class HealthGamut {
     @RequiresApi(api = Build.VERSION_CODES.O)
     public synchronized void getAllData() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
-        val startTime = Instant.now().minus(1, ChronoUnit.DAYS);
-        val endTime = Instant.now();
-        val reply = new DataReply();
+        final Instant startTime = Instant.now().minus(1, ChronoUnit.DAYS);
+        final Instant endTime = Instant.now();
+        final DataReply reply = new DataReply();
 
         try {
             if (token != null) {
@@ -280,7 +283,7 @@ public class HealthGamut {
                                 if (change instanceof UpsertionChange) {
                                     ups++;
                                     UpsertionChange cu = (UpsertionChange) change;
-                                    val record = cu.getRecord();
+                                    final Record record = cu.getRecord();
                                     if (record instanceof StepsRecord) {
                                         reply.stepsRecords.add((StepsRecord) record);
                                     }
@@ -358,22 +361,22 @@ public class HealthGamut {
 
     public void sendGlucose(final BgReading bg) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
-        if (init()) {
-            val list = new LinkedList<BloodGlucoseRecord>();
-            val record = new BloodGlucoseRecord(Instant.ofEpochMilli(bg.timestamp),
-                    null, BloodGlucose.milligramsPerDeciliter(bg.calculated_value),
-                    BloodGlucoseRecord.SPECIMEN_SOURCE_INTERSTITIAL_FLUID,
-                    MealType.MEAL_TYPE_UNKNOWN, BloodGlucoseRecord.RELATION_TO_MEAL_UNKNOWN, new Metadata());
-            list.add(record);
-            client.insertRecords(list, coroutines.getContinuation((result, throwable) -> {
-                try {
-                    Log.d(TAG, "Insert result: " + result.getRecordIdsList().size());
-                } catch (Exception e) {
-                    Log.e(TAG, "Got exception on insert: " + e);
-                }
-            }));
-        } else {
+//        if (init()) {
+//            final LinkedList<BloodGlucoseRecord> list = new LinkedList<BloodGlucoseRecord>();
+//            final BloodGlucoseRecord record = new BloodGlucoseRecord(Instant.ofEpochMilli(bg.timestamp),
+//                    null, BloodGlucose.milligramsPerDeciliter(bg.calculated_value),
+//                    BloodGlucoseRecord.SPECIMEN_SOURCE_INTERSTITIAL_FLUID,
+//                    MealType.MEAL_TYPE_UNKNOWN, BloodGlucoseRecord.RELATION_TO_MEAL_UNKNOWN, new Metadata());
+//            list.add(record);
+//            client.insertRecords(list, coroutines.getContinuation((result, throwable) -> {
+//                try {
+//                    Log.d(TAG, "Insert result: " + result.getRecordIdsList().size());
+//                } catch (Exception e) {
+//                    Log.e(TAG, "Got exception on insert: " + e);
+//                }
+//            }));
+//        } else {
             Log.e(TAG, "Could not send Glucose");
-        }
+//        }
     }
 }

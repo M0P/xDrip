@@ -55,6 +55,7 @@ import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
@@ -101,13 +102,14 @@ import com.eveningoutpost.dexdrip.utilitymodels.BroadcastGlucose;
 import com.eveningoutpost.dexdrip.utilitymodels.CollectionServiceStarter;
 import com.eveningoutpost.dexdrip.utilitymodels.Constants;
 import com.eveningoutpost.dexdrip.utilitymodels.Inevitable;
+import com.eveningoutpost.dexdrip.utilitymodels.NotificationChannels;
+import com.eveningoutpost.dexdrip.utilitymodels.Notifications;
 import com.eveningoutpost.dexdrip.utilitymodels.PersistentStore;
 import com.eveningoutpost.dexdrip.utilitymodels.Pref;
 import com.eveningoutpost.dexdrip.utilitymodels.RxBleProvider;
 import com.eveningoutpost.dexdrip.utilitymodels.StatusItem;
 import com.eveningoutpost.dexdrip.utilitymodels.StatusItem.Highlight;
 import com.eveningoutpost.dexdrip.utilitymodels.WholeHouse;
-import com.eveningoutpost.dexdrip.ui.helpers.Span;
 import com.eveningoutpost.dexdrip.utils.DexCollectionType;
 import com.eveningoutpost.dexdrip.utils.bt.Subscription;
 import com.eveningoutpost.dexdrip.utils.framework.WakeLockTrampoline;
@@ -118,13 +120,9 @@ import com.polidea.rxandroidble2.RxBleConnection;
 import com.polidea.rxandroidble2.RxBleCustomOperation;
 import com.polidea.rxandroidble2.RxBleDevice;
 import com.polidea.rxandroidble2.RxBleDeviceServices;
-import com.polidea.rxandroidble2.exceptions.BleGattCallbackTimeoutException;
-import com.polidea.rxandroidble2.exceptions.BleScanException;
-import com.polidea.rxandroidble2.internal.RxBleLog;
-import com.polidea.rxandroidble2.internal.connection.RxBleGattCallback;
-import com.polidea.rxandroidble2.scan.ScanFilter;
-import com.polidea.rxandroidble2.scan.ScanResult;
-import com.polidea.rxandroidble2.scan.ScanSettings;
+import com.polidea.rxandroidble2.exceptions.BleCannotSetCharacteristicNotificationException;
+import com.polidea.rxandroidble2.exceptions.BleDisconnectedException;
+import com.polidea.rxandroidble2.exceptions.BleGattCharacteristicException;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -140,9 +138,6 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.Observable;
 import io.reactivex.Scheduler;
 import io.reactivex.schedulers.Schedulers;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.val;
 
 
 /**
@@ -183,8 +178,6 @@ public class Ob1G5CollectionService extends G5BaseService {
     public static volatile long lastUsableGlucosePacketTime = 0;
     private static volatile String static_connection_state = null;
     public static volatile long static_last_connected = 0;
-    @Setter
-    @Getter
     private static long last_transmitter_timestamp = 0;
     private static long lastStateUpdated = 0;
     private static long wakeup_time = 0;
@@ -247,6 +240,14 @@ public class Ob1G5CollectionService extends G5BaseService {
     private static final Set<String> alwaysConnectModels = Sets.newHashSet("G Watch");
     private static final Set<String> alwaysBuggyWakeupModels = Sets.newHashSet("Jelly-Pro", "SmartWatch 3");
     private static final HashMap<String, Long> failureTally = new HashMap<>();
+
+    public static long getLast_transmitter_timestamp() {
+        return last_transmitter_timestamp;
+    }
+
+    public static void setLast_transmitter_timestamp(long last_transmitter_timestamp) {
+        Ob1G5CollectionService.last_transmitter_timestamp = last_transmitter_timestamp;
+    }
 
     // Internal process state tracking
     public enum STATE {
@@ -347,7 +348,7 @@ public class Ob1G5CollectionService extends G5BaseService {
                         break;
                     case CONNECT_NOW:
                         if (specialPairingWorkaround()) {
-                            val locallyBonded = isDeviceLocallyBonded();
+                            boolean locallyBonded = isDeviceLocallyBonded();
                             UserError.Log.d(TAG, "wasbonded = " + wasBonded + " local: " + locallyBonded);
                             if (wasBonded.equals(getTransmitterID()) && !locallyBonded && skippedConnects < 10) {
                                 skippedConnects++;
@@ -533,9 +534,9 @@ public class Ob1G5CollectionService extends G5BaseService {
     }
 
     private static void init_tx_id() {
-        val TXID_PREF = "dex_txid";
-        val txid = Pref.getString(TXID_PREF, "NULL");
-        val txid_filtered = txid.trim();
+        String TXID_PREF = "dex_txid";
+        String txid = Pref.getString(TXID_PREF, "NULL");
+        String txid_filtered = txid.trim();
         transmitterID = txid_filtered;
         if (!txid.equals(txid_filtered)) {
             Pref.setString(TXID_PREF, txid_filtered);
@@ -1562,7 +1563,7 @@ public class Ob1G5CollectionService extends G5BaseService {
     }
 
     private void releaseFloating() {
-        val wl = floatingWakeLock;
+        PowerManager.WakeLock wl = floatingWakeLock;
         if (wl != null) {
             if (wl.isHeld()) {
                 JoH.releaseWakeLock(wl);
@@ -1592,7 +1593,7 @@ public class Ob1G5CollectionService extends G5BaseService {
                     try {
                         plugin = Loader.getLocalInstance(Registry.get(KEKS), getTransmitterID());
                         if (plugin == null) {
-                            val msg = "Unable to load keks plugin - please re-enter transmitter id";
+                            String msg = "Unable to load keks plugin - please re-enter transmitter id";
                             UserError.Log.wtf(TAG, msg);
                             JoH.static_toast_long(msg);
                         } else {
@@ -2239,8 +2240,8 @@ public class Ob1G5CollectionService extends G5BaseService {
 
         try {
             if (vr2 != null) {
-                if (vr2.typicalSensorDays != 10 && vr2.typicalSensorDays != 7) {
-                    l.add(new StatusItem("Sensor Period", vr2.typicalSensorDays, Highlight.NOTICE));
+                if (vr2.getTypicalSensorDays() != 10 && vr2.getTypicalSensorDays() != 7) {
+                    l.add(new StatusItem("Sensor Period", vr2.getTypicalSensorDays(), Highlight.NOTICE));
                 }
                 //l.add(new StatusItem("Feature mask", vr2.featureBits));
             }

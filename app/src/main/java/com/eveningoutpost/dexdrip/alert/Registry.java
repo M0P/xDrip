@@ -1,6 +1,6 @@
 package com.eveningoutpost.dexdrip.alert;
 
-import static com.eveningoutpost.dexdrip.utilitymodels.UpdateActivity.AUTO_UPDATE_PREFS_NAME;
+//import static com.eveningoutpost.dexdrip.utilitymodels.UpdateActivity.AUTO_UPDATE_PREFS_NAME;
 
 import android.content.SharedPreferences;
 
@@ -10,7 +10,7 @@ import com.eveningoutpost.dexdrip.utilitymodels.Pref;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Getter;
+//import lombok.Getter;
 
 /**
  * JamOrHam
@@ -22,7 +22,7 @@ public class Registry {
 
     private static final String TAG = "AlertRegistry";
 
-    @Getter
+    //@Getter
     private static final List<Pollable> registry = new ArrayList<>();
 
     // TODO allow for adjusting list and available vs enabled lists
@@ -38,9 +38,9 @@ public class Registry {
             if (Pref.getBooleanDefaultFalse("alert_raise_for_sensor_expiry")) {
                 registry.add(new SensorExpiry());
             }
-            if (Pref.getBoolean(AUTO_UPDATE_PREFS_NAME, true)) {
-                registry.add(new UpdateAvailable());
-            }
+//            if (Pref.getBoolean(AUTO_UPDATE_PREFS_NAME, true)) {
+//                registry.add(new UpdateAvailable());
+//            }
             //  addGlucoseAlerts();
             // sort();
         }
@@ -75,6 +75,7 @@ public class Registry {
     }*/
 
     public static SharedPreferences.OnSharedPreferenceChangeListener prefListener = (prefs, key) -> {
+        assert key != null;
         if (key.startsWith("alert_")) {
             Log.d(TAG, "Refreshing due to settings change");
             refresh();

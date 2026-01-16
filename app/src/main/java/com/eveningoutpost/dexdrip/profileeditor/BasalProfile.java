@@ -12,8 +12,6 @@ import org.json.JSONObject;
 import java.util.LinkedList;
 import java.util.List;
 
-import lombok.val;
-
 // jamorham
 
 public class BasalProfile {
@@ -40,7 +38,7 @@ public class BasalProfile {
     }
 
     private static <T> int howManyMatch(final List<T> segments, final int start, final int maxMatches) {
-        val current = segments.get(start);
+        final T current = segments.get(start);
         int matches = 1;
         for (int pos = start + 1; pos < segments.size(); pos++) {
             if (current.equals(segments.get(pos))) {
@@ -97,11 +95,11 @@ public class BasalProfile {
 
 
     public static String getAllProfilesAsJson() {
-        val profiles = new JSONArray();
-        for (val profile : PROFILE_NAMES) {
-            val item = new JSONObject();
+        final JSONArray profiles = new JSONArray();
+        for (final String profile : PROFILE_NAMES) {
+            final JSONObject item = new JSONObject();
             try {
-                val result = Pref.getString(getPrefix(profile), null);
+                final String result = Pref.getString(getPrefix(profile), null);
                 if (result != null && result.length() > 5) {
                     item.put(profile, result);
                     profiles.put(item);

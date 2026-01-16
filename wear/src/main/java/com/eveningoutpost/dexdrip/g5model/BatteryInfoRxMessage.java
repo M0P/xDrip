@@ -7,7 +7,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Locale;
 
-import lombok.val;
 
 /**
  * Created by jamorham on 25/11/2016.
@@ -31,7 +30,7 @@ public class BatteryInfoRxMessage extends BaseMessage {
     public BatteryInfoRxMessage(byte[] packet) {
         if (packet.length >= 10) {
             data = ByteBuffer.wrap(packet).order(ByteOrder.LITTLE_ENDIAN);
-            val oc = data.get();
+            byte oc = data.get();
             if (oc == opcode || oc == opcode2) {
                 status = data.get();
                 voltagea = getUnsignedShort(data);

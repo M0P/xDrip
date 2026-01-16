@@ -9,8 +9,6 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.spec.X509EncodedKeySpec;
 
-import lombok.val;
-
 /**
  * JamOrHam
  */
@@ -45,7 +43,7 @@ public class Verify {
 
     public static boolean verify(final byte[] data, final byte[] signature) {
         try {
-            val signCheck = Signature.getInstance("SHA256withDSA");
+            final Signature signCheck = Signature.getInstance("SHA256withDSA");
             signCheck.initVerify(getPublicKey());
             signCheck.update(data);
             return signCheck.verify(signature)

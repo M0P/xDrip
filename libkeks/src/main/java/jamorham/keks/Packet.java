@@ -12,9 +12,6 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 import jamorham.keks.util.ByteArrayHashMap;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.val;
 
 /**
  * JamOrHam
@@ -22,15 +19,29 @@ import lombok.val;
  * Data packet serialization
  */
 
-@AllArgsConstructor
 public class Packet {
 
-    @Getter
     BigInteger hash;
-    @Getter
     ECPoint publicKeyPoint1;
-    @Getter
     ECPoint publicKeyPoint2;
+
+    public Packet(BigInteger hash, ECPoint publicKeyPoint1, ECPoint publicKeyPoint2) {
+        this.hash = hash;
+        this.publicKeyPoint1 = publicKeyPoint1;
+        this.publicKeyPoint2 = publicKeyPoint2;
+    }
+
+    public BigInteger getHash() {
+        return hash;
+    }
+
+    public ECPoint getPublicKeyPoint1() {
+        return publicKeyPoint1;
+    }
+
+    public ECPoint getPublicKeyPoint2() {
+        return publicKeyPoint2;
+    }
 
     public Packet(final ByteArrayHashMap bhm) {
         this(fromUnsignedByteArray(bhm.mget(HBYTES1_ID)),
@@ -48,20 +59,20 @@ public class Packet {
 
     public static Packet parse(final byte[] packet) {
         if (packet.length < PACKET_SIZE) return null;
-        val bhm = new ByteArrayHashMap();
-        val buf = ByteBuffer.wrap(packet);
-        for (val id : ID_LIST) {
+        ByteArrayHashMap bhm = new ByteArrayHashMap();
+        ByteBuffer buf = ByteBuffer.wrap(packet);
+        for (int id : ID_LIST) {
             buf.get(bhm.mget(id));
         }
         return new Packet(bhm);
     }
 
     public byte[] output() {
-        val packet = ByteBuffer.allocate(PACKET_SIZE);
+        ByteBuffer packet = ByteBuffer.allocate(PACKET_SIZE);
         packet.put(new JECPoint(getPublicKeyPoint1()).toBytes());
         packet.put(new JECPoint(getPublicKeyPoint2()).toBytes());
         packet.put(asUnsignedByteArray(FIELD_SIZE, getHash()));
-        val array = packet.array();
+        byte[] array = packet.array();
         if (array.length != PACKET_SIZE) {
             throw new RuntimeException("Invalid size");
         }

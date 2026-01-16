@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.eveningoutpost.dexdrip">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-feature android:name="android.hardware.type.watch" />
 
@@ -144,7 +143,7 @@
                 <category android:name="com.google.android.wearable.watchface.category.WATCH_FACE" />
             </intent-filter>
         </service>
-        <service android:name=".ListenerService">
+        <service android:name=".ListenerService" android:exported="true">
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.CAPABILITY_CHANGED" />
 
@@ -184,22 +183,23 @@
         <service
             android:name=".services.G5CollectionService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="false"/>
         <service
             android:name=".services.Ob1G5CollectionService"
-            android:enabled="true" />
+            android:enabled="true"
+            android:exported="false" />
         <service
             android:name=".services.DexCollectionService"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="false"/>
         <service
             android:name=".services.DexShareCollectionService"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="false"/>
         <service
             android:name=".services.SyncService"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="false"/>
         <service
             android:name=".utilitymodels.Notifications"
             android:exported="false" />
@@ -209,7 +209,7 @@
         <service
             android:name=".services.MissedReadingService"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="false"/>
         <service
             android:name=".services.CustomComplicationProviderService"
             android:icon="@drawable/ic_watch_white"
@@ -234,19 +234,19 @@
             android:name=".ProcessAPKChannelDownload"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
-        <receiver android:name=".NSEmulatorReceiver">
+        <receiver android:name=".NSEmulatorReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="com.eveningoutpost.dexdrip.NS_EMULATOR" />
                 <action android:name="com.eveningoutpost.dexdrip.OOP2_DECODE_FARM_RESULT" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".services.ComplicationTapBroadcastReceiver" />
-        <receiver android:name=".utils.DisconnectReceiver">
+        <receiver android:name=".services.ComplicationTapBroadcastReceiver" android:exported="false"/>
+        <receiver android:name=".utils.DisconnectReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".utils.framework.WakeLockTrampoline" />
+        <receiver android:name=".utils.framework.WakeLockTrampoline" android:exported="false"/>
 
         <meta-data
             android:name="io.fabric.ApiKey"
@@ -352,7 +352,7 @@
 
             android:name=".ConfigReceiver"
             android:enabled="true"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>

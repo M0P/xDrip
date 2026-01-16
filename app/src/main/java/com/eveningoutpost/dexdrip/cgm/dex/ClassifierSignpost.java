@@ -4,15 +4,17 @@ import android.bluetooth.BluetoothGattCharacteristic;
 
 import java.util.UUID;
 
-import lombok.RequiredArgsConstructor;
-
 /**
  * JamOrHam
  */
 
-@RequiredArgsConstructor
 public class ClassifierSignpost {
     final public UUID uuid;
     final public String action;
     public BluetoothGattCharacteristic characteristic;
+
+    public ClassifierSignpost(UUID uuid, String action) {
+        this.uuid = uuid;
+        this.action = action;
+    }
 }

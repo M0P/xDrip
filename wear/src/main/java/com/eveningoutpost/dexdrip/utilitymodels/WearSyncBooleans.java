@@ -5,12 +5,13 @@ package com.eveningoutpost.dexdrip.utilitymodels;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Getter;
-
 public class WearSyncBooleans {
 
-    @Getter
     private static final List<String> booleansToSync = new ArrayList<>();
+
+    public static List<String> getBooleansToSync() {
+        return booleansToSync;
+    }
 
     static {
         booleansToSync.add("use_wear_heartrate");

@@ -30,7 +30,6 @@ import com.eveningoutpost.dexdrip.utils.Preferences;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import lombok.val;
 
 /**
  * Created by Emma Black on 4/15/15.
@@ -50,11 +49,11 @@ public class IdempotentMigrations {
         migrateBGAlerts();
         migrateToNewStyleRestUris();
         BgReading.updateDB();
-        LibreBlock.updateDB();
-        LibreData.updateDB();
+//        LibreBlock.updateDB();
+//        LibreData.updateDB();
         APStatus.updateDB();
         Prediction.updateDB();
-        DesertSync.updateDB();
+//        DesertSync.updateDB();
         PenData.updateDB();
         Libre2RawValue.updateDB();
         Libre2Sensor.updateDB();
@@ -145,8 +144,8 @@ public class IdempotentMigrations {
     // This function moves us from calibrate_external_libre_2_algorithm which is a boolean to a
     // multi value list option
     public static void migrateOOP2CalibrationPreferences() {
-        val oldPref = "calibrate_external_libre_2_algorithm";
-        val newPref = "calibrate_external_libre_2_algorithm_type";
+        final String oldPref = "calibrate_external_libre_2_algorithm";
+        final String newPref = "calibrate_external_libre_2_algorithm_type";
         if (Pref.isPreferenceSet(oldPref) && !Pref.isPreferenceSet(newPref)) {
             Log.e(TAG, oldPref + " found - updating to new style");
             Pref.setString(newPref, Pref.getBooleanDefaultFalse(oldPref) ? "calibrate_raw" : "no_calibration");

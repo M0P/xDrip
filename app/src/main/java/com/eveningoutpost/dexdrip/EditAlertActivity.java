@@ -46,7 +46,7 @@ import com.eveningoutpost.dexdrip.utilitymodels.BgGraphBuilder;
 import com.eveningoutpost.dexdrip.utilitymodels.Constants;
 import com.eveningoutpost.dexdrip.utilitymodels.Pref;
 import com.eveningoutpost.dexdrip.utils.ActivityWithMenu;
-import com.eveningoutpost.dexdrip.watch.thinjam.BlueJayEntry;
+//import com.eveningoutpost.dexdrip.watch.thinjam.BlueJayEntry;
 import com.eveningoutpost.dexdrip.wearintegration.WatchUpdaterService;
 
 import java.text.DecimalFormat;
@@ -58,8 +58,6 @@ import java.util.List;
 
 import static com.eveningoutpost.dexdrip.Home.startWatchUpdaterService;
 import static com.eveningoutpost.dexdrip.xdrip.gs;
-
-import lombok.val;
 
 public class EditAlertActivity extends ActivityWithMenu {
     //public static String menu_name = "Edit Alert";
@@ -561,7 +559,7 @@ public class EditAlertActivity extends ActivityWithMenu {
                 startWatchUpdaterService(mContext, WatchUpdaterService.ACTION_SYNC_ALERTTYPE, TAG);
                 Intent returnIntent = new Intent();
                 setResult(RESULT_OK,returnIntent);
-                BlueJayEntry.startWithRefreshIfEnabled();
+//                BlueJayEntry.startWithRefreshIfEnabled();
                 finish();
             }
 
@@ -710,6 +708,7 @@ public class EditAlertActivity extends ActivityWithMenu {
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             Uri uri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
             if (uri != null) {
@@ -719,7 +718,7 @@ public class EditAlertActivity extends ActivityWithMenu {
             } else {
                 if (requestCode == REQUEST_CODE_CHOOSE_FILE) {
                     try {
-                        val selectedAudioUri = data.getData();
+                        Uri selectedAudioUri = data.getData();
                         getContentResolver().takePersistableUriPermission(selectedAudioUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
                         // Todo this code is very flacky. Probably need a much better understanding of how the different programs
@@ -743,7 +742,7 @@ public class EditAlertActivity extends ActivityWithMenu {
     }
 
     private static String getDisplayNameFromURI(final Uri contentUri) {
-        val title = JoH.getFieldFromURI(MediaStore.Audio.Media.TITLE, contentUri);
+        String title = JoH.getFieldFromURI(MediaStore.Audio.Media.TITLE, contentUri);
         if (title == null || contentUri.toString().endsWith(title)) {
             return JoH.getFieldFromURI(MediaStore.Audio.Media.DISPLAY_NAME, contentUri);
         }
@@ -789,14 +788,14 @@ public class EditAlertActivity extends ActivityWithMenu {
             return "xDrip Default";
         }
         if (path.startsWith("content:")) {
-            val result = getDisplayNameFromURI(Uri.parse(path));
+            String result = getDisplayNameFromURI(Uri.parse(path));
             if (result != null) return result;
         }
         // This may not actually be used anymore
         if (isPathRingtone(xdrip.getAppContext(), path)) {
-            val ringtone = RingtoneManager.getRingtone(xdrip.getAppContext(), Uri.parse(path));
+            Ringtone ringtone = RingtoneManager.getRingtone(xdrip.getAppContext(), Uri.parse(path));
             // Just verified that the ringtone exists... not checking for null
-            val result = ringtone.getTitle(xdrip.getAppContext());
+            String result = ringtone.getTitle(xdrip.getAppContext());
             Log.d(TAG,"Ringtone title: "+result);
             return result;
         }

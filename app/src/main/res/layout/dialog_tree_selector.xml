@@ -4,8 +4,6 @@
 
     <data>
 
-        <import type="me.tatarka.bindingcollectionadapter2.LayoutManagers" />
-
         <variable
             name="viewModel"
             type="com.eveningoutpost.dexdrip.utilitymodels.SourceWizard.ViewModel" />
@@ -22,7 +20,7 @@
             android:paddingBottom="10dp"
             app:itemBinding="@{viewModel.itemBinding}"
             app:items="@{viewModel.items}"
-            app:layoutManager="@{LayoutManagers.linear()}" />
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
         <ImageButton
             android:id="@+id/imageButton8"

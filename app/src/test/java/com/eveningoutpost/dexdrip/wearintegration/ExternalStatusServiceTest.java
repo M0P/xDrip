@@ -15,7 +15,7 @@ import com.eveningoutpost.dexdrip.utilitymodels.PersistentStore;
 
 import org.junit.Test;
 
-import lombok.val;
+//import lombok.val;
 
 // jamorham
 
@@ -31,22 +31,22 @@ public class ExternalStatusServiceTest extends RobolectricTestWithConfig {
     @Test
     public void getTBRTest() {
 
-        val tbnull = getTBR(null);
+        String tbnull = getTBR(null);
         assertWithMessage("TBR null status err").that(tbnull).isEqualTo("");
-        val tbempty = getTBR("");
+        String tbempty = getTBR("");
         assertWithMessage("TBR empty status err").that(tbempty).isEqualTo("");
-        val tbrandom = getTBR("hello world");
+        String tbrandom = getTBR("hello world");
         assertWithMessage("TBR invalid status default").that(tbrandom).isEqualTo("100%");
 
-        val tb1 = getTBR(tbr1);
+        String tb1 = getTBR(tbr1);
         assertWithMessage("TBR 1 status ok").that(tb1).isEqualTo("10%");
-        val tb2 = getTBR(tbr2);
+        String tb2 = getTBR(tbr2);
         assertWithMessage("TBR 2 status ok").that(tb2).isEqualTo("15%");
-        val tb3 = getTBR(tbr3);
+        String tb3 = getTBR(tbr3);
         assertWithMessage("TBR 3 status ok").that(tb3).isEqualTo("235%");
-        val tb4 = getTBR(tbr4);
+        String tb4 = getTBR(tbr4);
         assertWithMessage("TBR 4 status pass thru").that(tb4).isEqualTo("100%");
-        val tb5 = getTBR(tbr5);
+        String tb5 = getTBR(tbr5);
         assertWithMessage("TBR 5 status pass thru").that(tb5).isEqualTo("100%");
 
         PersistentStore.setLong(EXTERNAL_STATUS_STORE_TIME, JoH.tsl());

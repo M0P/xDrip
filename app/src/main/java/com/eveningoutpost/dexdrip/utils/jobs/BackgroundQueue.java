@@ -12,8 +12,6 @@ import androidx.annotation.NonNull;
 import com.eveningoutpost.dexdrip.models.JoH;
 import com.eveningoutpost.dexdrip.models.UserError;
 
-import lombok.val;
-
 /**
  * JamOrHam
  * Sequential background queue processor
@@ -40,7 +38,7 @@ public class BackgroundQueue extends HandlerThread {
     }
 
     public static void post(final Runnable runnable) {
-        val handler = getInstance().getHandler();
+        final Handler handler = getInstance().getHandler();
         if (handler != null) {
             handler.post(runnable);
         } else {
@@ -53,14 +51,14 @@ public class BackgroundQueue extends HandlerThread {
 
     public static void postDelayed(Runnable runnable, final long delay) {
         if (D) {
-            val counter = getInstance().xcounter++;
-            val origRunnable = runnable;
+            final long counter = getInstance().xcounter++;
+            final Runnable origRunnable = runnable;
             runnable = () -> {
                 UserError.Log.d(TAG, "Execute: " + counter);
                 origRunnable.run();
             };
         }
-        val handler = getInstance().getHandler();
+        final Handler handler = getInstance().getHandler();
         if (handler != null) {
             if (D) UserError.Log.d(TAG, "Handler ready");
             handler.postDelayed(runnable, delay);
@@ -104,5 +102,3 @@ public class BackgroundQueue extends HandlerThread {
 
     }
 }
-
-

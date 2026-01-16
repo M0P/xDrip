@@ -5,13 +5,7 @@
 
     <data>
 
-        <import type="me.tatarka.bindingcollectionadapter2.LayoutManagers" />
-
         <import type="android.view.View" />
-
-        <variable
-            name="viewModel"
-            type="com.eveningoutpost.dexdrip.cgm.glupro.ViewModel" />
 
     </data>
 
@@ -51,8 +45,7 @@
                     android:id="@+id/pinCode"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:hint="123456"
-                    android:onTextChanged="@{(s, start, before, count) -> viewModel.onPinChange(s)}" />
+                    android:hint="123456" />
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
@@ -63,12 +56,8 @@
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="0dp"
                 android:layout_weight="1"
-                android:onViewAttachedToWindow="@{viewModel::initRecycler}"
                 android:paddingBottom="0dp"
-                app:adapter="@{viewModel.adapter}"
-                app:itemBinding="@{viewModel.itemBinding}"
-                app:items="@{viewModel.scannedDevices}"
-                app:layoutManager="@{LayoutManagers.linear()}"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintBottom_toTopOf="@+id/event_log_buttons"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -97,8 +86,7 @@
                     android:layout_gravity="left"
                     android:layout_weight="1"
                     android:gravity="left"
-                    android:keepScreenOn="true"
-                    android:visibility="@{viewModel.scanning ? View.VISIBLE : View.GONE}" />
+                    android:keepScreenOn="true" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -114,7 +102,6 @@
                         android:layout_marginTop="15dp"
                         android:layout_marginEnd="10dp"
                         android:layout_marginBottom="0dp"
-                        android:onClick="@{() -> viewModel.select((String)null,(String)null)}"
                         android:text="@string/glupro_scan_again" />
                 </LinearLayout>
             </LinearLayout>

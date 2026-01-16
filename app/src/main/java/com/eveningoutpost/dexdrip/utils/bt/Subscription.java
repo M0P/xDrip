@@ -6,8 +6,6 @@ import com.eveningoutpost.dexdrip.models.UserError;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.UndeliverableException;
 import io.reactivex.plugins.RxJavaPlugins;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 /**
  *
@@ -16,12 +14,18 @@ import lombok.RequiredArgsConstructor;
  * wrapper class to smooth rxandroidble migration
  */
 
-@RequiredArgsConstructor
 public class Subscription implements Disposable {
 
     private final Disposable disposable;
-    @Getter
     private volatile boolean unsubscribed;
+
+    public Subscription(Disposable disposable) {
+        this.disposable = disposable;
+    }
+
+    public boolean isUnsubscribed() {
+        return unsubscribed;
+    }
 
     public synchronized void unsubscribe() {
         dispose();
@@ -53,4 +57,3 @@ public class Subscription implements Disposable {
     }
 
 }
-

@@ -18,7 +18,6 @@ import java.security.NoSuchAlgorithmException;
 import android.os.PowerManager;
 import android.util.Base64;
 
-import lombok.val;
 
 /**
  * jamorham
@@ -45,7 +44,7 @@ public class AdbInstaller implements AdbBase64 {
         new Thread(() -> {
             wl.acquire(35_000);
             try {
-                val stream = openDestination(ID_DESTINATION);
+                AdbStream stream = openDestination(ID_DESTINATION);
                 if (stream != null) {
                     stream.close();
                     UserError.Log.d(TAG, "Ping success");
@@ -64,10 +63,10 @@ public class AdbInstaller implements AdbBase64 {
     public static void install(final byte[] updateBytes) {
         UserError.Log.d(TAG, "Install called");
         new Thread(() -> {
-            val destination = INSTALL_DESTINATION + " -S " + updateBytes.length;
+            String destination = INSTALL_DESTINATION + " -S " + updateBytes.length;
             wl.acquire(65_000);
             try {
-                val stream = openDestination(destination);
+                AdbStream stream = openDestination(destination);
                 if (stream == null) {
                     UserError.Log.d(TAG, "Could not get stream, returning");
                     return;
@@ -76,7 +75,7 @@ public class AdbInstaller implements AdbBase64 {
                 UserError.Log.d(TAG, "Writing");
                 int ptr = 0;
                 while (ptr < updateBytes.length) {
-                    val segment = new byte[Math.min(4096, updateBytes.length - ptr)];
+                    byte[] segment = new byte[Math.min(4096, updateBytes.length - ptr)];
                     System.arraycopy(updateBytes, ptr, segment, 0, segment.length);
                     stream.write(segment);
                     ptr += segment.length;
@@ -95,14 +94,14 @@ public class AdbInstaller implements AdbBase64 {
     }
 
     private static synchronized AdbCrypto getKeys() throws NoSuchAlgorithmException, IOException {
-        val path = xdrip.getAppContext().getFilesDir().getPath();
-        val filePriv = new File(path + "/adbpriv");
-        val filePub = new File(path + "/adbpub");
+        String path = xdrip.getAppContext().getFilesDir().getPath();
+        File filePriv = new File(path + "/adbpriv");
+        File filePub = new File(path + "/adbpub");
         try {
             return AdbCrypto.loadAdbKeyPair(new AdbInstaller(), filePriv, filePub);
         } catch (Exception e) {
             UserError.Log.d(TAG, "Generating new keys");
-            val crypto = AdbCrypto.generateAdbKeyPair(new AdbInstaller());
+            AdbCrypto crypto = AdbCrypto.generateAdbKeyPair(new AdbInstaller());
             crypto.saveAdbKeyPair(filePriv, filePub);
             return crypto;
         }
@@ -110,13 +109,13 @@ public class AdbInstaller implements AdbBase64 {
 
     private static AdbStream openDestination(final String destination) {
         try {
-            val socket = new Socket("127.0.0.1", 5555);
-            val connection = AdbConnection.create(socket, getKeys());
+            Socket socket = new Socket("127.0.0.1", 5555);
+            AdbConnection connection = AdbConnection.create(socket, getKeys());
             UserError.Log.d(TAG, "Connecting");
             connection.connect();
             UserError.Log.d(TAG, "Opening stream");
 
-            val stream = connection.open(destination);
+            AdbStream stream = connection.open(destination);
             if (stream.isClosed()) {
                 UserError.Log.d(TAG, "Stream already closed");
                 return null;

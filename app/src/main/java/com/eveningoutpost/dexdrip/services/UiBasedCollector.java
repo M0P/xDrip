@@ -46,7 +46,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import lombok.val;
 
 /**
  * JamOrHam
@@ -154,7 +153,7 @@ public class UiBasedCollector extends NotificationListenerService {
 
     @Override
     public void onNotificationPosted(final StatusBarNotification sbn) {
-        val fromPackage = sbn.getPackageName();
+        final String fromPackage = sbn.getPackageName();
         if (coOptedPackages.contains(fromPackage)) {
             if (getDexCollectionType() == UiBased) {
                 UserError.Log.d(TAG, "Notification from: " + fromPackage);
@@ -203,17 +202,17 @@ public class UiBasedCollector extends NotificationListenerService {
     }
     private void processCompanionAppIoBNotificationCV(final RemoteViews cview) {
         if (cview == null) return;
-        val applied = cview.apply(this, null);
-        val root = (ViewGroup) applied.getRootView();
-        val texts = new ArrayList<TextView>();
+        final View applied = cview.apply(this, null);
+        final ViewGroup root = (ViewGroup) applied.getRootView();
+        final ArrayList<TextView> texts = new ArrayList<TextView>();
         getTextViews(texts, root);
         if (debug) UserError.Log.d(TAG, "Text views: " + texts.size());
         Double iob = null;
         try {
-            for (val view : texts) {
-                val tv = (TextView) view;
+            for (final TextView view : texts) {
+                final TextView tv = (TextView) view;
                 String text = tv.getText() != null ? tv.getText().toString() : "";
-                val desc = tv.getContentDescription() != null ? tv.getContentDescription().toString() : "";
+                final String desc = tv.getContentDescription() != null ? tv.getContentDescription().toString() : "";
                 if (debug) UserError.Log.d(TAG, "Examining: >" + text + "< : >" + desc + "<");
                 iob = parseIoB(text);
                 if (iob != null) {
@@ -263,7 +262,7 @@ public class UiBasedCollector extends NotificationListenerService {
         JoH.dumpBundle(notification.extras, TAG);
         if (notification.contentView != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val cid = notification.getChannelId();
+                final String cid = notification.getChannelId();
                 UserError.Log.d(TAG, "Channel ID: " + cid);
             }
             processRemote(notification.contentView);
@@ -318,7 +317,7 @@ public class UiBasedCollector extends NotificationListenerService {
         if (bottom > top) {
             throw new RuntimeException("bottom and top of character range invalid");
         }
-        val filtered = new StringBuilder(input.length());
+        final StringBuilder filtered = new StringBuilder(input.length());
         for (final char c : input.toCharArray()) {
             if (c < bottom || c > top) {
                 filtered.append(c);
@@ -330,20 +329,20 @@ public class UiBasedCollector extends NotificationListenerService {
     @SuppressWarnings("UnnecessaryLocalVariable")
     private boolean processRemote(final RemoteViews cview) {
         if (cview == null) return false;
-        val applied = cview.apply(this, null);
-        val root = (ViewGroup) applied.getRootView();
-        val texts = new ArrayList<TextView>();
+        final View applied = cview.apply(this, null);
+        final ViewGroup root = (ViewGroup) applied.getRootView();
+        final ArrayList<TextView> texts = new ArrayList<TextView>();
         getTextViews(texts, root);
         UserError.Log.d(TAG, "Text views: " + texts.size());
         int matches = 0;
         int mgdl = 0;
-        for (val view : texts) {
+        for (final TextView view : texts) {
             try {
-                val tv = (TextView) view;
-                val text = tv.getText() != null ? tv.getText().toString() : "";
-                val desc = tv.getContentDescription() != null ? tv.getContentDescription().toString() : "";
+                final TextView tv = (TextView) view;
+                final String text = tv.getText() != null ? tv.getText().toString() : "";
+                final String desc = tv.getContentDescription() != null ? tv.getContentDescription().toString() : "";
                 UserError.Log.d(TAG, "Examining: >" + text + "< : >" + desc + "<");
-                val lmgdl = tryExtractString(text);
+                final int lmgdl = tryExtractString(text);
                 if (lmgdl > 0) {
                     mgdl = lmgdl;
                     matches++;
@@ -367,12 +366,12 @@ public class UiBasedCollector extends NotificationListenerService {
     int tryExtractString(final String text) {
         int mgdl = -1;
         try {
-            val ftext = filterString(text);
+            final String ftext = filterString(text);
             if (Unitized.usingMgDl()) {
                 mgdl = Integer.parseInt(ftext);
             } else {
                 if (isValidMmol(ftext)) {
-                    val result = JoH.tolerantParseDouble(ftext, -1);
+                    final double result = JoH.tolerantParseDouble(ftext, -1);
                     if (result != -1) {
                         mgdl = (int) Math.round(Unitized.mgdlConvert(result));
                     }
@@ -385,7 +384,7 @@ public class UiBasedCollector extends NotificationListenerService {
     }
 
     boolean handleNewValue(final int mgdl) {
-        val timestamp = JoH.tsl();
+        final long timestamp = JoH.tsl();
         return handleNewValue(timestamp, mgdl);
     }
 
@@ -395,19 +394,19 @@ public class UiBasedCollector extends NotificationListenerService {
         UserError.Log.d(TAG, "Found specific value: " + mgdl);
 
         if ((mgdl >= 40 && mgdl <= 405)) {
-            val grace = DexCollectionType.getCurrentSamplePeriod() * 4;
-            val recentbt = msSince(lastReadingTimestamp) < grace;
-            val dedupe = (!recentbt && isDifferentToLast(mgdl)) ? Constants.SECOND_IN_MS * 10
+            final long grace = DexCollectionType.getCurrentSamplePeriod() * 4;
+            final boolean recentbt = msSince(lastReadingTimestamp) < grace;
+            final long dedupe = (!recentbt && isDifferentToLast(mgdl)) ? Constants.SECOND_IN_MS * 10
                     : DexCollectionType.getCurrentDeduplicationPeriod();
-            val period = recentbt ? grace : dedupe;
-            val existing = BgReading.getForPreciseTimestamp(timestamp, period, false);
+            final long period = recentbt ? grace : dedupe;
+            final BgReading existing = BgReading.getForPreciseTimestamp(timestamp, period, false);
             if (existing == null) {
                 if (isJammed(mgdl)) {
                     UserError.Log.wtf(TAG, "Apparently value is jammed at: " + mgdl);
                 } else {
                     UserError.Log.d(TAG, "Inserting new value");
                     PersistentStore.setLong(UI_BASED_STORE_LAST_VALUE, mgdl);
-                    val bgr = BgReading.bgReadingInsertFromG5(mgdl, timestamp);
+                    final BgReading bgr = BgReading.bgReadingInsertFromG5(mgdl, timestamp);
                     if (bgr != null) {
                         bgr.find_slope();
                         bgr.noRawWillBeAvailable();
@@ -434,19 +433,19 @@ public class UiBasedCollector extends NotificationListenerService {
 
     // note this method only checks existing stored data
     private boolean isDifferentToLast(final int mgdl) {
-        val previousValue = PersistentStore.getLong(UI_BASED_STORE_LAST_VALUE);
+        final long previousValue = PersistentStore.getLong(UI_BASED_STORE_LAST_VALUE);
         return previousValue != mgdl;
     }
 
     // note this method actually updates the stored value
     private boolean isJammed(final int mgdl) {
-        val previousValue = PersistentStore.getLong(UI_BASED_STORE_LAST_VALUE);
+        final long previousValue = PersistentStore.getLong(UI_BASED_STORE_LAST_VALUE);
         if (previousValue == mgdl) {
             PersistentStore.incrementLong(UI_BASED_STORE_LAST_REPEAT);
         } else {
             PersistentStore.setLong(UI_BASED_STORE_LAST_REPEAT, 0);
         }
-        val lastRepeat = PersistentStore.getLong(UI_BASED_STORE_LAST_REPEAT);
+        final long lastRepeat = PersistentStore.getLong(UI_BASED_STORE_LAST_REPEAT);
         UserError.Log.d(TAG, "Last repeat: " + lastRepeat);
         return lastRepeat > jamThreshold();
     }
@@ -459,9 +458,9 @@ public class UiBasedCollector extends NotificationListenerService {
     }
 
     private void getTextViews(final List<TextView> output, final ViewGroup parent) {
-        val children = parent.getChildCount();
+        final int children = parent.getChildCount();
         for (int i = 0; i < children; i++) {
-            val view = parent.getChildAt(i);
+            final View view = parent.getChildAt(i);
             if (view.getVisibility() == View.VISIBLE) {
                 if (view instanceof TextView) {
                     output.add((TextView) view);
@@ -513,12 +512,12 @@ public class UiBasedCollector extends NotificationListenerService {
     }
 
     private static boolean isNotificationServiceEnabled() {
-        val pkgName = xdrip.getAppContext().getPackageName();
-        val flat = Settings.Secure.getString(xdrip.getAppContext().getContentResolver(),
+        final String pkgName = xdrip.getAppContext().getPackageName();
+        final String flat = Settings.Secure.getString(xdrip.getAppContext().getContentResolver(),
                 ENABLED_NOTIFICATION_LISTENERS);
         if (!TextUtils.isEmpty(flat)) {
-            val names = flat.split(":");
-            for (val name : names) {
+            final String[] names = flat.split(":");
+            for (final String name : names) {
                 final ComponentName cn = ComponentName.unflattenFromString(name);
                 if (cn != null) {
                     if (TextUtils.equals(pkgName, cn.getPackageName())) {

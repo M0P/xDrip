@@ -2,7 +2,6 @@ package com.eveningoutpost.dexdrip.utilitymodels;
 
 import android.os.AsyncTask;
 
-import com.eveningoutpost.dexdrip.influxdb.InfluxDBUploader;
 import com.eveningoutpost.dexdrip.models.BgReading;
 import com.eveningoutpost.dexdrip.models.BloodTest;
 import com.eveningoutpost.dexdrip.models.Calibration;
@@ -11,7 +10,6 @@ import com.eveningoutpost.dexdrip.models.LibreBlock;
 import com.eveningoutpost.dexdrip.models.TransmitterData;
 import com.eveningoutpost.dexdrip.models.Treatments;
 import com.eveningoutpost.dexdrip.models.UserError.Log;
-import com.eveningoutpost.dexdrip.services.SyncService;
 import com.eveningoutpost.dexdrip.wearintegration.WatchUpdaterService;
 import com.eveningoutpost.dexdrip.xdrip;
 
@@ -59,9 +57,11 @@ public class UploaderTask extends AsyncTask<String, Void, Void> {
                     Log.e(TAG, "Skipping Nightscout upload due to mobile data only");
                 }
             }
+            /*
             if (Pref.getBooleanDefaultFalse("cloud_storage_influxdb_enable")) {
                 circuits.add(UploaderQueue.INFLUXDB_RESTAPI);
             }
+            */
 
 
             for (long THIS_QUEUE : circuits) {
@@ -159,21 +159,21 @@ public class UploaderTask extends AsyncTask<String, Void, Void> {
                     Log.d(TAG, UploaderQueue.getCircuitName(THIS_QUEUE) + " Processing: " + bgReadings.size() + " BgReadings and " + calibrations.size() + " Calibrations " + bloodtests.size() + " bloodtests " + treatmentsAdd.size() + " treatmentsAdd " + treatmentsDel.size() + " treatmentsDel");
                     boolean uploadStatus = false;
 
-                    if (THIS_QUEUE == UploaderQueue.MONGO_DIRECT) {
+                    /*if (THIS_QUEUE == UploaderQueue.MONGO_DIRECT) {
                         final NightscoutUploader uploader = new NightscoutUploader(xdrip.getAppContext());
                         uploadStatus = uploader.uploadMongo(bgReadings, calibrations, calibrations, transmittersData, libreBlock);
                     } else if (THIS_QUEUE == UploaderQueue.NIGHTSCOUT_RESTAPI) {
                         final NightscoutUploader uploader = new NightscoutUploader(xdrip.getAppContext());
                         uploadStatus = uploader.uploadRest(bgReadings, bloodtests, calibrations);
-                    } else if (THIS_QUEUE == UploaderQueue.INFLUXDB_RESTAPI) {
+                    }  else if (THIS_QUEUE == UploaderQueue.INFLUXDB_RESTAPI) {
                         final InfluxDBUploader influxDBUploader = new InfluxDBUploader(xdrip.getAppContext());
                         uploadStatus = influxDBUploader.upload(bgReadings, calibrations, calibrations);
-                    } else if (THIS_QUEUE == UploaderQueue.WATCH_WEARAPI) {
+                    } else*/ if (THIS_QUEUE == UploaderQueue.WATCH_WEARAPI) {
                         uploadStatus = WatchUpdaterService.sendWearUpload(bgReadings, calibrations, bloodtests, treatmentsAdd, treatmentsDel);
                     }
 
                     if (retry_timer) {
-                        SyncService.startSyncService(Constants.MINUTE_IN_MS * 6); // standard retry timer
+                        // SyncService.startSyncService(Constants.MINUTE_IN_MS * 6); // standard retry timer
                     }
 
                     // TODO some kind of fail counter?
@@ -185,7 +185,7 @@ public class UploaderTask extends AsyncTask<String, Void, Void> {
 
                         if (PersistentStore.getBoolean(BACKFILLING_BOOSTER)) {
                             Log.d(TAG, "Scheduling boosted repeat query");
-                            SyncService.startSyncService(2000);
+                            // SyncService.startSyncService(2000);
                         }
 
                     }

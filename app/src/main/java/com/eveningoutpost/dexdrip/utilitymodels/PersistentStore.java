@@ -12,7 +12,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
-import lombok.val;
 
 /**
  * Created by jamorham on 23/09/2016.
@@ -163,14 +162,14 @@ public class PersistentStore {
 
     public static void cleanupOld(final String prefix) {
         if (prefix == null) return;
-        val erase = new LinkedList<String>();
+        final LinkedList<String> erase = new LinkedList<String>();
         Set<? extends Map.Entry<String, ?>> set = prefs.getAll().entrySet();
         for (Map.Entry<String, ?> i : set) {
             if (i.getKey().startsWith(prefix)) {
                 erase.add(i.getKey());
             }
         }
-        for (val i : erase) {
+        for (final String i : erase) {
             System.out.println("Erasing: " + i);
             removeItem(i);
         }

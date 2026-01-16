@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.RandomAccess;
 
-import lombok.Setter;
 
 /**
  * If you use this code, please consider notifying isak at du-preez dot com
@@ -30,8 +29,11 @@ public class CircularArrayList<E>
     private final List<E> buf; // a List implementing RandomAccess
     private int head = 0;
     private int tail = 0;
-    @Setter
     private boolean autoEvict = false;
+
+    public void setAutoEvict(boolean autoEvict) {
+        this.autoEvict = autoEvict;
+    }
 
     public CircularArrayList(int capacity) {
         n = capacity + 1;

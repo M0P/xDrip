@@ -2,20 +2,17 @@ package com.eveningoutpost.dexdrip.plugin;
 
 import static com.eveningoutpost.dexdrip.models.JoH.msSince;
 import static com.eveningoutpost.dexdrip.models.JoH.tsl;
-import static com.eveningoutpost.dexdrip.utilitymodels.Constants.MINUTE_IN_MS;
 import static com.eveningoutpost.dexdrip.plugin.PluginDef.State.Fresh;
 import static com.eveningoutpost.dexdrip.plugin.PluginDef.State.Loaded;
 import static com.eveningoutpost.dexdrip.plugin.PluginDef.State.Loading;
-
-import lombok.RequiredArgsConstructor;
+import static com.eveningoutpost.dexdrip.utilitymodels.Constants.MINUTE_IN_MS;
 
 /**
  * JamOrHam
- *
+ * <p>
  * Plugin meta-data and state handling
  */
 
-@RequiredArgsConstructor
 public class PluginDef {
 
     final String name;
@@ -24,6 +21,13 @@ public class PluginDef {
     final String repository;
     private volatile State state = Fresh;
     private volatile long lastChange;
+
+    public PluginDef(String name, String author, String version, String repository) {
+        this.name = name;
+        this.author = author;
+        this.version = version;
+        this.repository = repository;
+    }
 
     public boolean isReady() {
         return state == Loaded;

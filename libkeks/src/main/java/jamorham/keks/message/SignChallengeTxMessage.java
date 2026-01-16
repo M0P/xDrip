@@ -4,8 +4,6 @@ import static jamorham.keks.util.Util.getRandomKey;
 
 import java.nio.ByteBuffer;
 
-import lombok.Getter;
-
 /**
  * JamOrHam
  */
@@ -13,8 +11,11 @@ import lombok.Getter;
 public class SignChallengeTxMessage extends BaseMessage {
 
     byte opcode = 0x0c;
-    @Getter
     byte[] challengeHash;
+
+    public byte[] getChallengeHash() {
+        return challengeHash;
+    }
 
     public SignChallengeTxMessage(byte[] challenge) {
         challengeHash = challenge;

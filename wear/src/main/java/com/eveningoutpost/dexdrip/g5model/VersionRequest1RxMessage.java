@@ -4,7 +4,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Locale;
 
-import lombok.val;
 
 /**
  * Created by jamorham on 25/11/2016.
@@ -29,7 +28,7 @@ public class VersionRequest1RxMessage extends BaseMessage {
         if (packet.length >= 18) {
             // TODO check CRC??
             data = ByteBuffer.wrap(packet).order(ByteOrder.LITTLE_ENDIAN);
-            val op = data.get();
+            byte op = data.get();
             status = data.get();
             if (op == opcode) {
                 firmware_version_string = dottedStringFromData(data, 4);

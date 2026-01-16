@@ -11,9 +11,6 @@ import static com.eveningoutpost.dexdrip.utilitymodels.PersistentStore.setString
 
 import java.security.InvalidParameterException;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-
 /**
  * JamOrHam
  * <p>
@@ -24,9 +21,12 @@ public class Persist {
 
     private static final java.lang.String PREF_TIMEOUT = "TIMEOUT__";
 
-    @RequiredArgsConstructor
     public static class String {
         private final java.lang.String pref;
+
+        public String(java.lang.String pref) {
+            this.pref = pref;
+        }
 
         public java.lang.String get() {
             return getString(pref);
@@ -37,9 +37,12 @@ public class Persist {
         }
     }
 
-    @RequiredArgsConstructor
     public static class Long {
         private final java.lang.String pref;
+
+        public Long(java.lang.String pref) {
+            this.pref = pref;
+        }
 
         public long get() {
             return getLong(pref);
@@ -50,9 +53,12 @@ public class Persist {
         }
     }
 
-    @RequiredArgsConstructor
     public static class Double {
         private final java.lang.String pref;
+
+        public Double(java.lang.String pref) {
+            this.pref = pref;
+        }
 
         public java.lang.Double get() {
             return getDouble(pref);
@@ -101,7 +107,7 @@ public class Persist {
             return !timeout.expired() ? super.get() : null;
         }
 
-        public void set(@NonNull final java.lang.Double value) {
+        public void set(final java.lang.Double value) {
             if (value == null) {
                 throw new InvalidParameterException("Sorry null not permitted here");
             }

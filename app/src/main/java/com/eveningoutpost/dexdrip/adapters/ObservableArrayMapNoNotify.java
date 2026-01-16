@@ -1,116 +1,87 @@
 package com.eveningoutpost.dexdrip.adapters;
-/*
- * Copyright (C) 2015 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
 import androidx.collection.ArrayMap;
 import androidx.databinding.MapChangeRegistry;
 import androidx.databinding.ObservableMap;
 
-
 import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
-public class ObservableArrayMapNoNotify<K, V> extends ArrayMap<K, V> implements ObservableMap<K, V> {
+public class ObservableArrayMapNoNotify<K, V> implements ObservableMap<K, V> {
 
+    private final ArrayMap<K, V> backing = new ArrayMap<>();
     private transient MapChangeRegistry mListeners;
 
     @Override
-    public void addOnMapChangedCallback(
-            OnMapChangedCallback<? extends ObservableMap<K, V>, K, V> listener) {
-        if (mListeners == null) {
-            mListeners = new MapChangeRegistry();
-        }
+    public void addOnMapChangedCallback(OnMapChangedCallback<? extends ObservableMap<K, V>, K, V> listener) {
+        if (mListeners == null) mListeners = new MapChangeRegistry();
         mListeners.add(listener);
     }
 
     @Override
-    public void removeOnMapChangedCallback(
-            OnMapChangedCallback<? extends ObservableMap<K, V>, K, V> listener) {
-        if (mListeners != null) {
-            mListeners.remove(listener);
-        }
+    public void removeOnMapChangedCallback(OnMapChangedCallback<? extends ObservableMap<K, V>, K, V> listener) {
+        if (mListeners != null) mListeners.remove(listener);
+    }
+
+    private void notifyChange(Object key) {
+        if (mListeners != null) mListeners.notifyCallbacks(this, 0, key);
+    }
+
+    // ---- Map / ObservableMap ----
+    @Override public int size() { return backing.size(); }
+    @Override public boolean isEmpty() { return backing.isEmpty(); }
+    @Override public boolean containsKey(Object key) { return backing.containsKey(key); }
+    @Override public boolean containsValue(Object value) { return backing.containsValue(value); }
+    @Override public V get(Object key) { return backing.get(key); }
+
+    @Override
+    public V put(K key, V value) {
+        V old = backing.put(key, value);
+        notifyChange(key);
+        return old;
+    }
+
+    public V putNoNotify(K key, V value) {
+        return backing.put(key, value);
+    }
+
+    @Override
+    public V remove(Object key) {
+        V old = backing.remove(key);
+        if (old != null) notifyChange(key);
+        return old;
+    }
+
+    @Override
+    public boolean remove(Object key, Object value) {
+        boolean removed = backing.remove(key, value);
+        if (removed) notifyChange(key);
+        return removed;
     }
 
     @Override
     public void clear() {
-        boolean wasEmpty = isEmpty();
-        if (!wasEmpty) {
-            super.clear();
+        if (!backing.isEmpty()) {
+            backing.clear();
             notifyChange(null);
         }
     }
 
-    public V put(K k, V v) {
-        V val = super.put(k, v);
-        notifyChange(k);
-        return v;
-    }
-
-    @SuppressWarnings({"WeakerAccess", "UnusedReturnValue"})
-    public V putNoNotify(K k, V v) {
-        V val = super.put(k, v);
-        return v;
-    }
-
     @Override
-    public boolean removeAll(Collection<?> collection) {
-        boolean removed = false;
-        for (Object key : collection) {
-            int index = indexOfKey(key);
-            if (index >= 0) {
-                removed = true;
-                removeAt(index);
-            }
-        }
-        return removed;
-    }
-
-    @Override
-    public boolean retainAll(Collection<?> collection) {
-        boolean removed = false;
-        for (int i = size() - 1; i >= 0; i--) {
-            Object key = keyAt(i);
-            if (!collection.contains(key)) {
-                removeAt(i);
-                removed = true;
-            }
-        }
-        return removed;
-    }
-
-    @Override
-    public V removeAt(int index) {
-        K key = keyAt(index);
-        V value = super.removeAt(index);
-        if (value != null) {
-            notifyChange(key);
-        }
-        return value;
-    }
-
-    @Override
-    public V setValueAt(int index, V value) {
-        K key = keyAt(index);
-        V oldValue = super.setValueAt(index, value);
-        notifyChange(key);
-        return oldValue;
-    }
-
-    private void notifyChange(Object key) {
-        if (mListeners != null) {
-            mListeners.notifyCallbacks(this, 0, key);
+    public void putAll(Map<? extends K, ? extends V> m) {
+        for (Entry<? extends K, ? extends V> e : m.entrySet()) {
+            put(e.getKey(), e.getValue());
         }
     }
+
+    @Override public Set<K> keySet() { return backing.keySet(); }
+    @Override public Collection<V> values() { return backing.values(); }
+    @Override public Set<Entry<K, V>> entrySet() { return backing.entrySet(); }
+
+    // Optional, falls du diese API im Projekt nutzt:
+    public K keyAt(int index) { return backing.keyAt(index); }
+    public V valueAt(int index) { return backing.valueAt(index); }
+    public V removeAt(int index) { K k = backing.keyAt(index); V v = backing.removeAt(index); if (v != null) notifyChange(k); return v; }
+    public V setValueAt(int index, V value) { K k = backing.keyAt(index); V old = backing.setValueAt(index, value); notifyChange(k); return old; }
 }

@@ -20,9 +20,6 @@ import com.eveningoutpost.dexdrip.models.LibreBlock;
 import com.eveningoutpost.dexdrip.models.TransmitterData;
 import com.eveningoutpost.dexdrip.models.Treatments;
 import com.eveningoutpost.dexdrip.models.UserError;
-import com.eveningoutpost.dexdrip.tidepool.TidepoolEntry;
-import com.eveningoutpost.dexdrip.tidepool.TidepoolStatus;
-import com.eveningoutpost.dexdrip.tidepool.TidepoolUploader;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
@@ -34,7 +31,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.eveningoutpost.dexdrip.services.SyncService.startSyncService;
+// import static com.eveningoutpost.dexdrip.services.SyncService.startSyncService;
 
 /**
  * Created by jamorham on 15/11/2016.
@@ -198,7 +195,7 @@ public class UploaderQueue extends Model {
     	newEntry(action, obj);
     	// For libre us sensors, we have a reading, it might not create a BG entry, but we still need
     	// to upload it.
-    	startSyncService(3000); // sync in 3 seconds
+    	// startSyncService(3000); // sync in 3 seconds
     }
     
     // TODO remove duplicated functionality, replace with generic multi-purpose method
@@ -444,11 +441,13 @@ public class UploaderQueue extends Model {
                         @Override
                         public void run() {
                             if (JoH.ratelimit("nightscout-manual-poll", 15)) {
-                                startSyncService(100);
+                                // startSyncService(100);
                                 JoH.static_toast_short("Polling");
+                                /*
                                 if (TidepoolEntry.enabled()) {
                                     TidepoolUploader.doLogin(true);
                                 }
+                                */
                             }
                         }
                     }));
@@ -530,14 +529,16 @@ public class UploaderQueue extends Model {
 
         ///
 
-        if (NightscoutUploader.last_exception_count > 0) {
-            l.add(new StatusItem("REST-API problem\n" + JoH.dateTimeText(NightscoutUploader.last_exception_time) + " (" + NightscoutUploader.last_exception_count + ")", NightscoutUploader.last_exception, StatusItem.Highlight.BAD));
-        }
+//        if (NightscoutUploader.last_exception_count > 0) {
+//            l.add(new StatusItem("REST-API problem\n" + JoH.dateTimeText(NightscoutUploader.last_exception_time) + " (" + NightscoutUploader.last_exception_count + ")", NightscoutUploader.last_exception, StatusItem.Highlight.BAD));
+//        }
 
 
+        /*
         if (TidepoolEntry.enabled()) {
             l.addAll(TidepoolStatus.megaStatus());
         }
+        */
 
 
         if (last_cleanup > 0)
@@ -549,7 +550,7 @@ public class UploaderQueue extends Model {
     private static void refreshStatus(String store_marker) {
         PersistentStore.setString(store_marker, "");
         if (JoH.ratelimit("nightscout-manual-poll", 15)) {
-            startSyncService(100);
+            // startSyncService(100);
             JoH.static_toast_short("Refreshing Status");
         }
     }

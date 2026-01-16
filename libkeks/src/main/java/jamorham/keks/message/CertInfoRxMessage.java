@@ -3,8 +3,6 @@ package jamorham.keks.message;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import lombok.Getter;
-
 /**
  * JamOrHam
  */
@@ -13,12 +11,21 @@ public class CertInfoRxMessage extends BaseMessage {
 
     public static final byte opcode = 0x0b;
 
-    @Getter
     private int size = -1;
-    @Getter
     private int which = -1;
-    @Getter
     private int state = 0;
+
+    public int getSize() {
+        return size;
+    }
+
+    public int getWhich() {
+        return which;
+    }
+
+    public int getState() {
+        return state;
+    }
 
     public boolean valid() {
         return (size > 0 && state == 0 && which >= 0);

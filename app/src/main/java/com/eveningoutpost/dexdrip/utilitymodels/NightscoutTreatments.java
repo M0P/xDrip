@@ -72,7 +72,7 @@ public class NightscoutTreatments {
                             double mgdl = JoH.tolerantParseDouble(tr.getString("glucose"), 0d);
                             if (tr.getString("units").equals("mmol"))
                                 mgdl = mgdl * Constants.MMOLL_TO_MGDL;
-                            final BloodTest bt = BloodTest.create(timestamp, mgdl, tr.getString("enteredBy") + " " + NightscoutUploader.VIA_NIGHTSCOUT_TAG);
+                            final BloodTest bt = BloodTest.create(timestamp, mgdl, tr.getString("enteredBy") );
                             if (bt != null) {
                                 bt.uuid = uuid; // override random uuid with nightscout one
                                 bt.saveit();
@@ -159,9 +159,9 @@ public class NightscoutTreatments {
 
                             //t.uuid = nightscout_id; // replace with nightscout uuid
                             try {
-                                t.enteredBy = tr.getString("enteredBy") + " " + NightscoutUploader.VIA_NIGHTSCOUT_TAG;
+                                t.enteredBy = tr.getString("enteredBy") ;
                             } catch (JSONException e) {
-                                t.enteredBy = NightscoutUploader.VIA_NIGHTSCOUT_TAG;
+//                                t.enteredBy = NightscoutUploader.VIA_NIGHTSCOUT_TAG;
                             }
 
                             t.save();

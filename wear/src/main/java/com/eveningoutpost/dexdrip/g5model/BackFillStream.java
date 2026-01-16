@@ -14,9 +14,6 @@ import java.nio.ByteOrder;
 import java.util.LinkedList;
 import java.util.List;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
 public class BackFillStream extends BaseMessage {
 
     private volatile int last_sequence = 0;
@@ -161,12 +158,28 @@ public class BackFillStream extends BaseMessage {
         System.out.println("\n");
     }
 
-    @Data
-    @AllArgsConstructor()
-    public class Backsie {
+    public static class Backsie {
         private final int glucose;
         private final int trend;
         private final int dextime;
+
+        public Backsie(int glucose, int trend, int dextime) {
+            this.glucose = glucose;
+            this.trend = trend;
+            this.dextime = dextime;
+        }
+
+        public int getGlucose() {
+            return glucose;
+        }
+
+        public int getTrend() {
+            return trend;
+        }
+
+        public int getDextime() {
+            return dextime;
+        }
     }
 
 }

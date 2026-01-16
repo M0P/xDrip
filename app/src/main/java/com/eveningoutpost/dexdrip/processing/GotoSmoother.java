@@ -12,7 +12,6 @@ import com.eveningoutpost.dexdrip.processing.sgfilter.SGFilter;
 import java.util.Collections;
 import java.util.List;
 
-import lombok.val;
 
 /**
  * JamOrHam
@@ -38,8 +37,8 @@ public class GotoSmoother extends BaseSmoother {
      * @return the double [ ]
      */
     public double[] sgFilter(final double[] data) {
-        val padding = filter.getNl();
-        val empty = new double[padding];
+        int padding = filter.getNl();
+        double[] empty = new double[padding];
         if (D) UserError.Log.d(TAG, "Padding size on filter: " + padding);
         return filter.smooth(data, empty, empty, 0, new double[][]{coefficients});
     }
@@ -86,7 +85,7 @@ public class GotoSmoother extends BaseSmoother {
      */
     static double[] extractDoubleArray(final List<BgReading> readings, final int start, final int length) {
         if (readings == null) return null;
-        val data = new double[length];
+        double[] data = new double[length];
         for (int i = 0; i < length; i++) {
             data[i] = (float) readings.get(i + start).calculated_value;
         }
@@ -137,7 +136,7 @@ public class GotoSmoother extends BaseSmoother {
         long lastGoodTimestamp = -1;
         int count = 0;
         for (int i = start; i < readings.size(); i++) {
-            val r = readings.get(i);
+            BgReading r = readings.get(i);
             if ((lastGoodTimestamp != -1) && (Math.abs(r.timestamp - lastGoodTimestamp) > triggerPeriod)) {
                 break;
             }

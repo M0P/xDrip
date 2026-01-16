@@ -31,16 +31,11 @@ import com.eveningoutpost.dexdrip.models.UserError.Log;
 import com.eveningoutpost.dexdrip.R;
 import com.eveningoutpost.dexdrip.services.SnoozeOnNotificationDismissService;
 import com.eveningoutpost.dexdrip.SnoozeActivity;
-import com.eveningoutpost.dexdrip.utilitymodels.pebble.PebbleWatchSync;
-import com.eveningoutpost.dexdrip.eassist.AlertTracker;
+
 import com.eveningoutpost.dexdrip.ui.FlashLight;
 import com.eveningoutpost.dexdrip.ui.helpers.AudioFocusType;
 import com.eveningoutpost.dexdrip.utils.PowerStateReceiver;
-import com.eveningoutpost.dexdrip.watch.lefun.LeFun;
-import com.eveningoutpost.dexdrip.watch.lefun.LeFunEntry;
-import com.eveningoutpost.dexdrip.watch.miband.MiBand;
-import com.eveningoutpost.dexdrip.watch.miband.MiBandEntry;
-import com.eveningoutpost.dexdrip.watch.thinjam.BlueJayEntry;
+
 import com.eveningoutpost.dexdrip.wearintegration.Amazfitservice;
 import com.eveningoutpost.dexdrip.services.broadcastservice.BroadcastEntry;
 import com.eveningoutpost.dexdrip.wearintegration.WatchUpdaterService;
@@ -48,8 +43,6 @@ import com.eveningoutpost.dexdrip.services.broadcastservice.Const;
 import com.eveningoutpost.dexdrip.xdrip;
 
 import java.util.Date;
-
-import lombok.Getter;
 
 
 // A helper class to create the mediaplayer on the UI thread.
@@ -110,8 +103,12 @@ class MediaPlayerCreaterHelper {
 public class AlertPlayer {
 
     private volatile static AlertPlayer alertPlayerInstance;
-    @Getter
     private volatile static long lastVolumeChange = 0;
+
+    public static long getLastVolumeChange() {
+        return lastVolumeChange;
+    }
+
     private final static String TAG = AlertPlayer.class.getSimpleName();
     private volatile MediaPlayer mediaPlayer = null;
     private final AudioManager manager = (AudioManager)xdrip.getAppContext().getSystemService(Context.AUDIO_SERVICE);
@@ -190,7 +187,7 @@ public class AlertPlayer {
         ActiveBgAlert.Create(newAlert.uuid, start_snoozed, nextAlertTime);
         if (!start_snoozed) VibrateNotifyMakeNoise(ctx, newAlert, bgValue, 0);
         ping("alarm");
-        AlertTracker.evaluate();
+        // AlertTracker.evaluate();
     }
 
     public synchronized void stopAlert(Context ctx, boolean ClearData, boolean clearIfSnoozeFinished) {
@@ -238,7 +235,7 @@ public class AlertPlayer {
     public synchronized void Snooze(Context ctx, int repeatTime) {
         Snooze(ctx, repeatTime, true);
 
-        BlueJayEntry.cancelNotifyIfEnabled();
+        // BlueJayEntry.cancelNotifyIfEnabled();
 
         if (Pref.getBooleanDefaultFalse("bg_notifications_watch") ) {
             startWatchUpdaterService(ctx, WatchUpdaterService.ACTION_SNOOZE_ALERT, TAG, "repeatTime", "" + repeatTime);
@@ -322,7 +319,7 @@ public class AlertPlayer {
             activeBgAlert.updateNextAlertAt(nextAlertTime);
             
             VibrateNotifyMakeNoise(ctx, alert, bgValue, minutesFromStartPlaying);
-            AlertTracker.evaluate();
+            // AlertTracker.evaluate();
         }
 
     }
@@ -580,14 +577,16 @@ public class AlertPlayer {
                 if (overrideSilent || isLoudPhone(context)) {
                     playFile(context, alert.mp3_file, volumeFrac, forceSpeaker, overrideSilent);
                 }
-            } else {
+            }
+            else {
                 Log.i(TAG, "Silenced Alert Noise due to ongoing call");
             }
         }
         if (profile != ALERT_PROFILE_SILENT && alert.vibrate) {
             if (notSilencedDueToCall()) {
                 builder.setVibrate(Notifications.vibratePattern);
-            } else {
+            }
+            else {
                 Log.i(TAG, "Vibration silenced due to ongoing call");
             }
         } else {
@@ -601,14 +600,16 @@ public class AlertPlayer {
         mNotifyMgr.notify(Notifications.exportAlertNotificationId, XdripNotificationCompat.build(builder));
 
         // send to bluejay
-        BlueJayEntry.sendAlertIfEnabled((alert.above ? "High" : "Low") + " Alert " + bgValue + " " + alert.name); // string text is used to determine alert type
+        // BlueJayEntry.sendAlertIfEnabled((alert.above ? "High" : "Low") + " Alert " + bgValue + " " + alert.name); // string text is used to determine alert type
 
         // send alert to pebble
+        /*
         if (Pref.getBooleanDefaultFalse("broadcast_to_pebble") && (Pref.getBooleanDefaultFalse("pebble_vibe_alerts"))) {
             if (JoH.ratelimit("pebble_vibe_start", 59)) {
                 JoH.startService(PebbleWatchSync.class);
             }
         }
+        */
 
         //send alert to amazfit
         if (Pref.getBooleanDefaultFalse("pref_amazfit_enable_key")
@@ -616,13 +617,17 @@ public class AlertPlayer {
             Amazfitservice.start("xDrip_Alarm", alert.name, alert.default_snooze);
         }
 
+        /*
         if (LeFunEntry.areAlertsEnabled() && ActiveBgAlert.currentlyAlerting()) {
             LeFun.sendAlert(highlow, bgValue);
         }
+        */
 
+        /*
         if (MiBandEntry.areAlertsEnabled() && ActiveBgAlert.currentlyAlerting()) {
             MiBand.sendAlert(alert.name, highlow + " " + bgValue, alert.default_snooze);
         }
+        */
 
         if (ActiveBgAlert.currentlyAlerting()) {
             BroadcastEntry.sendAlert(Const.BG_ALERT_TYPE, highlow + " " + bgValue);

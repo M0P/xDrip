@@ -25,10 +25,8 @@ import com.eveningoutpost.dexdrip.utils.bt.ConnectReceiver;
 import com.eveningoutpost.dexdrip.xdrip;
 
 import java.util.HashMap;
+import java.util.Set;
 import java.util.UUID;
-
-import lombok.Getter;
-import lombok.val;
 
 /**
  * JamOrHam
@@ -38,7 +36,6 @@ public class BlueTails extends BluetoothGattCallback implements BtCallBack3 {
 
     private static final String TAG = BlueTails.class.getSimpleName();
     private static final String PREF = "bluetails_enabled";
-    @Getter
     private static final BlueTails instance = new BlueTails();
     private static final int STATE_DISCONNECTED = 0;
     private static final int STATE_CONNECTING = 1;
@@ -48,6 +45,10 @@ public class BlueTails extends BluetoothGattCallback implements BtCallBack3 {
     private BluetoothAdapter mBluetoothAdapter;
     private final byte[] EMPTY_PAYLOAD = new byte[1];
     private final HashMap<UUID, ClassifierSignpost> characteristics = new HashMap<>();
+
+    public static BlueTails getInstance() {
+        return instance;
+    }
 
     {
         characteristics.put(Control, new ClassifierSignpost(Control, CONTROL));
@@ -82,12 +83,12 @@ public class BlueTails extends BluetoothGattCallback implements BtCallBack3 {
     public void btCallback3(final String mac, final String status, final String name, final Bundle bundle, final BluetoothDevice device) {
         if (enabled()) {
             UserError.Log.d(TAG, "Got connection for: " + mac + " " + status + " " + name + " " + " device: " + device);
-            val pairedDevices = mBluetoothAdapter.getBondedDevices();
+            Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
             if ((pairedDevices != null) && (pairedDevices.size() > 0)) {
-                for (val d : pairedDevices) {
+                for (BluetoothDevice d : pairedDevices) {
                     if (d.getAddress().equals(mac)) {
                         if (d.getName().startsWith("DXC") || d.getName().startsWith("Dex")) {
-                            val gatt = device.connectGatt(xdrip.getAppContext(), false, getInstance());
+                            device.connectGatt(xdrip.getAppContext(), false, getInstance());
                         }
                         break;
                     }
@@ -112,7 +113,7 @@ public class BlueTails extends BluetoothGattCallback implements BtCallBack3 {
     }
 
     private void enableNotifications(final BluetoothGatt gatt) {
-        for (val v : characteristics.values()) {
+        for (ClassifierSignpost v : characteristics.values()) {
             if (v.characteristic != null) {
                 gatt.setCharacteristicNotification(v.characteristic, true);
                 UserError.Log.d(TAG, "Enable notification: " + v.action);
@@ -123,9 +124,9 @@ public class BlueTails extends BluetoothGattCallback implements BtCallBack3 {
     @Override
     public void onServicesDiscovered(final BluetoothGatt gatt, final int status) {
         UserError.Log.d(TAG, "Services discovered start");
-        for (val service : gatt.getServices()) {
-            for (val cha : service.getCharacteristics()) {
-                val c = characteristics.get(cha.getUuid());
+        for (android.bluetooth.BluetoothGattService service : gatt.getServices()) {
+            for (BluetoothGattCharacteristic cha : service.getCharacteristics()) {
+                ClassifierSignpost c = characteristics.get(cha.getUuid());
                 if (c != null) {
                     c.characteristic = cha;
                     UserError.Log.d(TAG, "Found " + c.action);
@@ -137,10 +138,10 @@ public class BlueTails extends BluetoothGattCallback implements BtCallBack3 {
 
     @Override
     public synchronized void onCharacteristicChanged(final BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
-        val bytes = characteristic.getValue();
+        byte[] bytes = characteristic.getValue();
         UserError.Log.d(TAG, "Characteristic changed: " + characteristic.getUuid() + " " + HexDump.dumpHexString(bytes));
 
-        val achar = characteristics.get(characteristic.getUuid());
+        ClassifierSignpost achar = characteristics.get(characteristic.getUuid());
         if (achar != null) {
             action(achar.action, bytes);
         } else {

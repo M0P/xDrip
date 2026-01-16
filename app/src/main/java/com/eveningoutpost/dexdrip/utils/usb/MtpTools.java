@@ -21,8 +21,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 
-import lombok.Getter;
-
 // jamorham
 
 @RequiresApi(api = Build.VERSION_CODES.N)
@@ -262,11 +260,17 @@ public class MtpTools {
 
     public static class MtpDeviceHelper {
 
-        @Getter
         final MtpDevice device;
 
-        @Getter
+        public MtpDevice getDevice() {
+            return device;
+        }
+
         int[] storageVolumeIds;
+
+        public int[] getStorageVolumeIds() {
+            return storageVolumeIds;
+        }
 
         public MtpDeviceHelper(final UsbDevice usbDevice) {
             this.device = openMTP(usbDevice);

@@ -11,17 +11,10 @@ import com.google.gson.annotations.Expose;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-
 /**
  * Created by jamorham on 11/06/2018.
  */
 
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "Prediction", id = BaseColumns._ID)
 public class Prediction extends PlusModel {
 
@@ -54,6 +47,54 @@ public class Prediction extends PlusModel {
     @Expose
     @Column(name = "note")
     public String note;
+
+    public Prediction() {
+    }
+
+    public Prediction(long timestamp, double glucose, String source, String note) {
+        this.timestamp = timestamp;
+        this.glucose = glucose;
+        this.source = source;
+        this.note = note;
+    }
+
+    public static class PredictionBuilder {
+        private long timestamp;
+        private double glucose;
+        private String source;
+        private String note;
+
+        PredictionBuilder() {
+        }
+
+        public PredictionBuilder timestamp(long timestamp) {
+            this.timestamp = timestamp;
+            return this;
+        }
+
+        public PredictionBuilder glucose(double glucose) {
+            this.glucose = glucose;
+            return this;
+        }
+
+        public PredictionBuilder source(String source) {
+            this.source = source;
+            return this;
+        }
+
+        public PredictionBuilder note(String note) {
+            this.note = note;
+            return this;
+        }
+
+        public Prediction build() {
+            return new Prediction(timestamp, glucose, source, note);
+        }
+    }
+
+    public static PredictionBuilder builder() {
+        return new PredictionBuilder();
+    }
 
 
     public static Prediction create(long timestamp, int glucose, String source) {
@@ -127,6 +168,3 @@ public class Prediction extends PlusModel {
         patched = fixUpTable(schema, patched);
     }
 }
-
-
-

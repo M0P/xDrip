@@ -4,17 +4,13 @@ import com.eveningoutpost.dexdrip.insulin.Insulin;
 import com.eveningoutpost.dexdrip.insulin.InsulinManager;
 import com.google.gson.annotations.Expose;
 
-import lombok.Getter;
-
 public class InsulinInjection {
     private Insulin profile;
 
     @Expose
-    @Getter
     private double units;
 
     @Expose
-    @Getter
     private String insulin;
 
     public InsulinInjection(final Insulin p, final double u) {
@@ -23,6 +19,13 @@ public class InsulinInjection {
         insulin = (p != null) ? p.getName() : "unknown";
     }
 
+    public double getUnits() {
+        return units;
+    }
+
+    public String getInsulin() {
+        return insulin;
+    }
 
     public Insulin getProfile() {
         // populate on demand

@@ -15,8 +15,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import lombok.val;
-
 // jamorham
 // keep track of pairings we have seen
 public class DexPairKeeper {
@@ -40,7 +38,7 @@ public class DexPairKeeper {
         synchronized (items) {
             // search list in reverse order as oldest items are first in the list
             for (int i = items.size() - 1; i >= 0; i--) {
-                val item = items.get(i);
+                PairKeeper item = items.get(i);
                 if (item.mac.equalsIgnoreCase(mac)) {
                     if (!item.txid.equalsIgnoreCase(txid)) {
                         log("Registered a mismatch for search txid: " + txid + " found mac: " + mac + " but we know as: " + item.txid);
@@ -62,7 +60,7 @@ public class DexPairKeeper {
         }
         synchronized (items) {
             for (int i = items.size() - 1; i >= 0; i--) {
-                val item = items.get(i);
+                PairKeeper item = items.get(i);
                 if (item.mac.equalsIgnoreCase(mac)) {
                     return true;
                 }
@@ -78,7 +76,7 @@ public class DexPairKeeper {
         }
         synchronized (items) {
             for (int i = items.size() - 1; i >= 0; i--) {
-                val item = items.get(i);
+                PairKeeper item = items.get(i);
                 if (item.mac.equalsIgnoreCase(mac)) {
                     return item.ended();
                 }
@@ -105,12 +103,12 @@ public class DexPairKeeper {
             return false;
         }
         synchronized (items) {
-            for (val item : items) {
+            for (PairKeeper item : items) {
                 if (item.mac.equalsIgnoreCase(mac)) {
                     return false; // already exists
                 }
             }
-            val item = new PairKeeper(txid, mac);
+            PairKeeper item = new PairKeeper(txid, mac);
             items.add(item);
             log("Added: " + item);
             save();
@@ -162,7 +160,7 @@ public class DexPairKeeper {
             items.clear();
             try {
                 //noinspection unchecked
-                val toAdd = (List<PairKeeper>) (defaultGsonInstance()
+                List<PairKeeper> toAdd = (List<PairKeeper>) (defaultGsonInstance()
                         .fromJson(PersistentStore.getString(PAIR_KEEPER_PREF), listType));
                 if (toAdd != null) {
                     items.addAll(toAdd);
@@ -186,9 +184,9 @@ public class DexPairKeeper {
     }
 
     private void prune() {
-        val remove = new LinkedList<PairKeeper>();
+        LinkedList<PairKeeper> remove = new LinkedList<PairKeeper>();
         synchronized (items) {
-            for (val item : items) {
+            for (PairKeeper item : items) {
                 if (item.expired()) {
                     remove.add(item);
                     log("Expiring pair: " + item);

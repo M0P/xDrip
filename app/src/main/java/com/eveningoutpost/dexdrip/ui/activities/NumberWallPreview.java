@@ -30,9 +30,6 @@ import com.eveningoutpost.dexdrip.utils.SdcardImportExport;
 
 import java.io.File;
 
-import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
-
 import static com.eveningoutpost.dexdrip.ui.NumberGraphic.isLockScreenBitmapTiled;
 import static com.eveningoutpost.dexdrip.ui.helpers.BitmapUtil.getScreenHeight;
 import static com.eveningoutpost.dexdrip.ui.helpers.BitmapUtil.getScreenWidth;
@@ -100,7 +97,6 @@ public class NumberWallPreview extends AppCompatActivity {
 
 
     // bound view model
-    @RequiredArgsConstructor
     public class ViewModel {
 
         public static final String PREF_numberwall_x_param = "numberwall_x_param";
@@ -112,7 +108,8 @@ public class NumberWallPreview extends AppCompatActivity {
         private final Activity activity;
         public ObservableBackground background = new ObservableBackground();
 
-        {
+        public ViewModel(Activity activity) {
+            this.activity = activity;
             refreshBitmap();
         }
 
@@ -160,22 +157,27 @@ public class NumberWallPreview extends AppCompatActivity {
     }
 
     // transparent preferences binding with below minimum defaults snaps to default
-    @AllArgsConstructor
     public class PrefsViewStringSnapDefaultsRefresh extends PrefsViewString {
 
         private final ViewModel model;
 
-        @Override
-        public String get(Object key) {
+        public PrefsViewStringSnapDefaultsRefresh(ViewModel model) {
+            this.model = model;
+        }
+
+//        @Override
+        public String get(String key) {
             final String original = super.get(key);
             String result = original;
             Integer value = 0;
             try {
-                value = Integer.parseInt(result);
+                if (result != null) {
+                    value = Integer.parseInt(result);
+                }
             } catch (NumberFormatException e) {
                 //
             }
-            switch ((String) key) {
+            switch (key) {
                 case ViewModel.PREF_numberwall_x_param:
                     if (value < 30) {
                         result = "30";
@@ -193,9 +195,9 @@ public class NumberWallPreview extends AppCompatActivity {
                     break;
             }
 
-            if (!result.equals(original)) {
+            if (result != null && !result.equals(original)) {
                 UserError.Log.d(TAG, "Snapped: " + key + " " + original + " -> " + result);
-                put((String) key, result);
+                put(key, result);
             }
             return result;
         }

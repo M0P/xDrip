@@ -6,10 +6,10 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
+import androidx.annotation.NonNull;
+
 import com.activeandroid.Cache;
 import com.eveningoutpost.dexdrip.models.UserError;
-
-import lombok.NonNull;
 
 
 /* Wouldn't it be nice if you could search and replace inside an sqlite schema?

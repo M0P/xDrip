@@ -5,11 +5,9 @@ package com.eveningoutpost.dexdrip.utilitymodels;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Getter;
 
 public class WearSyncBooleans {
 
-    @Getter
     private static final List<String> booleansToSync = new ArrayList<>();
 
     static {
@@ -34,6 +32,10 @@ public class WearSyncBooleans {
         booleansToSync.add("enable_crashlytics");
         booleansToSync.add("ob1_ultra_power_save");
         booleansToSync.add("detect_libre_sn_changes");
+    }
+
+    public static List<String> getBooleansToSync() {
+        return booleansToSync;
     }
 
 

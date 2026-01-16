@@ -32,7 +32,7 @@ import com.eveningoutpost.dexdrip.utils.bt.ReplyProcessor;
 import com.eveningoutpost.dexdrip.utils.bt.Subscription;
 import com.eveningoutpost.dexdrip.utils.framework.PoorMansConcurrentLinkedDeque;
 import com.eveningoutpost.dexdrip.utils.time.SlidingWindowConstraint;
-import com.eveningoutpost.dexdrip.watch.thinjam.BackgroundScanReceiver;
+//import com.eveningoutpost.dexdrip.watch.thinjam.BackgroundScanReceiver;
 import com.eveningoutpost.dexdrip.xdrip;
 import com.polidea.rxandroidble2.RxBleClient;
 import com.polidea.rxandroidble2.RxBleConnection;
@@ -54,8 +54,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.schedulers.Schedulers;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 import static com.eveningoutpost.dexdrip.models.JoH.emptyString;
 import static com.eveningoutpost.dexdrip.services.JamBaseBluetoothSequencer.BaseState.CLOSE;
@@ -136,8 +134,12 @@ public abstract class JamBaseBluetoothSequencer extends JamBaseBluetoothService 
         public long wakeup_time;
         long failover_time;
         long last_wake_up_time;
-        @Getter
+
         long lastConnected;
+
+        public long getLastConnected() {
+            return lastConnected;
+        }
 
 
         private Inst() {
@@ -220,30 +222,30 @@ public abstract class JamBaseBluetoothSequencer extends JamBaseBluetoothService 
     }
 
 
-    private String getIntentFilterName() {
-        return BackgroundScanReceiver.getACTION_NAME();
-    }
+//    private String getIntentFilterName() {
+//        return BackgroundScanReceiver.getACTION_NAME();
+//    }
 
     private PendingIntent scanCallBack = null;
 
-    private void registerScanReceiver() {
-        if (scanCallBack == null) {
-            scanCallBack = PendingIntent.getBroadcast(xdrip.getAppContext(), SCAN_REQUEST_CODE,
-                    new Intent(xdrip.getAppContext(), BackgroundScanReceiver.class).setAction(getIntentFilterName()).putExtra("CallingClass", this.getClass().getSimpleName()), PendingIntent.FLAG_UPDATE_CURRENT);
-        }
-        BackgroundScanReceiver.addCallBack2(this, this.getClass().getSimpleName());
-    }
+//    private void registerScanReceiver() {
+//        if (scanCallBack == null) {
+//            scanCallBack = PendingIntent.getBroadcast(xdrip.getAppContext(), SCAN_REQUEST_CODE,
+//                    new Intent(xdrip.getAppContext(), BackgroundScanReceiver.class).setAction(getIntentFilterName()).putExtra("CallingClass", this.getClass().getSimpleName()), PendingIntent.FLAG_UPDATE_CURRENT);
+//        }
+//        BackgroundScanReceiver.addCallBack2(this, this.getClass().getSimpleName());
+//    }
 
-    private void unregisterScanReceiver() {
-        if (scanCallBack != null) {
-            try {
-                rxBleClient.getBackgroundScanner().stopBackgroundBleScan(scanCallBack);
-            } catch (Exception e) {
-                UserError.Log.d(TAG, "Error removing background scanner callback: " + e);
-            }
-            BackgroundScanReceiver.removeCallBack(this.getClass().getSimpleName());
-        }
-    }
+//    private void unregisterScanReceiver() {
+//        if (scanCallBack != null) {
+//            try {
+//                rxBleClient.getBackgroundScanner().stopBackgroundBleScan(scanCallBack);
+//            } catch (Exception e) {
+//                UserError.Log.d(TAG, "Error removing background scanner callback: " + e);
+//            }
+//            BackgroundScanReceiver.removeCallBack(this.getClass().getSimpleName());
+//        }
+//    }
 
     protected synchronized void startConnect(final String address) {
         if (emptyString(address)) {
@@ -262,7 +264,7 @@ public abstract class JamBaseBluetoothSequencer extends JamBaseBluetoothService 
         stopConnect(address); // or do something like check if we are already connected
         I.isConnected = false;
 
-        resetBluetoothIfWeSeemToAlreadyBeConnected(address); // TODO might be a race condition here if we are already disconnecting - maybe we should check twice
+//        resetBluetoothIfWeSeemToAlreadyBeConnected(address); // TODO might be a race condition here if we are already disconnecting - maybe we should check twice
 
         if (I.autoConnect && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) && Pref.getBoolean("bluetooth_allow_background_scans", true)) {
             UserError.Log.d(TAG, "Trying background scan connect: " + scanCallBack + " " + address);
@@ -669,7 +671,6 @@ public abstract class JamBaseBluetoothSequencer extends JamBaseBluetoothService 
 
     /// Queue Handling
 
-    @RequiredArgsConstructor
     private class QueueItem {
         final UUID queueWriteCharacterstic;
         final byte[] data;
@@ -682,6 +683,16 @@ public abstract class JamBaseBluetoothSequencer extends JamBaseBluetoothService 
         Runnable runnable;
         ReplyProcessor replyProcessor;
         BytesGenerator generator;
+
+        QueueItem(UUID queueWriteCharacterstic, byte[] data, int timeoutSeconds, long post_delay, String description, boolean expectReply, long expireAt) {
+            this.queueWriteCharacterstic = queueWriteCharacterstic;
+            this.data = data;
+            this.timeoutSeconds = timeoutSeconds;
+            this.post_delay = post_delay;
+            this.description = description;
+            this.expectReply = expectReply;
+            this.expireAt = expireAt;
+        }
 
         boolean isExpired() {
             return expireAt != 0 && expireAt < JoH.tsl();
@@ -1010,7 +1021,7 @@ public abstract class JamBaseBluetoothSequencer extends JamBaseBluetoothService 
     @Override
     public void onCreate() {
         super.onCreate();
-        registerScanReceiver();
+//        registerScanReceiver();
     }
 
 
@@ -1019,7 +1030,7 @@ public abstract class JamBaseBluetoothSequencer extends JamBaseBluetoothService 
         shutDown();
         DisconnectReceiver.removeCallBack(TAG);
         ConnectReceiver.removeCallBack(TAG);
-        unregisterScanReceiver();
+//        unregisterScanReceiver();
         super.onDestroy();
     }
 
@@ -1033,35 +1044,35 @@ public abstract class JamBaseBluetoothSequencer extends JamBaseBluetoothService 
     }
 
     // does the system think we are connected to a device
-    public static boolean isConnectedToDevice(final String mac) {
-        if (JoH.emptyString(mac)) {
-            return false;
-        }
-        final BluetoothManager bluetoothManager = (BluetoothManager) xdrip.getAppContext().getSystemService(Context.BLUETOOTH_SERVICE);
-        if (bluetoothManager == null) {
-            return false;
-        }
-        boolean foundConnectedDevice = false;
-        for (BluetoothDevice bluetoothDevice : bluetoothManager.getConnectedDevices(BluetoothProfile.GATT)) {
-            if (bluetoothDevice.getAddress().equalsIgnoreCase(mac)) {
-                foundConnectedDevice = true;
-                break;
-            }
-        }
-        return foundConnectedDevice;
-    }
+//    public static boolean isConnectedToDevice(final String mac) {
+//        if (JoH.emptyString(mac)) {
+//            return false;
+//        }
+//        final BluetoothManager bluetoothManager = (BluetoothManager) xdrip.getAppContext().getSystemService(Context.BLUETOOTH_SERVICE);
+//        if (bluetoothManager == null) {
+//            return false;
+//        }
+//        boolean foundConnectedDevice = false;
+//        for (BluetoothDevice bluetoothDevice : bluetoothManager.getConnectedDevices(BluetoothProfile.GATT)) {
+//            if (bluetoothDevice.getAddress().equalsIgnoreCase(mac)) {
+//                foundConnectedDevice = true;
+//                break;
+//            }
+//        }
+//        return foundConnectedDevice;
+//    }
 
-    public void resetBluetoothIfWeSeemToAlreadyBeConnected(final String mac) {
-        if (isConnectedToDevice(mac)) {
-            if (Pref.getBooleanDefaultFalse("bluetooth_watchdog")) {
-                if (JoH.ratelimit("jamsequencer-restart-bluetooth", 1200)) {
-                    UserError.Log.e(TAG, "Restarting bluetooth as device reports we are connected but we can't find our connection");
-                    JoH.niceRestartBluetooth(xdrip.getAppContext());
-                } else {
-                    UserError.Log.d(TAG, "Cannot restart bluetooth due to rate limit but we seem to be connected");
-                }
-            }
-        }
-    }
+//    public void resetBluetoothIfWeSeemToAlreadyBeConnected(final String mac) {
+//        if (isConnectedToDevice(mac)) {
+//            if (Pref.getBooleanDefaultFalse("bluetooth_watchdog")) {
+//                if (JoH.ratelimit("jamsequencer-restart-bluetooth", 1200)) {
+//                    UserError.Log.e(TAG, "Restarting bluetooth as device reports we are connected but we can't find our connection");
+//                    JoH.niceRestartBluetooth(xdrip.getAppContext());
+//                } else {
+//                    UserError.Log.d(TAG, "Cannot restart bluetooth due to rate limit but we seem to be connected");
+//                }
+//            }
+//        }
+//    }
 
 }

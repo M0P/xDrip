@@ -75,7 +75,6 @@ import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.internal.bind.DateTypeAdapter;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -383,7 +382,7 @@ public class WatchUpdaterService extends WearableListenerService implements
         if (entries != null) {
             final Gson gson = new GsonBuilder()
                     .excludeFieldsWithoutExposeAnnotation()
-                    .registerTypeAdapter(Date.class, new DateTypeAdapter())
+                    
                     .serializeSpecialFloatingPointValues()
                     .create();
 
@@ -434,8 +433,6 @@ public class WatchUpdaterService extends WearableListenerService implements
             } else {
                 UserError.Log.e(TAG, "Not acknowledging wear BG readings as count was 0");
             }
-        } else {
-            UserError.Log.d(TAG, "Null entries list - should only happen with native status update only");
         }
     }
 
@@ -449,7 +446,7 @@ public class WatchUpdaterService extends WearableListenerService implements
 
             Gson gson = new GsonBuilder()
                     .excludeFieldsWithoutExposeAnnotation()
-                    .registerTypeAdapter(Date.class, new DateTypeAdapter())
+                    
                     .serializeSpecialFloatingPointValues()
                     .create();
 
@@ -523,7 +520,7 @@ public class WatchUpdaterService extends WearableListenerService implements
 
             Gson gson = new GsonBuilder()
                     .excludeFieldsWithoutExposeAnnotation()
-                    .registerTypeAdapter(Date.class, new DateTypeAdapter())
+                    
                     .serializeSpecialFloatingPointValues()
                     .create();
 
@@ -570,7 +567,7 @@ public class WatchUpdaterService extends WearableListenerService implements
 
             Gson gson = new GsonBuilder()
                     .excludeFieldsWithoutExposeAnnotation()
-                    .registerTypeAdapter(Date.class, new DateTypeAdapter())
+                    
                     .serializeSpecialFloatingPointValues()
                     .create();
 
@@ -890,8 +887,6 @@ public class WatchUpdaterService extends WearableListenerService implements
             Log.d(TAG, "startBtG5Service start G5CollectionService");
             myContext.startService(new Intent(myContext, G5CollectionService.class));
             Log.d(TAG, "startBtG5Service AFTER startService G5CollectionService");
-        } else {
-            Log.d(TAG, "Not starting any G5 service as it is not our data source");
         }
     }
 
@@ -1025,8 +1020,6 @@ public class WatchUpdaterService extends WearableListenerService implements
                 } else {
                     googleApiClient.connect();
                 }
-            } else {
-                Log.wtf(TAG, "GoogleAPI client is null!");
             }
         }
 
@@ -1560,15 +1553,13 @@ public class WatchUpdaterService extends WearableListenerService implements
                 msg = msg + " " + (ts() - benchmark_time) + " ms";
                 sendDataReceived(DATA_ITEM_RECEIVED_PATH, msg, 1, "BM", -1);//"DATA_RECEIVED"
                 return decomprBytes;
-            } else {
-                decomprBytes = JoH.decompressBytesToBytes(bytes);
-                Log.d(TAG, pathdesc + " JoH.decompressBytesToBytes from length=" + bytes.length + " to length=" + decomprBytes.length);
-                return decomprBytes;
             }
-        } else {
-            Log.d(TAG, "Benchmark: decompressBytesToBytes DataMap is not compressed!  Process as normal. length=" + bytes.length);
-            return bytes;
+            decomprBytes = JoH.decompressBytesToBytes(bytes);
+            Log.d(TAG, pathdesc + " JoH.decompressBytesToBytes from length=" + bytes.length + " to length=" + decomprBytes.length);
+            return decomprBytes;
         }
+        Log.d(TAG, "Benchmark: decompressBytesToBytes DataMap is not compressed!  Process as normal. length=" + bytes.length);
+        return bytes;
     }
 
     private void sendG5QueueData(String queueData) {
@@ -1680,8 +1671,10 @@ public class WatchUpdaterService extends WearableListenerService implements
         forceGoogleApiConnect();
         if (googleApiClient.isConnected()) {
             final Asset asset = Asset.createFromBytes(blob);
-            Log.d(TAG, "sendBlob asset size: " + asset.getData().length);
+//            Log.d(TAG, "sendBlob asset size: " + asset.getData().length);
+            Log.d(TAG, "sendBlob blob size: " + blob.length);
             final PutDataMapRequest request = PutDataMapRequest.create(path);
+
             request.getDataMap().putLong("time", new Date().getTime());
             request.getDataMap().putByteArray("asset", blob);
             request.setUrgent();
@@ -1934,8 +1927,6 @@ public class WatchUpdaterService extends WearableListenerService implements
                     new SendToDataLayerThread(WEARABLE_ACTIVEBTDEVICE_DATA_PATH, googleApiClient).executeOnExecutor(xdrip.executor, dataMap);
                 }
             }
-        } else {
-            Log.d(TAG, "Not sending activebluetoothdevice data as we are not using bt");
         }
     }
 
@@ -1999,8 +1990,8 @@ public class WatchUpdaterService extends WearableListenerService implements
                 entries.putString("action", "delete");
                 entries.putStringArrayList("entries", (new ArrayList<String>(list)));
                 new SendToDataLayerThread(WEARABLE_TREATMENTS_DATA_PATH, googleApiClient).executeOnExecutor(xdrip.executor, entries);
-            } else
-                Log.d(TAG, "sendWearTreatmentsDataDelete treatments count = 0");
+            }
+            Log.d(TAG, "sendWearTreatmentsDataDelete treatments count = 0");
         } else {
             Log.e(TAG, "sendWearTreatmentsData No connection to wearable available for send treatment!");
             return false;
@@ -2229,24 +2220,15 @@ public class WatchUpdaterService extends WearableListenerService implements
                             }
                             if ((bg != null) && (bg.sensor_uuid != null) && (bg.sensor_uuid.equals(sensor.uuid) && (bg.calibration_uuid != null))) {
                                 dataMaps.add(dataMap(bg));
-                            } else {
-                                if (bg.sensor_uuid == null) {
-                                    Log.d(TAG, "sendWearBgData: sensor uuid is null on record to send");
-                                }
-                                if (bg.calibration_uuid == null) {
-                                    Log.d(TAG, "sendWearBgData: calibration uuid is null on record to send");
-                                }
                             }
                         }
-                    } else {
-                        Log.d(TAG, "sendWearBgData Not queueing data due to sensor: " + (sensor != null ? sensor.uuid : "null sensor object"));
                     }
                     entries.putLong("time", new Date().getTime()); // MOST IMPORTANT LINE FOR TIMESTAMP
                     entries.putInt("battery", battery);
                     entries.putDataMapArrayList("entries", dataMaps);
                     new SendToDataLayerThread(WEARABLE_BG_DATA_PATH, googleApiClient).executeOnExecutor(xdrip.executor, entries);
-                } else
-                    Log.d(TAG, "sendWearBgData lastest count = 0");
+                }
+                Log.d(TAG, "sendWearBgData lastest count = 0");
             } else {
                 Log.e(TAG, "sendWearBgData No connection to wearable available for send BG!");
                 return false;
@@ -2290,11 +2272,10 @@ public class WatchUpdaterService extends WearableListenerService implements
                     sendWearBgData(sendBgCount);
                 }
                 sendData();//ensure BgReading.Last is displayed on watch
-            } else {
-                Log.d(TAG, "Skip initWearData as wear integration is disabled");
             }
-        } else
-            Log.d(TAG, "Skip initWearData due to exceeding ratelimit");
+            Log.d(TAG, "Skip initWearData as wear integration is disabled");
+        }
+        Log.d(TAG, "Skip initWearData due to exceeding ratelimit");
     }
 
     private void initWearTreatments() {
@@ -2306,8 +2287,8 @@ public class WatchUpdaterService extends WearableListenerService implements
             sendWearBloodTestData(sendTreatmentsCount, startTime);
             sendWearCalibrationData(sendTreatmentsCount, startTime);
             sendWearBgData(sendTreatmentsCount, startTime);
-        } else
-            Log.d(TAG, "Skip initWearTreatments due to exceeding ratelimit");
+        }
+        Log.d(TAG, "Skip initWearTreatments due to exceeding ratelimit");
     }
 
     private long sgvLevel(double sgv_double, SharedPreferences prefs, BgGraphBuilder bgGB) {
@@ -2317,9 +2298,8 @@ public class WatchUpdaterService extends WearableListenerService implements
             return 1;
         } else if (bgGB.unitized(sgv_double) >= lowMark) {
             return 0;
-        } else {
-            return -1;
         }
+        return -1;
     }
 
     private double inMgdl(double value, SharedPreferences sPrefs) {

@@ -40,7 +40,6 @@ import lecho.lib.hellocharts.model.Column;
 import lecho.lib.hellocharts.model.SubcolumnValue;
 import lecho.lib.hellocharts.model.Viewport;
 import lecho.lib.hellocharts.view.ColumnChartView;
-import lombok.val;
 
 import static com.eveningoutpost.dexdrip.utilitymodels.ColorCache.getCol;
 import static com.eveningoutpost.dexdrip.ui.helpers.UiHelper.convertDpToPixel;
@@ -148,7 +147,7 @@ public class BasalProfileEditor extends AppCompatActivity implements AdapterView
         chart.getChartComputator().resetContentRect();
         if (chart.getChartComputator().getContentRectMinusAxesMargins().right != 0) {
             goodMargin = new Rect();
-            val currentMargin = chart.getChartComputator().getContentRectMinusAxesMargins();
+            final Rect currentMargin = chart.getChartComputator().getContentRectMinusAxesMargins();
             goodMargin.bottom = currentMargin.bottom;
         }
 
@@ -194,9 +193,9 @@ public class BasalProfileEditor extends AppCompatActivity implements AdapterView
     }
 
     private int findSpinnerPositionForName(final String name) {
-        val count = basalSelectSpinner.getAdapter().getCount();
+        final int count = basalSelectSpinner.getAdapter().getCount();
         for (int i = 0; i < count; i++) {
-            val item = basalSelectSpinner.getItemAtPosition(i);
+            final Object item = basalSelectSpinner.getItemAtPosition(i);
             if (item.toString().equals(name)) return i;
         }
         return 0;

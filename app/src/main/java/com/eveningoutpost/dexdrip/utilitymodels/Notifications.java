@@ -138,7 +138,7 @@ public class Notifications extends IntentService {
 
             if (Pref.getBoolean("motion_tracking_enabled", false)) {
                 // TODO move this
-                ActivityRecognizedService.reStartActivityRecogniser(context);
+//                ActivityRecognizedService.reStartActivityRecogniser(context);
             }
 
             ReadPerfs(context);

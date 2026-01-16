@@ -8,8 +8,6 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.RequiredArgsConstructor;
-
 /**
  * Created by jamorham on 17/01/2018.
  *
@@ -73,11 +71,15 @@ public class RouteFinder {
     }
 
 
-    @RequiredArgsConstructor
     private static final class RouteInfo {
         public final String path;
         public final String module;
         boolean raw = false;
+
+        public RouteInfo(final String path, final String module) {
+            this.path = path;
+            this.module = module;
+        }
 
         RouteInfo useRaw() {
             raw = true;

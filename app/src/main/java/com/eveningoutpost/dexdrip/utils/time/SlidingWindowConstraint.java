@@ -8,20 +8,17 @@ import java.lang.reflect.Type;
 import java.util.LinkedList;
 import java.util.List;
 
-import lombok.RequiredArgsConstructor;
-
 import static com.eveningoutpost.dexdrip.models.JoH.emptyString;
 
 /**
  * Created by jamorham on 14/02/2018.
- *
+ * <p>
  * Sliding Window Constraint
- *
+ * <p>
  * Designed to facilitate a restriction of X units per time period
- *
+ * <p>
  * For example, in the decision for popping up fingerprint authentication on meal boluses,
  * but allowing tiny boluses through, so long as they don't exceed a threshold.
- *
  */
 
 
@@ -171,10 +168,14 @@ public class SlidingWindowConstraint {
         return records.size();
     }
 
-    @RequiredArgsConstructor
     private class Record {
         final long timestamp;
         final double value;
+
+        private Record(long timestamp, double value) {
+            this.timestamp = timestamp;
+            this.value = value;
+        }
     }
 
 }

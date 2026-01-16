@@ -1,14 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory
-        android:title="@string/inter_app_settings"
-        android:key="interapp">
-        <CheckBoxPreference
-            android:key="broadcast_to_pebble"
-            android:title="@string/broadcast_data_locally"
-            android:summary="@string/send_data_to_other_apps"
-            android:defaultValue="false" />
-    </PreferenceCategory>
-
 </PreferenceScreen>

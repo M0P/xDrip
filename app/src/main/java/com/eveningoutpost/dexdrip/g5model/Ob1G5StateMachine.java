@@ -59,7 +59,6 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 
 import io.reactivex.schedulers.Schedulers;
-import lombok.val;
 
 import static com.eveningoutpost.dexdrip.g5model.BluetoothServices.Authentication;
 import static com.eveningoutpost.dexdrip.g5model.BluetoothServices.Control;
@@ -201,7 +200,7 @@ public class Ob1G5StateMachine {
     @SuppressLint("CheckResult")
     private static void doNext(final Ob1G5CollectionService parent, final RxBleConnection connection) {
         try {
-            val p = parent.plugin.aNext();
+            final byte[][] p = parent.plugin.aNext();
             if (p == null) {
                 UserError.Log.d(TAG, "Null value returned via plugin");
                 if (shortTxId()) {
@@ -210,17 +209,17 @@ public class Ob1G5StateMachine {
                 }
                 return;
             }
-            val cmd = p[0];
+            final byte[] cmd = p[0];
 
             if (p.length == 2) {
-                val data = p[1];
+                final byte[] data = p[1];
                 if (data != null) {
                     connection.getCharacteristic(ExtraData)
                             .blockingGet().setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
-                    val len = data.length;
+                    final int len = data.length;
                     for (int i = 0; i < len; i = i + 20) {
-                        val size = Math.min(20, len - i);
-                        val buf = new byte[size];
+                        final int size = Math.min(20, len - i);
+                        final byte[] buf = new byte[size];
                         System.arraycopy(data, i, buf, 0, size);
                         UserError.Log.d(TAG, "Sending auth data: " + bytesToHex(buf));
                         connection.writeCharacteristic(ExtraData, nn(buf)).subscribe(value -> {
@@ -885,7 +884,7 @@ public class Ob1G5StateMachine {
                             break;
 
                         case EGlucoseRxMessage2:
-                            val eglucose2 = (EGlucoseRxMessage2) data_packet.msg;
+                            final EGlucoseRxMessage2 eglucose2 = (EGlucoseRxMessage2) data_packet.msg;
                             UserError.Log.d(TAG, "EG2 Debug: " + eglucose2);
                             if (eglucose2.isValid()) {
                                 parent.processCalibrationState(eglucose2.adjustedCalibrationState());
@@ -967,7 +966,7 @@ public class Ob1G5StateMachine {
                             break;
 
                         default:
-                            val hex = bytesToHex(bytes);
+                            final String hex = bytesToHex(bytes);
                             UserError.Log.e(TAG, "Got unknown packet rx: " + hex);
 
                             switch (hex) {

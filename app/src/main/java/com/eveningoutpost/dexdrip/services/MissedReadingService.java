@@ -24,14 +24,14 @@ import com.eveningoutpost.dexdrip.utilitymodels.Inevitable;
 import com.eveningoutpost.dexdrip.utilitymodels.NanoStatus;
 import com.eveningoutpost.dexdrip.utilitymodels.Notifications;
 import com.eveningoutpost.dexdrip.utilitymodels.Pref;
-import com.eveningoutpost.dexdrip.utilitymodels.pebble.PebbleUtil;
-import com.eveningoutpost.dexdrip.utilitymodels.pebble.PebbleWatchSync;
+//import com.eveningoutpost.dexdrip.utilitymodels.pebble.PebbleUtil;
+//import com.eveningoutpost.dexdrip.utilitymodels.pebble.PebbleWatchSync;
 import com.eveningoutpost.dexdrip.healthconnect.HealthConnectEntry;
-import com.eveningoutpost.dexdrip.insulin.inpen.InPenEntry;
+//import com.eveningoutpost.dexdrip.insulin.inpen.InPenEntry;
 import com.eveningoutpost.dexdrip.ui.LockScreenWallPaper;
 import com.eveningoutpost.dexdrip.utils.DexCollectionType;
-import com.eveningoutpost.dexdrip.watch.lefun.LeFun;
-import com.eveningoutpost.dexdrip.watch.lefun.LeFunEntry;
+//import com.eveningoutpost.dexdrip.watch.lefun.LeFun;
+//import com.eveningoutpost.dexdrip.watch.lefun.LeFunEntry;
 import com.eveningoutpost.dexdrip.services.broadcastservice.BroadcastEntry;
 import com.eveningoutpost.dexdrip.wearintegration.WatchUpdaterService;
 import com.eveningoutpost.dexdrip.webservices.XdripWebService;
@@ -66,17 +66,17 @@ public class MissedReadingService extends IntentService {
 
 
             // send to pebble
-            if (Pref.getBoolean("broadcast_to_pebble", false) && (PebbleUtil.getCurrentPebbleSyncType() != 1) && !BgReading.last_within_millis(stale_millis)) {
-                if (JoH.ratelimit("peb-miss", 120)) {
-                    // TODO replace ratelimit with Inevitable.task?
-                    JoH.startService(PebbleWatchSync.class);
-                }
-                // update pebble even when we don't have data to ensure missed readings show
-            }
+//            if (Pref.getBoolean("broadcast_to_pebble", false) && (PebbleUtil.getCurrentPebbleSyncType() != 1) && !BgReading.last_within_millis(stale_millis)) {
+//                if (JoH.ratelimit("peb-miss", 120)) {
+//                    // TODO replace ratelimit with Inevitable.task?
+//                    JoH.startService(PebbleWatchSync.class);
+//                }
+//                // update pebble even when we don't have data to ensure missed readings show
+//            }
 
-            if (LeFunEntry.isEnabled() && (!BgReading.last_within_millis(stale_millis))) {
-                LeFun.showLatestBG();
-            }
+//            if (LeFunEntry.isEnabled() && (!BgReading.last_within_millis(stale_millis))) {
+//                LeFun.showLatestBG();
+//            }
 
             if (BroadcastEntry.isEnabled() && (!BgReading.last_within_millis(stale_millis))) {
                 BroadcastEntry.sendLatestBG();
@@ -97,10 +97,10 @@ public class MissedReadingService extends IntentService {
 
 
             Reminder.processAnyDueReminders();
-            BluetoothGlucoseMeter.immortality();
+//            BluetoothGlucoseMeter.immortality();
             XdripWebService.immortality(); //
-            InPenEntry.immortality();
-            DesertSync.pullAsEnabled();
+//            InPenEntry.immortality();
+//            DesertSync.pullAsEnabled();
             NanoStatus.keepFollowerUpdated();
             LockScreenWallPaper.timerPoll();
             HealthConnectEntry.ping();
