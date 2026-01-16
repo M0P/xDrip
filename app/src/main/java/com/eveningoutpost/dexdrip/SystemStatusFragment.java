@@ -64,7 +64,7 @@ import static com.eveningoutpost.dexdrip.xdrip.gs;
 
 public class SystemStatusFragment extends Fragment {
     private static final int SMALL_SCREEN_WIDTH = 300;
-    //public static final String menu_name = "System Status";
+    public static final String menu_name = "System Status";
     private TextView version_name_view;
     private TextView collection_method;
     private TextView current_device;
