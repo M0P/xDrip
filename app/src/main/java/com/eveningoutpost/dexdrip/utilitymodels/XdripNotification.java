@@ -6,7 +6,7 @@ import android.os.Build;
 
 /*
  * Created by jwoglom on 5/17/2018
- * <p>
+ *
  * Wrapper for android.app.Notification.Builder that adds the necessary notification
  * channel ID if enabled. Identical functionality-wise to XdripNotificationCompat.
  */
@@ -14,24 +14,40 @@ import android.os.Build;
 public class XdripNotification {
 
     @TargetApi(Build.VERSION_CODES.O)
-    public static Notification build(Notification.Builder builder) {
-        if ((Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)) {
-            if (Pref.getBooleanDefaultFalse("use_notification_channels")) {
-                // get dynamic channel based on contents of the builder
-                try {
+    public static Notification build(final Notification.Builder builder) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+            // Android O+ requires a valid channelId for notifications, and foreground services
+            // are especially strict: a missing/invalid channelId can crash the app with:
+            // RemoteServiceException$CannotPostForegroundServiceNotificationException.
+            //
+            // For safety we never set the channelId to null on Android O+.
+            try {
+                // If channel handling is enabled, we try to dynamically choose a channel.
+                if (Pref.getBooleanDefaultFalse("use_notification_channels")) {
                     final String id = NotificationChannels.getChan(builder).getId();
-                    builder.setChannelId(id);
-                } catch (NullPointerException e) {
-                    //noinspection ConstantConditions
-                    builder.setChannelId(null);
+                    if (id != null) {
+                        builder.setChannelId(id);
+                    }
                 }
-            } else {
-                //noinspection ConstantConditions
-                builder.setChannelId(null);
+            } catch (Exception e) {
+                // Keep existing channelId if dynamic channel selection fails.
             }
+
+            // Final fallback: ensure we always have *some* channel ID.
+            try {
+                final Notification temp = builder.build();
+                if (temp.getChannelId() == null) {
+                    builder.setChannelId(NotificationChannels.ONGOING_CHANNEL);
+                }
+            } catch (Exception e) {
+                builder.setChannelId(NotificationChannels.ONGOING_CHANNEL);
+            }
+
             return builder.build();
-        } else {
-            return builder.build(); // standard pre-oreo behaviour
         }
+
+        // Standard pre-oreo behavior
+        return builder.build();
     }
 }
