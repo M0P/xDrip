@@ -864,7 +864,12 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
         }
     }
 
-    private static void bindPreferenceSummaryToValue(Preference preference) {
+    private static void bindPreferenceSummaryToValue(final Preference preference) {
+        // NOTE: Some XML variants remove individual keys. Always guard against null.
+        if (preference == null) {
+            Log.wtf(TAG, "Cannot bind preference summary (null preference)");
+            return;
+        }
         try {
             preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
             sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
@@ -872,7 +877,7 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
                             .getDefaultSharedPreferences(preference.getContext())
                             .getString(preference.getKey(), ""));
         } catch (Exception e) {
-            Log.e(TAG, "Got exception binding preference summary: " + e.toString());
+            Log.e(TAG, "Got exception binding preference summary: " + e);
         }
     }
 
@@ -990,15 +995,25 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
     }
 
 
-    private static void bindPreferenceSummaryToValueAndEnsureNumeric(Preference preference) {
+    private static void bindPreferenceSummaryToValueAndEnsureNumeric(final Preference preference) {
+        // NOTE: Some XML variants remove individual keys. Always guard against null.
+        if (preference == null) {
+            Log.wtf(TAG, "Cannot bind numeric preference summary (null preference)");
+            return;
+        }
         preference.setOnPreferenceChangeListener(sBindNumericPreferenceSummaryToValueListener);
-        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
+        sBindNumericPreferenceSummaryToValueListener.onPreferenceChange(preference,
                 PreferenceManager
                         .getDefaultSharedPreferences(preference.getContext())
                         .getString(preference.getKey(), ""));
     }
 
-    private static void bindPreferenceSummaryToUnitizedValueAndEnsureNumeric(Preference preference) { // Use this to show the value as well as the corresponding glucose unit as the summary, and reject out-of-range inputs
+    private static void bindPreferenceSummaryToUnitizedValueAndEnsureNumeric(final Preference preference) { // Use this to show the value as well as the corresponding glucose unit as the summary, and reject out-of-range inputs
+        // NOTE: Some XML variants remove individual keys. Always guard against null.
+        if (preference == null) {
+            Log.wtf(TAG, "Cannot bind unitized numeric preference summary (null preference)");
+            return;
+        }
         preference.setOnPreferenceChangeListener(sBindNumericUnitizedPreferenceSummaryToValueListener);
         sBindNumericUnitizedPreferenceSummaryToValueListener.onPreferenceChange(preference,
                 PreferenceManager
@@ -1100,6 +1115,37 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
             final Preference pref = safeFindPreference(key);
             if (pref == null) return;
             pref.setOnPreferenceClickListener(listener);
+        }
+
+        private static boolean safeRemovePreference(final PreferenceGroup group, final Preference preference, final String debugKey) {
+            // NOTE: Some builds have reduced preference XMLs. PreferenceGroup#removePreference(null)
+            // throws a NullPointerException in framework code, so always guard before calling it.
+            if (group == null) return false;
+            if (preference == null) {
+                Log.wtf(TAG, "Cannot remove missing preference " + debugKey);
+                return false;
+            }
+            try {
+                return group.removePreference(preference);
+            } catch (Exception e) {
+                Log.wtf(TAG, "Failed to remove preference " + debugKey + ": " + e);
+                return false;
+            }
+        }
+
+        private static boolean safeAddPreference(final PreferenceGroup group, final Preference preference, final String debugKey) {
+            // NOTE: PreferenceGroup#addPreference(null) can crash on some Android versions.
+            if (group == null) return false;
+            if (preference == null) {
+                Log.wtf(TAG, "Cannot add missing preference " + debugKey);
+                return false;
+            }
+            try {
+                return group.addPreference(preference);
+            } catch (Exception e) {
+                Log.wtf(TAG, "Failed to add preference " + debugKey + ": " + e);
+                return false;
+            }
         }
 
 
@@ -1315,14 +1361,8 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
             final Preference xSyncFollowChime = safeFindPreference("follower_chime");
 
             if (collectionType != DexCollectionType.WebFollow) {
-                try {
-                    final Preference webfollow = safeFindPreference("xdrip_plus_web_follow_settings");
-                    if (collectionCategory != null) {
-                        collectionCategory.removePreference(webfollow);
-                    }
-                } catch (Exception e) {
-                    //
-                }
+                final Preference webfollow = safeFindPreference("xdrip_plus_web_follow_settings");
+                safeRemovePreference(collectionCategory, webfollow, "xdrip_plus_web_follow_settings");
             }
 
             final Preference carelinkFollowCountry = safeFindPreference("clfollow_country");
@@ -1335,33 +1375,25 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
             final Preference carelinkFollowDownloadMeals = safeFindPreference("clfollow_download_meals");
             final Preference carelinkFollowDownloadNotifications = safeFindPreference("clfollow_download_notifications");
             if (collectionType == DexCollectionType.CLFollow) {
-                if (collectionCategory != null) {
-                    collectionCategory.addPreference(carelinkFollowCountry);
-                    collectionCategory.addPreference(carelinkFollowPatient);
-                    collectionCategory.addPreference(carelinkFollowLogin);
-                    collectionCategory.addPreference(carelinkFollowGracePeriod);
-                    collectionCategory.addPreference(carelinkFollowMissedPollInterval);
-                    collectionCategory.addPreference(carelinkFollowDownloadFingerBGs);
-                    collectionCategory.addPreference(carelinkFollowDownloadBoluses);
-                    collectionCategory.addPreference(carelinkFollowDownloadMeals);
-                    collectionCategory.addPreference(carelinkFollowDownloadNotifications);
-                }
+                safeAddPreference(collectionCategory, carelinkFollowCountry, "clfollow_country");
+                safeAddPreference(collectionCategory, carelinkFollowPatient, "clfollow_patient");
+                safeAddPreference(collectionCategory, carelinkFollowLogin, "clfollow_login");
+                safeAddPreference(collectionCategory, carelinkFollowGracePeriod, "clfollow_grace_period");
+                safeAddPreference(collectionCategory, carelinkFollowMissedPollInterval, "clfollow_missed_poll_interval");
+                safeAddPreference(collectionCategory, carelinkFollowDownloadFingerBGs, "clfollow_download_finger_bgs");
+                safeAddPreference(collectionCategory, carelinkFollowDownloadBoluses, "clfollow_download_boluses");
+                safeAddPreference(collectionCategory, carelinkFollowDownloadMeals, "clfollow_download_meals");
+                safeAddPreference(collectionCategory, carelinkFollowDownloadNotifications, "clfollow_download_notifications");
             } else {
-                try {
-                    if (collectionCategory != null) {
-                        collectionCategory.removePreference(carelinkFollowCountry);
-                        collectionCategory.removePreference(carelinkFollowPatient);
-                        collectionCategory.removePreference(carelinkFollowLogin);
-                        collectionCategory.removePreference(carelinkFollowGracePeriod);
-                        collectionCategory.removePreference(carelinkFollowMissedPollInterval);
-                        collectionCategory.removePreference(carelinkFollowDownloadFingerBGs);
-                        collectionCategory.removePreference(carelinkFollowDownloadBoluses);
-                        collectionCategory.removePreference(carelinkFollowDownloadMeals);
-                        collectionCategory.removePreference(carelinkFollowDownloadNotifications);
-                    }
-                } catch (Exception e) {
-                    //
-                }
+                safeRemovePreference(collectionCategory, carelinkFollowCountry, "clfollow_country");
+                safeRemovePreference(collectionCategory, carelinkFollowPatient, "clfollow_patient");
+                safeRemovePreference(collectionCategory, carelinkFollowLogin, "clfollow_login");
+                safeRemovePreference(collectionCategory, carelinkFollowGracePeriod, "clfollow_grace_period");
+                safeRemovePreference(collectionCategory, carelinkFollowMissedPollInterval, "clfollow_missed_poll_interval");
+                safeRemovePreference(collectionCategory, carelinkFollowDownloadFingerBGs, "clfollow_download_finger_bgs");
+                safeRemovePreference(collectionCategory, carelinkFollowDownloadBoluses, "clfollow_download_boluses");
+                safeRemovePreference(collectionCategory, carelinkFollowDownloadMeals, "clfollow_download_meals");
+                safeRemovePreference(collectionCategory, carelinkFollowDownloadNotifications, "clfollow_download_notifications");
             }
 
             final PreferenceCategory flairCategory = (PreferenceCategory) safeFindPreference("xdrip_plus_display_colorset9_android5plus");
@@ -1511,57 +1543,29 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
 
             Log.d(TAG, collectionType.name());
             if (collectionType != DexCollectionType.DexcomShare) {
-                if (collectionCategory != null) {
-                    collectionCategory.removePreference(shareKey);
-                    collectionCategory.removePreference(findPreference("scan_share2_barcode"));
-                }
-                if (otherCategory != null) {
-                    otherCategory.removePreference(interpretRaw);
-                }
-                if (alertsCategory != null) {
-                    alertsCategory.addPreference(calibrationAlertsScreen);
-                }
+                safeRemovePreference(collectionCategory, shareKey, "share_key");
+                safeRemovePreference(collectionCategory, findPreference("scan_share2_barcode"), "scan_share2_barcode");
+                safeRemovePreference(otherCategory, interpretRaw, "interpret_raw");
+                safeAddPreference(alertsCategory, calibrationAlertsScreen, "calibration_alerts_screen");
             } else {
-                if (otherCategory != null) {
-                    otherCategory.removePreference(predictiveBG);
-                }
-                if (alertsCategory != null) {
-                    alertsCategory.removePreference(calibrationAlertsScreen);
-                }
+                safeRemovePreference(otherCategory, predictiveBG, "predictive_bg");
+                safeRemovePreference(alertsCategory, calibrationAlertsScreen, "calibration_alerts_screen");
                 this.prefs.edit().putBoolean("calibration_notifications", false).apply();
             }
 
             if (collectionType != DexCollectionType.Medtrum) {
-                try {
-                    if (collectionCategory != null) {
-                        collectionCategory.removePreference(findPreference("medtrum_use_native"));
-                        collectionCategory.removePreference(findPreference("medtrum_a_hex"));
-                    }
-                } catch (Exception e) {
-                    //
-                }
+                safeRemovePreference(collectionCategory, findPreference("medtrum_use_native"), "medtrum_use_native");
+                safeRemovePreference(collectionCategory, findPreference("medtrum_a_hex"), "medtrum_a_hex");
             }
 
             if (collectionType != DexCollectionType.NSFollow) {
-                try {
-                    if (collectionCategory != null) {
-                        collectionCategory.removePreference(nsFollowUrl);
-                        collectionCategory.removePreference(nsFollowDownload);
-                        collectionCategory.removePreference(nsFollowLag);
-                    }
-                } catch (Exception e) {
-                    //
-                }
+                safeRemovePreference(collectionCategory, nsFollowUrl, "nsfollow_url");
+                safeRemovePreference(collectionCategory, nsFollowDownload, "nsfollow_download_treatments_screen");
+                safeRemovePreference(collectionCategory, nsFollowLag, "nsfollow_lag");
             }
 
             if (collectionType != DexCollectionType.Follower) {
-                try {
-                    if (collectionCategory != null) {
-                        collectionCategory.removePreference(xSyncFollowChime);
-                    }
-                } catch (Exception e) {
-                    //
-                }
+                safeRemovePreference(collectionCategory, xSyncFollowChime, "follower_chime");
             }
 
             if (getBestCollectorHardwareName().equals("G7")) {
@@ -1577,19 +1581,13 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
             }
 
             if (collectionType != DexCollectionType.CLFollow) {
-                try {
-                    if (collectionCategory != null) {
-                        collectionCategory.removePreference(carelinkFollowCountry);
-                        collectionCategory.removePreference(carelinkFollowPatient);
-                        collectionCategory.removePreference(carelinkFollowGracePeriod);
-                        collectionCategory.removePreference(carelinkFollowMissedPollInterval);
-                        collectionCategory.removePreference(carelinkFollowDownloadFingerBGs);
-                        collectionCategory.removePreference(carelinkFollowDownloadMeals);
-                        collectionCategory.removePreference(carelinkFollowDownloadNotifications);
-                    }
-                } catch (Exception e) {
-                    //
-                }
+                safeRemovePreference(collectionCategory, carelinkFollowCountry, "clfollow_country");
+                safeRemovePreference(collectionCategory, carelinkFollowPatient, "clfollow_patient");
+                safeRemovePreference(collectionCategory, carelinkFollowGracePeriod, "clfollow_grace_period");
+                safeRemovePreference(collectionCategory, carelinkFollowMissedPollInterval, "clfollow_missed_poll_interval");
+                safeRemovePreference(collectionCategory, carelinkFollowDownloadFingerBGs, "clfollow_download_finger_bgs");
+                safeRemovePreference(collectionCategory, carelinkFollowDownloadMeals, "clfollow_download_meals");
+                safeRemovePreference(collectionCategory, carelinkFollowDownloadNotifications, "clfollow_download_notifications");
             }
 
             try {
@@ -1693,9 +1691,7 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
             }
 
             if (!DexCollectionType.hasLibre(collectionType)) {
-                if (collectionCategory != null) {
-                    collectionCategory.removePreference(nfcSettings);
-                }
+                safeRemovePreference(collectionCategory, nfcSettings, "xdrip_plus_nfc_settings");
             } else {
                 if (!engineering_mode)
                     try {
@@ -1710,9 +1706,7 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
             }
 
             if (!DexCollectionService.getBestLimitterHardwareName().equals("BlueReader")) {
-                if (collectionCategory != null) {
-                    collectionCategory.removePreference(bluereadersettings);
-                }
+                safeRemovePreference(collectionCategory, bluereadersettings, "xdrip_blueReader_advanced_settings");
             } else {
                 findPreference("blueReader_turn_off_value").setTitle(getString(R.string.blueReader_turnoffvalue) + " (" + prefs.getInt("blueReader_turn_off_value", 5) + ")");
 
@@ -1731,9 +1725,7 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
 
                 try {
                     if (DexCollectionType.getDexCollectionType() != DexCollectionType.LibreReceiver) {
-                        if (collectionCategory != null) {
-                            collectionCategory.removePreference(libre2settings);
-                        }
+                        safeRemovePreference(collectionCategory, libre2settings, "xdrip_libre2_advanced_settings");
                     }
                 } catch (NullPointerException e) {
                     Log.wtf(TAG, "Nullpointer Libre2Settings: ", e);
@@ -1743,9 +1735,7 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
                     if (!DexCollectionType.hasWifi()) {
                         final String receiversIpAddresses = this.prefs.getString("wifi_recievers_addresses", "").trim();
                         if (receiversIpAddresses.equals("")) {
-                            if (collectionCategory != null) {
-                                collectionCategory.removePreference(wifiRecievers);
-                            }
+                            safeRemovePreference(collectionCategory, wifiRecievers, "wifi_recievers_addresses");
                         }
                     }
                 } catch (NullPointerException e) {
@@ -1754,13 +1744,7 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
 
                 if ((collectionType != DexCollectionType.DexbridgeWixel)
                         && (collectionType != DexCollectionType.WifiDexBridgeWixel)) {
-                    try {
-                        if (collectionCategory != null) {
-                            collectionCategory.removePreference(transmitterId);
-                        }
-                    } catch (NullPointerException e) {
-                        Log.wtf(TAG, "Nullpointer removing txid ", e);
-                    }
+                    safeRemovePreference(collectionCategory, transmitterId, "dex_txid");
                 }
 
                 if (Build.VERSION.SDK_INT < 21) {
@@ -1808,24 +1792,13 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
                 final PreferenceScreen g5_settings_screen = (PreferenceScreen) findPreference("xdrip_plus_g5_extra_settings");
                 if (collectionType == DexCollectionType.DexcomG5) {
                     try {
-                        if (collectionCategory != null && transmitterId != null) {
-                            collectionCategory.addPreference(transmitterId);
-                        }
-
-                        if (collectionCategory != null) {
-                            collectionCategory.addPreference(g5_settings_screen);
-                        }
+                        safeAddPreference(collectionCategory, transmitterId, "dex_txid");
+                        safeAddPreference(collectionCategory, g5_settings_screen, "xdrip_plus_g5_extra_settings");
                     } catch (NullPointerException e) {
                         Log.wtf(TAG, "Null pointer adding G5 prefs ", e);
                     }
                 } else {
-                    try {
-                        if (collectionCategory != null) {
-                            collectionCategory.removePreference(g5_settings_screen);
-                        }
-                    } catch (NullPointerException e) {
-                        Log.wtf(TAG, "Null pointer removing G5 prefs ", e);
-                    }
+                    safeRemovePreference(collectionCategory, g5_settings_screen, "xdrip_plus_g5_extra_settings");
                 }
 
                 if (!engineering_mode) {
@@ -2003,36 +1976,22 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
                         DexCollectionType collectionType = DexCollectionType.getType((String) newValue);
 
                         if (collectionType != DexCollectionType.DexcomShare) {
-                            if (collectionCategory != null) {
-                                collectionCategory.removePreference(shareKey);
-                                collectionCategory.removePreference(findPreference("scan_share2_barcode"));
-                            }
-                            if (otherCategory != null) {
-                                otherCategory.removePreference(interpretRaw);
-                                otherCategory.addPreference(predictiveBG);
-                            }
-                            if (alertsCategory != null) {
-                                alertsCategory.addPreference(calibrationAlertsScreen);
-                            }
+                            safeRemovePreference(collectionCategory, shareKey, "share_key");
+                            safeRemovePreference(collectionCategory, findPreference("scan_share2_barcode"), "scan_share2_barcode");
+                            safeRemovePreference(otherCategory, interpretRaw, "interpret_raw");
+                            safeAddPreference(otherCategory, predictiveBG, "predictive_bg");
+                            safeAddPreference(alertsCategory, calibrationAlertsScreen, "calibration_alerts_screen");
                         } else {
-                            if (collectionCategory != null) {
-                                collectionCategory.addPreference(shareKey);
-                                collectionCategory.addPreference(findPreference("scan_share2_barcode"));
-                            }
-                            if (otherCategory != null) {
-                                otherCategory.addPreference(interpretRaw);
-                                otherCategory.removePreference(predictiveBG);
-                            }
-                            if (alertsCategory != null) {
-                                alertsCategory.removePreference(calibrationAlertsScreen);
-                            }
+                            safeAddPreference(collectionCategory, shareKey, "share_key");
+                            safeAddPreference(collectionCategory, findPreference("scan_share2_barcode"), "scan_share2_barcode");
+                            safeAddPreference(otherCategory, interpretRaw, "interpret_raw");
+                            safeRemovePreference(otherCategory, predictiveBG, "predictive_bg");
+                            safeRemovePreference(alertsCategory, calibrationAlertsScreen, "calibration_alerts_screen");
                             AllPrefsFragment.this.prefs.edit().putBoolean("calibration_notifications", false).apply();
                         }
 
                         if (DexCollectionType.hasLibre(collectionType)) {
-                            if (collectionCategory != null) {
-                                collectionCategory.addPreference(nfcSettings);
-                            }
+                            safeAddPreference(collectionCategory, nfcSettings, "xdrip_plus_nfc_settings");
                             NFCReaderX.handleHomeScreenScanPreference(xdrip.getAppContext(), prefs.getBoolean("nfc_scan_homescreen", false) && prefs.getBoolean("use_nfc_scan", false));
                             if (!engineering_mode)
                                 try {
@@ -2043,9 +2002,7 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
                                     //
                                 }
                         } else {
-                            if (collectionCategory != null) {
-                                collectionCategory.removePreference(nfcSettings);
-                            }
+                            safeRemovePreference(collectionCategory, nfcSettings, "xdrip_plus_nfc_settings");
                             NFCReaderX.handleHomeScreenScanPreference(xdrip.getAppContext(), false);
                         }
 
@@ -2053,49 +2010,33 @@ public class Preferences extends BasePreferenceActivity implements SearchPrefere
                             String receiversIpAddresses;
                             receiversIpAddresses = AllPrefsFragment.this.prefs.getString("wifi_recievers_addresses", "");
                             if (receiversIpAddresses == null || receiversIpAddresses.trim().equals("")) {
-                                if (collectionCategory != null) {
-                                    collectionCategory.removePreference(wifiRecievers);
-                                }
+                                safeRemovePreference(collectionCategory, wifiRecievers, "wifi_recievers_addresses");
                             } else {
-                                if (collectionCategory != null) {
-                                    collectionCategory.addPreference(wifiRecievers);
-                                }
+                                safeAddPreference(collectionCategory, wifiRecievers, "wifi_recievers_addresses");
                             }
                         } else {
-                            if (collectionCategory != null) {
-                                collectionCategory.addPreference(wifiRecievers);
-                            }
+                            safeAddPreference(collectionCategory, wifiRecievers, "wifi_recievers_addresses");
                         }
 
                         if ((collectionType != DexCollectionType.DexbridgeWixel)
                                 && (collectionType != DexCollectionType.WifiDexBridgeWixel)) {
-                            if (transmitterId != null && collectionCategory != null) {
-                                collectionCategory.removePreference(transmitterId);
-                            }
+                            safeRemovePreference(collectionCategory, transmitterId, "dex_txid");
                         } else {
-                            if (transmitterId != null && collectionCategory != null) {
-                                collectionCategory.addPreference(transmitterId);
-                            }
+                            safeAddPreference(collectionCategory, transmitterId, "dex_txid");
                         }
 
                         if (collectionType == DexCollectionType.DexcomG5) {
-                            if (transmitterId != null && collectionCategory != null) {
-                                collectionCategory.addPreference(transmitterId);
-                            }
+                            safeAddPreference(collectionCategory, transmitterId, "dex_txid");
                         }
 
                         if (collectionType == DexCollectionType.NSFollow) {
-                            if (collectionCategory != null) {
-                                collectionCategory.addPreference(nsFollowUrl);
-                                collectionCategory.addPreference(nsFollowDownload);
-                                collectionCategory.addPreference(nsFollowLag);
-                            }
+                            safeAddPreference(collectionCategory, nsFollowUrl, "nsfollow_url");
+                            safeAddPreference(collectionCategory, nsFollowDownload, "nsfollow_download_treatments_screen");
+                            safeAddPreference(collectionCategory, nsFollowLag, "nsfollow_lag");
                         }
 
                         if (collectionType == DexCollectionType.Follower) {
-                            if (collectionCategory != null) {
-                                collectionCategory.addPreference(xSyncFollowChime);
-                            }
+                            safeAddPreference(collectionCategory, xSyncFollowChime, "follower_chime");
                         }
 
                         String stringValue = newValue.toString();
