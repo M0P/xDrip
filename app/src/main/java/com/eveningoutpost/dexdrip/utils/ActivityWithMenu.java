@@ -20,8 +20,6 @@ import java.util.List;
  */
 public abstract class ActivityWithMenu extends BaseAppCompatActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks {
     private int menu_position;
-    private String menu_name;
-    private NavigationDrawerFragment mNavigationDrawerFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,13 +33,13 @@ public abstract class ActivityWithMenu extends BaseAppCompatActivity implements 
         } catch (IllegalArgumentException e) {
             UserError.Log.wtf("ActivityWithMenu", "Nasty error trying to call onResume() " + e);
         }
-        menu_name = getMenuName();
+        String menu_name = getMenuName();
         NavDrawerBuilder navDrawerBuilder = new NavDrawerBuilder(getApplicationContext());
         List<String> menu_option_list = navDrawerBuilder.nav_drawer_options;
         menu_position = menu_option_list.indexOf(menu_name);
 
         try {
-            mNavigationDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
+            NavigationDrawerFragment mNavigationDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
             mNavigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), menu_name, this);
         } catch (Exception e) {
             UserError.Log.e("ActivityWithMenu", "Exception setting up NavigationDrawerFragment: " + e);

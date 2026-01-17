@@ -78,16 +78,14 @@ public class Experience {
 
     public static boolean backupAvailable() {
         final String backup_file = Pref.getString("last-saved-database-zip", "");
-        if (backup_file.length() > 0) {
-            if (new File(backup_file).exists()) {
-                return true;
-            }
+        if (!backup_file.isEmpty()) {
+            return new File(backup_file).exists();
         }
         return false;
     }
 
 
-    private static final ImmutableSet<String> mmol_countries = ImmutableSet.of("AU", "CA", "CN", "HK", "MO", "TW", "HR", "CZ", "DE", "DK", "FI", "HK", "HU", "IS", "IE", "JM", "KZ", "YK", "LV", "LT", "MY", "MT", "NL", "AN", "NZ", "NO", "RU", "SK", "SI", "ZA", "SE", "CH", "GB");
+    private static final ImmutableSet<String> mmol_countries = ImmutableSet.of("AU", "CA", "CN", "HK", "MO", "TW", "HR", "CZ", "DE", "DK", "FI",  "HU", "IS", "IE", "JM", "KZ", "YK", "LV", "LT", "MY", "MT", "NL", "AN", "NZ", "NO", "RU", "SK", "SI", "ZA", "SE", "CH", "GB");
 
     private static String defaultUnits() {
         try {

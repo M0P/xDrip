@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    package="com.eveningoutpost.dexdrip"
     android:installLocation="internalOnly"
     tools:ignore="InnerclassSeparator">
 
@@ -42,7 +43,7 @@
     <uses-permission android:name="android.permission.FLASHLIGHT" />
     <uses-permission-sdk-23 android:name="android.permission.CAMERA" />
     <uses-permission-sdk-23 android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission-sdk-23 android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission-sdk-23 android:name="android.preference.ACCESS_COARSE_LOCATION" />
     <uses-permission-sdk-23 android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission-sdk-23 android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission-sdk-23 android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
@@ -424,10 +425,6 @@
             android:name=".ErrorsActivity"
             android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_error" />
-        <activity
-            android:name=".MissedReadingActivity"
-            android:configChanges="orientation|screenSize"
-            android:label="@string/configure_missed_readings" />
 
         <service
             android:name=".services.SnoozeOnNotificationDismissService"
@@ -695,6 +692,21 @@
             android:name=".ui.activities.NumberWallPreview"
             android:exported="true"
             android:label="@string/number_wall_config" />
+
+        <activity
+            android:name=".NFCFilterX"
+            android:configChanges="orientation|screenSize"
+            android:label="NFC Filter"
+            android:exported="true"
+            android:enabled="false">
+             <intent-filter>
+                <action android:name="android.nfc.action.TECH_DISCOVERED" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data android:name="android.nfc.action.TECH_DISCOVERED"
+                android:resource="@xml/nfc_tech_filter" />
+        </activity>
+
         <activity android:name=".ui.activities.TimePickerPrefActivity" />
         <activity
             android:name=".ui.activities.DatabaseAdmin"
